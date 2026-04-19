@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable, HasApiTokens, HasRoles;
+
+    protected $table = 'users';
+    public $timestamps = false;
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    protected $fillable = [
+        'uuid',
+        'name',
+        'full_name',
+        'first_name',
+        'last_name',
+        'email',
+        'password',
+        'is_active',
+        'created_by',
+        'created_at',
+        'updated_by',
+        'updated_at',
+    ];
+
+    protected $hidden = [
+        'is_active' => 'boolean',
+        'password' => 'hashed',
+        'email_verified_at' => 'datetime:Y-m-d H:i:s.u',
+        'created_at' => 'datetime:Y-m-d H:i:s.u',
+        'updated_at' => 'datetime:Y-m-d H:i:s.u',
+    ];
+    
+}
