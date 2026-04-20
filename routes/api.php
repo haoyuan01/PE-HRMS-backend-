@@ -5,6 +5,7 @@ use App\Http\Controllers\BE\AuthController;
 use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\LookupController;
 use App\Http\Controllers\BE\RoleController;
+use App\Http\Controllers\PositionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,7 @@ Route::group([
             Route::get('permissions', [LookupController::class, 'permissions']);
             Route::get('users', [LookupController::class, 'users']);
             Route::get('departments', [LookupController::class, 'departments']);
+            Route::get('positions', [LookupController::class, 'positions']);
         });
 
         Route::prefix('roles')->group(function () {
@@ -52,6 +54,14 @@ Route::group([
             Route::get('/{uuid}', [DepartmentController::class, 'show']);
             Route::put('/{uuid}', [DepartmentController::class, 'update']);
             Route::patch('/{uuid}', [DepartmentController::class, 'updateStatus']);
+        });
+        
+        Route::prefix('positions')->group(function () {
+            Route::get('/', [PositionController::class, 'index']);
+            Route::post('/', [PositionController::class, 'store']);
+            Route::get('/{uuid}', [PositionController::class, 'show']);
+            Route::put('/{uuid}', [PositionController::class, 'update']);
+            Route::patch('/{uuid}', [PositionController::class, 'updateStatus']);
         });
         
 

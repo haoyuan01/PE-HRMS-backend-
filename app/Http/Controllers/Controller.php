@@ -47,7 +47,7 @@ abstract class Controller
 
     public function auth()
     {
-        return Auth::auth();
+        return Auth::user();
     }
 
     // public function removeSpace($string) {

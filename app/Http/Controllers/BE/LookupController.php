@@ -8,6 +8,7 @@ use App\Http\Requests\LookupSearchRequest;
 use App\Http\Resources\LookupResource;
 use App\Models\Department;
 use App\Models\Permission;
+use App\Models\Position;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -78,6 +79,30 @@ class LookupController extends Controller
     public function departments(LookupSearchRequest $request)
     {
         $query = Department::query()
+            ->where('is_active', StatusCodeConstants::ACTIVE);
+
+        if ($request->filled('search_words'))
+        {
+            $query->where(function ($q) use ($request) {
+                foreach ($request->search_words as $word) {
+                    $q->orWhere(function ($sub) use ($word) {
+                        $sub->where('name', 'like', "%$word%")
+                            ->orWhere('uuid', $word);
+                    });
+                }
+            });
+        }
+
+        $data = $query->orderBy('created_at', 'asc')
+            ->limit(100)
+            ->get();
+
+        return self::response(LookupResource::collection($data));
+    }
+
+    public function positions(LookupSearchRequest $request)
+    {
+        $query = Position::query()
             ->where('is_active', StatusCodeConstants::ACTIVE);
 
         if ($request->filled('search_words'))

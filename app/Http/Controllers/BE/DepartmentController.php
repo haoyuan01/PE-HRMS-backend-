@@ -43,9 +43,9 @@ class DepartmentController extends Controller
         return self::response(new DepartmentResource($department));
     }
 
-    public function update(DepartmentUpdateRequest $request)
+    public function update(DepartmentUpdateRequest $request, $uuid)
     {
-        $department = $this->department_service->findByUUID($request->uuid);
+        $department = $this->department_service->findByUUID($uuid);
         $department->name = $request->name;
         $department->description = $request->description;
         $department->is_active = StatusCodeConstants::ACTIVE;
@@ -56,9 +56,9 @@ class DepartmentController extends Controller
         return self::response(new DepartmentResource($department));
     }
 
-    public function updateStatus(DepartmentUpdateStatusRequest $request)
+    public function updateStatus(DepartmentUpdateStatusRequest $request, $uuid)
     {
-        $department = $this->department_service->findByUUID($request->uuid);
+        $department = $this->department_service->findByUUID($uuid);
         $department->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
         $department->updated_by = self::auth()->uuid;
         $department->updated_at = self::currentDateTime();
@@ -67,9 +67,9 @@ class DepartmentController extends Controller
         return self::response(new DepartmentResource($department));
     }
 
-    public function show(DepartmentShowRequest $request)
+    public function show(DepartmentShowRequest $request, $uuid)
     {
-        $department = $this->department_service->findByUUID($request->uuid);
+        $department = $this->department_service->findByUUID($uuid);
         
         return self::response(new DepartmentResource($department));
     }
