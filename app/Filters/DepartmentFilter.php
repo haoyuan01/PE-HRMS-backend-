@@ -8,6 +8,11 @@ class DepartmentFilter
 {
     public function apply(Request $filters, $size, $data)
     {
+        if ($filters->has('uuid') && !empty($filters->uuid))
+        {
+            $data->where('uuid', $filters->uuid);
+        }
+        
         if ($filters->has('name') && !empty($filters->name))
         {
             $data->where('name', 'like', "%$filters->name%");

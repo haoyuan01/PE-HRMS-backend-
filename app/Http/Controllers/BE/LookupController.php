@@ -7,9 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LookupSearchRequest;
 use App\Http\Resources\LookupResource;
 use App\Models\Department;
+use App\Models\OfficeBranch;
 use App\Models\Permission;
 use App\Models\Position;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class LookupController extends Controller
@@ -117,6 +119,38 @@ class LookupController extends Controller
             });
         }
 
+        $data = $query->orderBy('created_at', 'asc')
+            ->limit(100)
+            ->get();
+
+        return self::response(LookupResource::collection($data));
+    }
+
+    public function officeBranches(LookupSearchRequest $request)
+    {
+        $query = OfficeBranch::query()
+            ->where('is_active', StatusCodeConstants::ACTIVE);
+
+        if ($request->filled('search_words'))
+        {
+            $query->where(function ($q) use ($request) {
+                foreach ($request->search_words as $word) {
+                    $q->orWhere(function ($sub) use ($word) {
+                        $sub->where('name', 'like', "%$word%");
+                            // ->orWhere(DB::raw("CONCAT_WS(address_1,'',address_2,'',address_3)"), 'like', "%$word%")
+                            // ->orWhere(DB::raw("CONCAT_WS(phone_code,'',phone_number)"), 'like', "%$word%")
+                            // ->orWhere(DB::raw("CONCAT_WS(fax_code,'',fax_number)"), 'like', "%$word%")
+                            // ->orWhere('email', 'like', "%$word%")
+                            // ->orWhere('city', 'like', "%$word%")
+                            // ->orWhere('state', 'like', "%$word%")
+                            // ->orWhere('postcode', 'like', "%$word%")
+                            // ->orWhere('country', 'like', "%$word%")
+                            // ->orWhere('uuid', $word);
+                    });
+                }
+            });
+        }
+        
         $data = $query->orderBy('created_at', 'asc')
             ->limit(100)
             ->get();

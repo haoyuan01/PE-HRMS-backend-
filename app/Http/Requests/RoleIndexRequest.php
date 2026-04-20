@@ -23,6 +23,7 @@ class RoleIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'uuid' => ['nullable', 'string', 'uuid'],
             'name' => ['nullable', 'string'],
             'is_active' => ['nullable', 'integer', 'between:-1,1'],
             'search_words' => ['nullable', 'array'],

@@ -23,7 +23,7 @@ class PositionStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'unique:departments,name'],
+            'name' => ['required', 'string', 'unique:positions,name'],
             'description' => ['required', 'string'],
         ];
     }

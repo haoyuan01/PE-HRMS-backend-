@@ -4,9 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class PositionUpdateRequest extends FormRequest
+class OfficeBranchShowRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -30,8 +29,6 @@ class PositionUpdateRequest extends FormRequest
     {
         return [
             'uuid' => ['required', 'string', 'uuid'],
-            'name' => ['required', 'string', Rule::unique('positions', 'name')->ignore($this->route('uuid'), 'uuid')],
-            'description' => ['required', 'string'],
         ];
     }
 }

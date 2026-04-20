@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class PositionIndexRequest extends FormRequest
+class OfficeBranchIndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,6 +25,16 @@ class PositionIndexRequest extends FormRequest
         return [
             'uuid' => ['nullable', 'string', 'uuid'],
             'name' => ['nullable', 'string'],
+            'address' => ['nullable', 'string'],
+            'city' => ['nullable', 'string'],
+            'state' => ['nullable', 'string'],
+            'postcode' => ['nullable', 'string'],
+            'country' => ['nullable', 'string'],
+            'phone' => ['nullable', 'string'],
+            'phone_code' => ['nullable', 'string'],
+            'fax' => ['nullable', 'string'],
+            'fax_code' => ['nullable', 'string'],
+            'email' => ['nullable', 'email'],
             'is_active' => ['nullable', 'integer', 'between:-1,1'],
             'search_words' => ['nullable', 'array'],
             'search_words.*' => ['nullable', 'string'],

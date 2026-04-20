@@ -4,6 +4,7 @@ use App\Constants\HttpStatusCodeConstants;
 use App\Http\Controllers\BE\AuthController;
 use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\LookupController;
+use App\Http\Controllers\BE\OfficeBranchController;
 use App\Http\Controllers\BE\RoleController;
 use App\Http\Controllers\PositionController;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ Route::group([
             Route::get('users', [LookupController::class, 'users']);
             Route::get('departments', [LookupController::class, 'departments']);
             Route::get('positions', [LookupController::class, 'positions']);
+            Route::get('office-branches', [LookupController::class, 'officeBranches']);
         });
 
         Route::prefix('roles')->group(function () {
@@ -64,7 +66,14 @@ Route::group([
             Route::patch('/{uuid}', [PositionController::class, 'updateStatus']);
         });
         
-
+        Route::prefix('office-branches')->group(function () {
+            Route::get('/', [OfficeBranchController::class, 'index']);
+            Route::post('/', [OfficeBranchController::class, 'store']);
+            Route::get('/{uuid}', [OfficeBranchController::class, 'show']);
+            Route::put('/{uuid}', [OfficeBranchController::class, 'update']);
+            Route::patch('/{uuid}', [OfficeBranchController::class, 'updateStatus']);
+        });
+        
 
 
 
