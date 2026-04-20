@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Permission\Models\Role as SpatieRole;
 
-class Role extends SpatieRole
+class Department extends Model
 {
     use HasFactory;
 
-    protected $table = 'roles';
+    protected $table = 'departments';
     public $timestamps = false;
     protected $casts = [
         'is_active' => 'boolean',
@@ -20,7 +20,7 @@ class Role extends SpatieRole
     protected $fillable = [
         'uuid',
         'name',
-        'guard_name',
+        'description',
         'is_active',
         'created_by',
         'created_at',

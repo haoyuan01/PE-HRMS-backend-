@@ -17,8 +17,10 @@ class User extends Authenticatable
     protected $table = 'users';
     public $timestamps = false;
     protected $casts = [
+        'is_active' => 'boolean',
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'created_at' => 'datetime:Y-m-d H:i:s.u',
+        'updated_at' => 'datetime:Y-m-d H:i:s.u',
     ];
 
     protected $fillable = [
@@ -37,11 +39,7 @@ class User extends Authenticatable
     ];
 
     protected $hidden = [
-        'is_active' => 'boolean',
-        'password' => 'hashed',
-        'email_verified_at' => 'datetime:Y-m-d H:i:s.u',
-        'created_at' => 'datetime:Y-m-d H:i:s.u',
-        'updated_at' => 'datetime:Y-m-d H:i:s.u',
+        'password',
     ];
     
 }

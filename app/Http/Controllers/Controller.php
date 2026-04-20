@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Constants\HttpStatusCodeConstants;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 abstract class Controller
 {
@@ -42,6 +43,11 @@ abstract class Controller
     public function currentDateTime()
     {
         return Carbon::now();
+    }
+
+    public function auth()
+    {
+        return Auth::auth();
     }
 
     // public function removeSpace($string) {

@@ -2,6 +2,7 @@
 
 use App\Constants\HttpStatusCodeConstants;
 use App\Http\Controllers\BE\AuthController;
+use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\LookupController;
 use App\Http\Controllers\BE\RoleController;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ Route::group([
         Route::prefix('lookup')->group(function () {
             Route::get('permissions', [LookupController::class, 'permissions']);
             Route::get('users', [LookupController::class, 'users']);
+            Route::get('departments', [LookupController::class, 'departments']);
         });
 
         Route::prefix('roles')->group(function () {
@@ -44,6 +46,13 @@ Route::group([
             Route::patch('/{uuid}', [RoleController::class, 'updateStatus']);
         });
 
+        Route::prefix('departments')->group(function () {
+            Route::get('/', [DepartmentController::class, 'index']);
+            Route::post('/', [DepartmentController::class, 'store']);
+            Route::get('/{uuid}', [DepartmentController::class, 'show']);
+            Route::put('/{uuid}', [DepartmentController::class, 'update']);
+            Route::patch('/{uuid}', [DepartmentController::class, 'updateStatus']);
+        });
         
 
 
@@ -53,7 +62,9 @@ Route::group([
 
 
 
-
+        Route::get('testing', function (Request $request) {
+            return $request->user();
+        });
 
         // middleware example usage
         Route::group(['middleware' => ['permission:Read User', 'role:Admin']], function() {
@@ -61,6 +72,8 @@ Route::group([
             Route::get('test-permission', function () {
                 return 'test-permission middleware';
             });
+
+
 
         });
         

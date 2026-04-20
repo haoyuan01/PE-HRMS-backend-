@@ -15,8 +15,6 @@ use App\Http\Resources\RoleResource;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Services\RoleService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
@@ -27,13 +25,13 @@ class RoleController extends Controller
 
     public function index(RoleIndexRequest $request)
     {
-        $data = Role::with([
+        $role = Role::with([
             'permissions',
         ]);
 
-        $data = $this->role_filter->apply($request, $request->size, $data);
+        $role = $this->role_filter->apply($request, $request->size, $role);
 
-        return self::responsePaginated(RoleResource::collection($data), $data);
+        return self::responsePaginated(RoleResource::collection($role), $role);
     }
 
     public function store(RoleStoreRequest $request)
@@ -46,7 +44,7 @@ class RoleController extends Controller
             $role->name = $request->name;
             $role->guard_name = 'web';
             $role->is_active = StatusCodeConstants::ACTIVE;
-            $role->created_by = $role->updated_by = Auth::user()->uuid;
+            $role->created_by = $role->updated_by = self::auth()->uuid;
             $role->created_at = $role->updated_at = self::currentDateTime();
             $role->save();
 
@@ -87,7 +85,7 @@ class RoleController extends Controller
 
         try {
             $role->name = $request->name;
-            $role->updated_by = Auth::user()->uuid;
+            $role->updated_by = self::auth()->uuid;
             $role->updated_at = self::currentDateTime();
             $role->save();
 
@@ -125,7 +123,7 @@ class RoleController extends Controller
         $role = $this->role_service->findByUUID($uuid);
 
         $role->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
-        $role->updated_by = Auth::user()->uuid;
+        $role->updated_by = self::auth()->uuid;
         $role->updated_at = self::currentDateTime();
         $role->save();
 
@@ -136,8 +134,8 @@ class RoleController extends Controller
 
     public function show(RoleShowRequest $request, $uuid)
     {
-        $data = $this->role_service->findByUUID($uuid);
+        $role = $this->role_service->findByUUID($uuid);
 
-        return self::response(new RoleResource($data));
+        return self::response(new RoleResource($role));
     }
 }

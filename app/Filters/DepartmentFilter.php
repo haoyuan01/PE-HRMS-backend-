@@ -4,7 +4,7 @@ namespace App\Filters;
 
 use Illuminate\Http\Request;
 
-class RoleFilter
+class DepartmentFilter
 {
     public function apply(Request $filters, $size, $data)
     {

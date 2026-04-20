@@ -3,15 +3,13 @@
 namespace App\Services;
 
 use App\Exceptions\AppException;
-use App\Models\Role;
+use App\Models\Department;
 
-class RoleService
+class DepartmentService
 {
-    public function findByUUID($uuid): Role
+    public function findByUUID($uuid): Department
     {
-        $data = Role::with([
-            'permissions'
-        ])->firstWhere('uuid', $uuid);
+        $data = Department::firstWhere('uuid', $uuid);
         throw_if(!$data, AppException::class, 'Role not found');
         
         return $data;
