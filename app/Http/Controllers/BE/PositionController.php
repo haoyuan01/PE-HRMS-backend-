@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\BE;
 
 use App\Constants\StatusCodeConstants;
 use App\Http\Requests\PositionIndexRequest;
+use App\Http\Controllers\Controller;
 use App\Models\Position;
 use App\Filters\PositionFilter;
 use App\Http\Requests\PositionShowRequest;

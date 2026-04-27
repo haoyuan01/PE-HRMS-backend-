@@ -6,7 +6,7 @@ use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\LookupController;
 use App\Http\Controllers\BE\OfficeBranchController;
 use App\Http\Controllers\BE\RoleController;
-use App\Http\Controllers\PositionController;
+use App\Http\Controllers\BE\PositionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
