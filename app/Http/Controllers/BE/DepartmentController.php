@@ -12,11 +12,10 @@ use App\Http\Requests\DepartmentUpdateRequest;
 use App\Http\Requests\DepartmentUpdateStatusRequest;
 use App\Models\Department;
 use App\Http\Resources\DepartmentResource;
-use App\Services\DepartmentService;
 
 class DepartmentController extends Controller
 {
-    public function __construct(private DepartmentFilter $department_filter, private DepartmentService $department_service)
+    public function __construct(private DepartmentFilter $department_filter)
     {
     }
 
@@ -43,9 +42,9 @@ class DepartmentController extends Controller
         return self::response(new DepartmentResource($department));
     }
 
-    public function update(DepartmentUpdateRequest $request, $uuid)
+    public function update(DepartmentUpdateRequest $request, string $uuid)
     {
-        $department = $this->department_service->findByUUID($uuid);
+        $department = Department::findByUuid($uuid);
         $department->name = $request->name;
         $department->description = $request->description;
         $department->is_active = StatusCodeConstants::ACTIVE;
@@ -56,9 +55,9 @@ class DepartmentController extends Controller
         return self::response(new DepartmentResource($department));
     }
 
-    public function updateStatus(DepartmentUpdateStatusRequest $request, $uuid)
+    public function updateStatus(DepartmentUpdateStatusRequest $request, string $uuid)
     {
-        $department = $this->department_service->findByUUID($uuid);
+        $department = Department::findByUuid($uuid);
         $department->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
         $department->updated_by = self::auth()->uuid;
         $department->updated_at = self::currentDateTime();
@@ -67,9 +66,9 @@ class DepartmentController extends Controller
         return self::response(new DepartmentResource($department));
     }
 
-    public function show(DepartmentShowRequest $request, $uuid)
+    public function show(DepartmentShowRequest $request, string $uuid)
     {
-        $department = $this->department_service->findByUUID($uuid);
+        $department = Department::findByUuid($uuid);
         
         return self::response(new DepartmentResource($department));
     }

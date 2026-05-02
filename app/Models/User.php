@@ -9,10 +9,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Traits\HasActivityLog;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens, HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, HasActivityLog;
 
     protected $table = 'users';
     public $timestamps = false;
@@ -42,4 +43,24 @@ class User extends Authenticatable
         'password',
     ];
     
+    /**
+     * Data Retrieval Methods
+     */
+    public static function findByEmail(string $email, bool $fail = true)
+    {
+        $query =  self::with([
+            'roles.permissions',
+        ])->where('email', $email);
+
+        if ($fail)
+        {
+            return $query->firstOrFail();
+        }
+
+        return $query->first();
+    }
+
+    /**
+     * Relationships
+     */
 }

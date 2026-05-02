@@ -1,6 +1,7 @@
 <?php
 
 use App\Constants\HttpStatusCodeConstants;
+use App\Http\Controllers\BE\ActivityLogController;
 use App\Http\Controllers\BE\AuthController;
 use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\LookupController;
@@ -34,6 +35,11 @@ Route::group([
 
         Route::prefix('auth')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
+        });
+
+        Route::prefix('activity-logs')->group(function () {
+            Route::get('/', [ActivityLogController::class, 'index']);
+            Route::get('/{uuid}', [ActivityLogController::class, 'show']);
         });
 
         Route::prefix('lookup')->group(function () {

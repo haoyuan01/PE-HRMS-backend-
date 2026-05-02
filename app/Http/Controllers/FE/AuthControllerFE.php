@@ -4,7 +4,7 @@ namespace App\Http\Controllers\FE;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthResetPasswordActionFE;
-use App\Services\UserService;
+use App\Models\User;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthControllerFE extends Controller
 {
-    public function __construct(private UserService $user_service)
+    public function __construct()
     {
     }
 
@@ -26,7 +26,7 @@ class AuthControllerFE extends Controller
             return view('auth.reset-password-invalid');
         }
     
-        $user = $this->user_service->findByEmail($email, false);
+        $user = User::findByEmail($email, false);
     
         if (!$user || !Password::tokenExists($user, $token))
         {
@@ -43,7 +43,7 @@ class AuthControllerFE extends Controller
 
     public function resetPasswordAction(AuthResetPasswordActionFE $request)
     {
-        $user = $this->user_service->findByEmail($request->email, false);
+        $user = User::findByEmail($request->email, false);
 
         if (!$user || !Password::tokenExists($user, $request->token))
         {

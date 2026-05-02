@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Constants\StatusCodeConstants;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasActivityLog;
 
 class Position extends Model
 {
-    use HasFactory;
+    use HasFactory, HasActivityLog;
 
     protected $table = 'positions';
     public $timestamps = false;
@@ -27,4 +29,18 @@ class Position extends Model
         'updated_by',
         'updated_at',
     ];
+
+    /**
+     * Data Retrieval Methods
+     */
+    public static function findByUuid(string $uuid)
+    {
+        return self::where('uuid', $uuid)
+            ->where('is_active', StatusCodeConstants::ACTIVE)
+            ->firstOrFail();
+    }
+
+    /**
+     * Relationships
+     */
 }

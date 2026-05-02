@@ -78,7 +78,7 @@ class OfficeBranchFilter
         {
             $data->where(function($query) use ($filters) {
                 foreach ($filters->search_words as $word) {
-                    $query->orWhere('name', 'like', "%$word%");
+                    $query->where('name', 'like', "%$word%");
                         //   ->orWhere(DB::raw("CONCAT_WS(address_1,'',address_2,'',address_3)"), 'like', "%$word%")
                         //   ->orWhere(DB::raw("CONCAT_WS(phone_code,'',phone_number)"), 'like', "%$word%")
                         //   ->orWhere(DB::raw("CONCAT_WS(fax_code,'',fax_number)"), 'like', "%$word%")

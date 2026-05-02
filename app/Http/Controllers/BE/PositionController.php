@@ -12,11 +12,10 @@ use App\Http\Requests\PositionStoreRequest;
 use App\Http\Requests\PositionUpdateRequest;
 use App\Http\Requests\PositionUpdateStatusRequest;
 use App\Http\Resources\PositionResource;
-use App\Services\PositionService;
 
 class PositionController extends Controller
 {
-    public function __construct(private PositionFilter $position_filter, private PositionService $position_service)
+    public function __construct(private PositionFilter $position_filter)
     {
     }
 
@@ -43,9 +42,9 @@ class PositionController extends Controller
         return self::response(new PositionResource($position));
     }
 
-    public function update(PositionUpdateRequest $request, $uuid)
+    public function update(PositionUpdateRequest $request, string $uuid)
     {
-        $position = $this->position_service->findByUUID($uuid);
+        $position = Position::findByUuid($uuid);
         $position->name = $request->name;
         $position->description = $request->description;
         $position->updated_by = self::auth()->uuid;
@@ -55,9 +54,9 @@ class PositionController extends Controller
         return self::response(new PositionResource($position));
     }
 
-    public function updateStatus(PositionUpdateStatusRequest $request, $uuid)
+    public function updateStatus(PositionUpdateStatusRequest $request, string $uuid)
     {
-        $position = $this->position_service->findByUUID($uuid);
+        $position = Position::findByUuid($uuid);
         $position->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
         $position->updated_by = self::auth()->uuid;
         $position->updated_at = self::currentDateTime();
@@ -66,9 +65,9 @@ class PositionController extends Controller
         return self::response(new PositionResource($position));
     }
 
-    public function show(PositionShowRequest $request, $uuid)
+    public function show(PositionShowRequest $request, string $uuid)
     {
-        $position = $this->position_service->findByUUID($uuid);
+        $position = Position::findByUuid($uuid);
         
         return self::response(new PositionResource($position));
     }

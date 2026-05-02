@@ -12,11 +12,10 @@ use App\Http\Requests\OfficeBranchUpdateRequest;
 use App\Http\Requests\OfficeBranchUpdateStatusRequest;
 use App\Http\Resources\OfficeBranchResource;
 use App\Models\OfficeBranch;
-use App\Services\OfficeBranchService;
 
 class OfficeBranchController extends Controller
 {
-    public function __construct(private OfficeBranchFilter $office_branch_filter, private OfficeBranchService $office_branch_service)
+    public function __construct(private OfficeBranchFilter $office_branch_filter)
     {
     }
 
@@ -57,9 +56,9 @@ class OfficeBranchController extends Controller
         return self::response(new OfficeBranchResource($office_branch));
     }
 
-    public function update(OfficeBranchUpdateRequest $request, $uuid)
+    public function update(OfficeBranchUpdateRequest $request, string $uuid)
     {
-        $office_branch = $this->office_branch_service->findByUUID($uuid);
+        $office_branch = OfficeBranch::findByUuid($uuid);
         $office_branch->name = $request->name;
         $office_branch->description = $request->description;
         $office_branch->address_1 = $request->address_1;
@@ -83,9 +82,9 @@ class OfficeBranchController extends Controller
         return self::response(new OfficeBranchResource($office_branch));
     }
 
-    public function updateStatus(OfficeBranchUpdateStatusRequest $request, $uuid)
+    public function updateStatus(OfficeBranchUpdateStatusRequest $request, string $uuid)
     {
-        $office_branch = $this->office_branch_service->findByUUID($uuid);
+        $office_branch = OfficeBranch::findByUuid($uuid);
         $office_branch->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
         $office_branch->updated_by = self::auth()->uuid;
         $office_branch->updated_at = self::currentDateTime();
@@ -94,9 +93,9 @@ class OfficeBranchController extends Controller
         return self::response(new OfficeBranchResource($office_branch));
     }
 
-    public function show(OfficeBranchShowRequest $request, $uuid)
+    public function show(OfficeBranchShowRequest $request, string $uuid)
     {
-        $office_branch = $this->office_branch_service->findByUUID($uuid);
+        $office_branch = OfficeBranch::findByUuid($uuid);
 
         return self::response(new OfficeBranchResource($office_branch));
     }

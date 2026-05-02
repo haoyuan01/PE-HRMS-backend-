@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Models\Permission as SpatiePermission;
+use App\Traits\HasActivityLog;
 
 class Permission extends SpatiePermission
 {
-    use HasFactory;
+    use HasFactory, HasActivityLog;
     
     protected $table = 'permissions';
     public $timestamps = false;
@@ -29,4 +30,12 @@ class Permission extends SpatiePermission
         'updated_by',
         'updated_at',
     ];
+
+    /**
+     * Data Retrieval Methods
+     */
+
+    /**
+     * Relationships
+     */
 }

@@ -14,12 +14,11 @@ use App\Http\Requests\RoleUpdateStatusRequest;
 use App\Http\Resources\RoleResource;
 use App\Models\Permission;
 use App\Models\Role;
-use App\Services\RoleService;
 use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
-    public function __construct(private RoleFilter $role_filter, private RoleService $role_service)
+    public function __construct(private RoleFilter $role_filter)
     {
     }
 
@@ -77,9 +76,9 @@ class RoleController extends Controller
         }
     }
 
-    public function update(RoleUpdateRequest $request, $uuid)
+    public function update(RoleUpdateRequest $request, string $uuid)
     {
-        $role = $this->role_service->findByUUID($uuid);
+        $role = Role::findByUuid($uuid);
 
         DB::beginTransaction();
 
@@ -118,9 +117,9 @@ class RoleController extends Controller
         }
     }
 
-    public function updateStatus(RoleUpdateStatusRequest $request, $uuid)
+    public function updateStatus(RoleUpdateStatusRequest $request, string $uuid)
     {
-        $role = $this->role_service->findByUUID($uuid);
+        $role = Role::findByUuid($uuid);
 
         $role->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
         $role->updated_by = self::auth()->uuid;
@@ -132,9 +131,9 @@ class RoleController extends Controller
         return self::response(new RoleResource($role));
     }
 
-    public function show(RoleShowRequest $request, $uuid)
+    public function show(RoleShowRequest $request, string $uuid)
     {
-        $role = $this->role_service->findByUUID($uuid);
+        $role = Role::findByUuid($uuid);
 
         return self::response(new RoleResource($role));
     }

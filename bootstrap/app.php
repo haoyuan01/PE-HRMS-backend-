@@ -7,6 +7,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
@@ -32,16 +33,48 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 
-        // Handle authentication failure
+        /*
+        |--------------------------------------------------------------------------
+        | Exception - Model Not Found
+        |--------------------------------------------------------------------------
+        */
+        $exceptions->render(function (\Throwable $e, Request $request) {
+
+            if (!$request->is('api/*'))
+            {
+                return null;
+            }
+
+            if ($e instanceof ModelNotFoundException || $e instanceof NotFoundHttpException)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No matching record found',
+                    'data' => null,
+                ], HttpStatusCodeConstants::NOT_FOUND);
+            }
+
+            return null;
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Exception - Authentication Failure
+        |--------------------------------------------------------------------------
+        */
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             return response()->json([
-                'status' => 'error',
+                'status' => false,
                 'message' => 'Access denied',
                 'data' => null,
             ], HttpStatusCodeConstants::UNAUTHORIZED);
         });
 
-        // Handle route not found
+        /*
+        |--------------------------------------------------------------------------
+        | Exception - Route Not Found
+        |--------------------------------------------------------------------------
+        */
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if ($request->is('api/*'))
             {
@@ -53,7 +86,11 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // Handle permission denied
+        /*
+        |--------------------------------------------------------------------------
+        | Exception - Permission Denied
+        |--------------------------------------------------------------------------
+        */
         $exceptions->render(function (UnauthorizedException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
@@ -64,7 +101,11 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // Handle all other exceptions
+        /*
+        |--------------------------------------------------------------------------
+        | Exception - All Other Exceptions
+        |--------------------------------------------------------------------------
+        */
         // $exceptions->render(function (\Throwable $e, Request $request) {
         //     if ($request->is('api/*'))
         //     {

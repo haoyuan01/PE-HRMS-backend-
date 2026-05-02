@@ -9,8 +9,8 @@ use App\Http\Requests\AuthLoginRequest;
 use App\Http\Requests\AuthResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Mail\ForgotPasswordMail;
+use App\Models\User;
 use App\Services\AuthService;
-use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -18,13 +18,13 @@ use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
-    public function __construct(private UserService $user_service, private AuthService $auth_service)
+    public function __construct(private AuthService $auth_service)
     {
     }
 
     public function login(AuthLoginRequest $request)
     {
-        $user = $this->user_service->findByEmail($request->email);
+        $user = User::findByEmail($request->email);
 
         $this->auth_service->validatePassword($user, $request->password);
 
@@ -51,7 +51,7 @@ class AuthController extends Controller
 
     public function forgotPassword(AuthForgotPasswordRequest $request)
     {
-        $user = $this->user_service->findByEmail($request->email, false);
+        $user = User::findByEmail($request->email, false);
         
         $token = Password::createToken($user);
 
@@ -70,7 +70,7 @@ class AuthController extends Controller
 
     public function resetPassword(AuthResetPasswordRequest $request)
     {
-        $user = $this->user_service->findByEmail($request->email);
+        $user = User::findByEmail($request->email);
 
         throw_if(!Password::tokenExists($user, $request->token), AppException::class, 'Invalid token');
         

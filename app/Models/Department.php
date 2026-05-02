@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Constants\StatusCodeConstants;
+use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Department extends Model
 {
-    use HasFactory;
+    use HasFactory, HasActivityLog;
 
     protected $table = 'departments';
     public $timestamps = false;
@@ -27,4 +29,18 @@ class Department extends Model
         'updated_by',
         'updated_at',
     ];
+
+    /**
+     * Data Retrieval Methods
+     */
+    public static function findByUuid(string $uuid)
+    {
+        return self::where('uuid', $uuid)
+            ->where('is_active', StatusCodeConstants::ACTIVE)
+            ->firstOrFail();
+    }
+
+    /**
+     * Relationships
+     */
 }

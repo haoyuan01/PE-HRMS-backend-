@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Constants\StatusCodeConstants;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\HasActivityLog;
 
 class OfficeBranch extends Model
 {
-    use HasFactory;
+    use HasFactory, HasActivityLog;
 
     protected $table = 'office_branches';
     public $timestamps = false;
@@ -39,4 +41,18 @@ class OfficeBranch extends Model
         'created_by',
         'updated_by',
     ];
+
+    /**
+     * Data Retrieval Methods
+     */
+    public static function findByUuid(string $uuid)
+    {
+        return self::where('uuid', $uuid)
+            ->where('is_active', StatusCodeConstants::ACTIVE)
+            ->firstOrFail();
+    }
+
+    /**
+     * Relationships
+     */
 }

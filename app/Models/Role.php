@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Models\Role as SpatieRole;
+use App\Traits\HasActivityLog;
 
 class Role extends SpatieRole
 {
-    use HasFactory;
+    use HasFactory, HasActivityLog;
 
     protected $table = 'roles';
     public $timestamps = false;
@@ -27,4 +28,19 @@ class Role extends SpatieRole
         'updated_by',
         'updated_at',
     ];
+
+    /**
+     * Data Retrieval Methods
+     */
+    public static function findByUuid(string $uuid)
+    {
+        return self::with([
+            'permissions',
+        ])->where('uuid', $uuid)
+        ->firstOrFail();
+    }
+
+    /**
+     * Relationships
+     */
 }
