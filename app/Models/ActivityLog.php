@@ -40,7 +40,10 @@ class ActivityLog extends Model
      */
     public static function findByUuid(string $uuid)
     {
-        return self::where('uuid', $uuid)->firstOrFail();
+        return self::with([
+            'user',
+        ])->where('uuid', $uuid)
+        ->firstOrFail();
     }
 
     /**
@@ -48,6 +51,6 @@ class ActivityLog extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'causer_id');
+        return $this->belongsTo(User::class, 'causer_id', 'id');
     }
 }

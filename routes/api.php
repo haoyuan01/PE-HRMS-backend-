@@ -8,6 +8,7 @@ use App\Http\Controllers\BE\LookupController;
 use App\Http\Controllers\BE\OfficeBranchController;
 use App\Http\Controllers\BE\RoleController;
 use App\Http\Controllers\BE\PositionController;
+use App\Http\Controllers\BE\RequestLogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,7 +23,7 @@ $version = 'v1';
 
 Route::group([
     'prefix' => $version,
-    'middleware' => ['throttle:60,1'],
+    'middleware' => ['throttle:60,1', 'log.request'],
 ], function () {
 
     Route::prefix('auth')->group(function () {
@@ -40,6 +41,11 @@ Route::group([
         Route::prefix('activity-logs')->group(function () {
             Route::get('/', [ActivityLogController::class, 'index']);
             Route::get('/{uuid}', [ActivityLogController::class, 'show']);
+        });
+
+        Route::prefix('request-logs')->group(function () {
+            Route::get('/', [RequestLogController::class, 'index']);
+            Route::get('/{uuid}', [RequestLogController::class, 'show']);
         });
 
         Route::prefix('lookup')->group(function () {

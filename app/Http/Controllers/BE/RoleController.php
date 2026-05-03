@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\BE;
 
 use App\Constants\StatusCodeConstants;
-use App\Exceptions\AppException;
 use App\Filters\RoleFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RoleIndexRequest;

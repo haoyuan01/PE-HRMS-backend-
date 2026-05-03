@@ -2,6 +2,7 @@
 
 use App\Constants\HttpStatusCodeConstants;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\LogApiRequest;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'log.request' => LogApiRequest::class,
         ]);
 
     })

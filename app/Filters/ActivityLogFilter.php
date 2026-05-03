@@ -4,6 +4,7 @@ namespace App\Filters;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ActivityLogFilter
 {
@@ -34,6 +35,17 @@ class ActivityLogFilter
             $data->whereHas('user', function ($query) use ($filters) {
                 $query->where('email', 'like', "%$filters->user%");
             });
+        }
+
+        if (
+            $filters->has('created_at_start') && !empty($filters->created_at_start) &&
+            $filters->has('created_at_end') && !empty($filters->created_at_end)
+        )
+        {
+            $data->whereBetween('created_at', [
+                Carbon::parse($filters->created_at_start)->startOfDay(),
+                Carbon::parse($filters->created_at_end)->endOfDay(),
+            ]);
         }
 
         if ($filters->has('search_words') && !empty($filters->search_words))

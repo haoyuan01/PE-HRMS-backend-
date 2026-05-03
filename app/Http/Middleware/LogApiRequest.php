@@ -1,49 +1,106 @@
 <?php
 
-namespace App\Traits;
+namespace App\Http\Middleware;
 
-use App\Services\ActivityLogService;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\Models\Activity;
+use App\Models\RequestLog;
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
-trait HasActivityLog
+class LogApiRequest
 {
-    use LogsActivity;
+    /**
+     * Fields that should never be logged.
+     */
+    private const SENSITIVE_FIELDS = [
+        'password',
+        'password_confirmation',
+        'token',
+        'secret',
+        'card_number',
+        'cvv',
+    ];
 
-    public function getActivitylogOptions(): LogOptions
+    public function handle(Request $request, Closure $next): Response
     {
-        return ActivityLogService::defaultOptions();
+        $start_time = hrtime(true);
+
+        $response = $next($request);
+
+        $duration_ms = (int) ((hrtime(true) - $start_time) / 1e6);
+
+        // start request        
+        $start_memory = memory_get_usage(true);
+
+        // after request
+        $end_memory = memory_get_usage(true);
+        $peak_memory = memory_get_peak_usage(true);
+
+        $memory_used_mb = round(($end_memory - $start_memory) / 1024 / 1024, 2); // actual request usage
+        $memory_peak_mb = round($peak_memory / 1024 / 1024, 2); // overall peak
+
+        $this->record($request, $response, $duration_ms, $memory_used_mb, $memory_peak_mb);
+
+        return $response;
     }
 
-    public function tapActivity(Activity $activity, string $eventName)
+    private function record(Request $request, Response $response, int $duration_ms, float $memory_used_mb, float $memory_peak_mb): void
     {
-        $properties = $activity->properties?->toArray() ?? [];
-        $model = class_basename($activity->subject_type);
+        try {
+            RequestLog::create([
+                'uuid'             => (string) Str::uuid(),
+                'user_id'          => $request->user()?->id,
+                'method'           => $request->method(),
+                'path'             => $request->path(),
+                'files'            => collect($request->files->all())->map(fn($file) => [
+                    'name'      => $file->getClientOriginalName(),
+                    'size'      => $file->getSize(),
+                    'mime_type' => $file->getMimeType(),
+                    'tmp_name'  => $file->getPathName(),
+                ])->toArray(),
+                'request_payload'  => $this->sanitize($request->except(self::SENSITIVE_FIELDS)),
+                'response_payload' => $this->parseResponse($response),
+                'ip'               => $request->ip(),
+                'url'              => $request->url(),
+                'scheme'           => $request->getScheme(),
+                'host'             => $request->getHost(),
+                'port'             => $request->getPort(),
+                'cookies'          => $request->cookies->all(),
+                'user_agent'       => $request->userAgent(),
+                'status_code'      => $response->getStatusCode(),
+                'success'          => $response->getStatusCode() >= 200 && $response->getStatusCode() < 300,
+                'performance' => [
+                    'duration_ms'      => $duration_ms,
+                    'memory_used_mb'   => $memory_used_mb,   // actual request usage
+                    'memory_peak_mb'   => $memory_peak_mb,   // overall peak
+                ],
+                'created_at'       => Carbon::now(),
+                'updated_at'       => Carbon::now(),
+            ]);
+        } catch (\Throwable) {
+            // Never let logging break the application
+        }
+    }
 
-        $duration_ms = round((microtime(true) - LARAVEL_START) * 1000, 2); // total request execution time from framework bootstrap
-        $memory_current_mb = round(memory_get_usage(true) / 1024 / 1024, 2); // current PHP memory allocation at execution time snapshot
-        $memory_peak_mb = round(memory_get_peak_usage(true) / 1024 / 1024, 2); // peak memory usage during request lifecycle
+    private function sanitize(array $data): ?array
+    {
+        return empty($data) ? null : $data;
+    }
 
-        $activity->uuid = (string) Str::uuid();
-        $activity->event = $eventName;
-        $activity->old_values = isset($properties['old']) ? json_encode($properties['old']) : null;
-        $activity->new_values = isset($properties['attributes']) ? json_encode($properties['attributes']) : null;
-        $activity->description = "{$model} {$eventName}";
-        $activity->performance = json_encode([
-            'duration_ms' => $duration_ms, // request time
-            'memory_current_mb' => $memory_current_mb, // memory now
-            'memory_peak_mb' => $memory_peak_mb, // peak memory
-        ]);
+    private function parseResponse(Response $response): ?array
+    {
+        $content = $response->getContent();
 
-        // following fields are logged automatically by spatie/activitylog
-        // subject_type
-        // subject_id
-        // causer_type
-        // causer_id
-        // properties
+        if (!$content) {
+            return null;
+        }
+
+        $decoded = json_decode($content, true);
+
+        return json_last_error() === JSON_ERROR_NONE ? $decoded : null;
     }
 
     // not using these for now

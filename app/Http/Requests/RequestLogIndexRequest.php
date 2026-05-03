@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ActivityLogIndexRequest extends FormRequest
+class RequestLogIndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +24,12 @@ class ActivityLogIndexRequest extends FormRequest
     {
         return [
             'uuid' => ['nullable', 'string', 'uuid'],
-            'log_name' => ['nullable', 'string'],
-            'event' => ['nullable', 'string'],
-            'description' => ['nullable', 'string'],
-            'user' => ['nullable', 'string'],
+            'method' => ['nullable', 'string'],
+            'path' => ['nullable', 'string'],
+            'ip_address' => ['nullable', 'string'],
+            'user_agent' => ['nullable', 'string'],
+            'status_code' => ['nullable', 'integer'],
+            'success' => ['nullable', 'integer', 'between:-1,1'],
             'created_at_start' => ['nullable', 'date_format:Y-m-d'],
             'created_at_end' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:created_at_start'],
             'search_words' => ['nullable', 'array'],
