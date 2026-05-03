@@ -49,7 +49,7 @@ class DepartmentController extends Controller
         $department->description = $request->description;
         $department->is_active = StatusCodeConstants::ACTIVE;
         $department->updated_by = self::auth()->uuid;
-        $department->updated_atzzz = self::currentDateTime();
+        $department->updated_at = self::currentDateTime();
         $department->save();
         
         return self::response(new DepartmentResource($department));
