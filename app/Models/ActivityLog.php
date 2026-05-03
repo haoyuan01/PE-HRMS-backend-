@@ -7,7 +7,7 @@ use App\Exceptions\AppException;
 
 class ActivityLog extends Model
 {
-    protected $table = 'activity_log';
+    protected $table = 'activity_logs';
     public $timestamps = false;
     protected $casts = [
         'properties' => 'array',

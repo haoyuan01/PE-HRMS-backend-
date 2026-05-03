@@ -3,12 +3,16 @@
 use App\Constants\HttpStatusCodeConstants;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\LogApiRequest;
+use App\Services\ErrorLogService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
+use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
@@ -37,10 +41,55 @@ return Application::configure(basePath: dirname(__DIR__))
 
         /*
         |--------------------------------------------------------------------------
+        | Exception - Database Query Exception
+        |--------------------------------------------------------------------------
+        */
+        $exceptions->render(function (QueryException $e, Request $request) {
+
+            ErrorLogService::capture($e); // Log the exception in error_logs
+
+            if ($request->is('api/*'))
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Database Query Error',
+                    'data'    => null,
+                ], 500);
+            }
+        });
+        
+        /*
+        |--------------------------------------------------------------------------
+        | Exception - Validation Exception
+        |--------------------------------------------------------------------------
+        */
+        $exceptions->render(function (ValidationException $e, Request $request) {
+
+            ErrorLogService::capture($e); // Log the exception in error_logs
+            
+            return null;
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Exception - Authorization Exception
+        |--------------------------------------------------------------------------
+        */
+        $exceptions->render(function (AuthorizationException $e, Request $request) {
+            
+            ErrorLogService::capture($e); // Log the exception in error_logs
+            
+            return null;
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Exception - Model Not Found
         |--------------------------------------------------------------------------
         */
         $exceptions->render(function (\Throwable $e, Request $request) {
+            
+            ErrorLogService::capture($e); // Log the exception in error_logs
 
             if (!$request->is('api/*'))
             {
@@ -65,6 +114,9 @@ return Application::configure(basePath: dirname(__DIR__))
         |--------------------------------------------------------------------------
         */
         $exceptions->render(function (AuthenticationException $e, Request $request) {
+
+            ErrorLogService::capture($e); // Log the exception in error_logs
+            
             return response()->json([
                 'status' => false,
                 'message' => 'Access denied',
@@ -78,6 +130,9 @@ return Application::configure(basePath: dirname(__DIR__))
         |--------------------------------------------------------------------------
         */
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+
+            ErrorLogService::capture($e); // Log the exception in error_logs
+
             if ($request->is('api/*'))
             {
                 return response()->json([
@@ -94,7 +149,11 @@ return Application::configure(basePath: dirname(__DIR__))
         |--------------------------------------------------------------------------
         */
         $exceptions->render(function (UnauthorizedException $e, Request $request) {
-            if ($request->is('api/*')) {
+
+            ErrorLogService::capture($e); // Log the exception in error_logs
+            
+            if ($request->is('api/*'))
+            {                
                 return response()->json([
                     'success' => false,
                     'message' => 'Access Prohibited',
@@ -108,20 +167,10 @@ return Application::configure(basePath: dirname(__DIR__))
         | Exception - All Other Exceptions
         |--------------------------------------------------------------------------
         */
-        // $exceptions->render(function (\Throwable $e, Request $request) {
-        //     if ($request->is('api/*'))
-        //     {
-        //         $status = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface ? $e->getStatusCode() : HttpStatusCodeConstants::INTERNAL_SERVER_ERROR;
-        
-        //         return response()->json([
-        //             'success' => false,
-        //             'message' => $e->getMessage() ?: 'Internal Server Error',
-        //             'data'    => null,
-        //         ], $status);
-        //     }
-        // });
         $exceptions->render(function (\Throwable $e, Request $request) {
-
+            
+            ErrorLogService::capture($e); // Log the exception in error_logs
+            
             if (!$request->is('api/*'))
             {
                 return null;
@@ -151,7 +200,7 @@ return Application::configure(basePath: dirname(__DIR__))
             {
                 $message = array_values($message);
             }
-
+            
             return response()->json([
                 'success' => false,
                 'message' => $message ?: 'Internal Server Error',

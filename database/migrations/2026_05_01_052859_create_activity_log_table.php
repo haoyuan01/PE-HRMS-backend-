@@ -8,7 +8,7 @@ class CreateActivityLogTable extends Migration
 {
     public function up()
     {
-        Schema::connection(config('activitylog.database_connection'))->create(config('activitylog.table_name'), function (Blueprint $table) {
+        Schema::connection(config('activitylogs.database_connection'))->create(config('activitylog.table_name'), function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid('uuid')->unique();
             $table->string('log_name')->nullable();             // audit
@@ -27,11 +27,12 @@ class CreateActivityLogTable extends Migration
             $table->index('log_name');
             $table->index('event');
             $table->index('description');
+            $table->index('created_at');
         });
     }
 
     public function down()
     {
-        Schema::connection(config('activitylog.database_connection'))->dropIfExists(config('activitylog.table_name'));
+        Schema::connection(config('activitylogs.database_connection'))->dropIfExists(config('activitylog.table_name'));
     }
 }

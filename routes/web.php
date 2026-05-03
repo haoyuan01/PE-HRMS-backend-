@@ -4,7 +4,7 @@ use App\Http\Controllers\FE\AuthControllerFE;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
-    'middleware' => ['throttle:10,1'],
+    'middleware' => ['throttle:10,1', 'log.request'],
 ], function () {
 
     Route::get('/', function () {

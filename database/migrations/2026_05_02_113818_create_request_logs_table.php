@@ -39,6 +39,7 @@ return new class extends Migration
             $table->index('user_agent');
             $table->index('status_code');
             $table->index('success');
+            $table->index('created_at');
 
             // foreign key
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasActivityLog;
 
 class RequestLog extends Model
 {
-    use HasFactory, HasActivityLog;
+    use HasFactory;
 
     protected $table = 'request_logs';
     public $timestamps = false;
