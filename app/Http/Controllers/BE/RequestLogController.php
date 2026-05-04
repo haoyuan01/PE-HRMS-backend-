@@ -19,6 +19,8 @@ class RequestLogController extends Controller
     {
         $request_log = RequestLog::with([
             'user',
+            'activityLogs',
+            'errorLogs',
         ]);
 
         $request_log = $this->request_log_filter->apply($request, $request->size, $request_log);

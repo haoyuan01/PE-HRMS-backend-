@@ -3,11 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Exceptions\AppException;
 
 class ActivityLog extends Model
 {
-    protected $table = 'activity_logs';
+    protected $table = 'activity_log';
     public $timestamps = false;
     protected $casts = [
         'properties' => 'array',
@@ -19,6 +18,8 @@ class ActivityLog extends Model
     ];
 
     protected $fillable = [
+        'uuid',
+        'request_log_uuid',
         'log_name',
         'event',
         'description',
@@ -42,6 +43,7 @@ class ActivityLog extends Model
     {
         return self::with([
             'user',
+            'requestLog',
         ])->where('uuid', $uuid)
         ->firstOrFail();
     }
@@ -52,5 +54,10 @@ class ActivityLog extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'causer_id', 'id');
+    }
+
+    public function requestLog()
+    {
+        return $this->belongsTo(RequestLog::class, 'request_log_uuid', 'uuid');
     }
 }

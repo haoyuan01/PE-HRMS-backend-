@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ErrorLogService
@@ -22,9 +24,12 @@ class ErrorLogService
         try {
             $request = request();
 
+            $request_log_uuid = $request->attributes->get('request_log_uuid');
+
             ErrorLog::create([
                 'uuid'               => (string) Str::uuid(),
                 'user_id'            => self::resolveUserId($request),
+                'request_log_uuid'   => $request_log_uuid,
                 'level'              => self::resolveLevel($exception),
                 'exception_class'    => get_class($exception),
                 'message'            => $exception->getMessage(),
@@ -36,8 +41,8 @@ class ErrorLogService
                 'previous_exception' => self::resolvePrevious($exception),
                 'performance'        => self::resolvePerformance(),
                 'hostname'           => gethostname() ?: null,
-                'created_at'         => now(),
-                'updated_at'         => now(),
+                'created_at'         => Carbon::now(),
+                'updated_at'         => Carbon::now(),
             ]);
         } catch (Throwable) {
             // Logging must never crash the application

@@ -4,6 +4,7 @@ use App\Constants\HttpStatusCodeConstants;
 use App\Http\Controllers\BE\ActivityLogController;
 use App\Http\Controllers\BE\AuthController;
 use App\Http\Controllers\BE\DepartmentController;
+use App\Http\Controllers\BE\ErrorLogController;
 use App\Http\Controllers\BE\LookupController;
 use App\Http\Controllers\BE\OfficeBranchController;
 use App\Http\Controllers\BE\RoleController;
@@ -46,6 +47,11 @@ Route::group([
         Route::prefix('request-logs')->group(function () {
             Route::get('/', [RequestLogController::class, 'index']);
             Route::get('/{uuid}', [RequestLogController::class, 'show']);
+        });
+
+        Route::prefix('error-logs')->group(function () {
+            Route::get('/', [ErrorLogController::class, 'index']);
+            Route::get('/{uuid}', [ErrorLogController::class, 'show']);
         });
 
         Route::prefix('lookup')->group(function () {

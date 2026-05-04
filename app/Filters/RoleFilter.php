@@ -27,7 +27,8 @@ class RoleFilter
         {
             $data->where(function($query) use ($filters) {
                 foreach ($filters->search_words as $word) {
-                    $query->where('name', 'like', "%$word%");
+                    $query->where('name', 'like', "%$word%")
+                        ->orWhere('uuid', $word);
                 }
             });
         }

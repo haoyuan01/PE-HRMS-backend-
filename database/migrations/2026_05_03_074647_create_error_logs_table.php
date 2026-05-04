@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('error_logs', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
+            $table->uuid('request_log_uuid')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('request_id')->nullable();
             $table->string('level'); 
             $table->string('exception_class')->nullable();
             $table->text('message')->nullable();
@@ -30,13 +30,12 @@ return new class extends Migration
 
             // index
             $table->index('user_id');
-            $table->index('request_id');
+            $table->index('request_log_uuid');
             $table->index('level');
             $table->index('created_at');
 
             // foreign key
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('request_id')->references('id')->on('request_logs')->onDelete('cascade');
         });
     }
 

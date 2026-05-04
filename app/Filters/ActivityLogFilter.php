@@ -53,11 +53,12 @@ class ActivityLogFilter
             $data->where(function($query) use ($filters) {
                 foreach ($filters->search_words as $word) {
                     $query->where('log_name', 'like', "%$word%")
-                          ->orWhere('event', 'like', "%$word%")
-                          ->orWhere('description', 'like', "%$word%")
-                          ->orWhereHas('user', function ($query) use ($word) {
-                              $query->where('email', 'like', "%$word%");
-                          });
+                        ->orWhere('event', 'like', "%$word%")
+                        ->orWhere('description', 'like', "%$word%")
+                        ->orWhereHas('user', function ($query) use ($word) {
+                            $query->where('email', 'like', "%$word%");
+                        })
+                        ->orWhere('uuid', $word);
                 }
             });
         }

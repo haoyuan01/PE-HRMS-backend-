@@ -3,8 +3,9 @@
 namespace App\Filters;
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
-class DepartmentFilter
+class ErrorLogFilter
 {
     public function apply(Request $filters, $size, $data)
     {
@@ -12,22 +13,28 @@ class DepartmentFilter
         {
             $data->where('uuid', $filters->uuid);
         }
-        
-        if ($filters->has('name') && !empty($filters->name))
+
+        if ($filters->has('level') && !empty($filters->level))
         {
-            $data->where('name', 'like', "%$filters->name%");
+            $data->where('level', 'like', "%$filters->level%");
         }
 
-        if ($filters->has('is_active') && $filters->is_active >= 0)
+        if (
+            $filters->has('created_at_start') && !empty($filters->created_at_start) &&
+            $filters->has('created_at_end') && !empty($filters->created_at_end)
+        )
         {
-            $data->where('is_active', "$filters->is_active");
+            $data->whereBetween('created_at', [
+                Carbon::parse($filters->created_at_start)->startOfDay(),
+                Carbon::parse($filters->created_at_end)->endOfDay(),
+            ]);
         }
 
         if ($filters->has('search_words') && !empty($filters->search_words))
         {
             $data->where(function($query) use ($filters) {
                 foreach ($filters->search_words as $word) {
-                    $query->where('name', 'like', "%$word%")
+                    $query->where('level', 'like', "%$word%")
                         ->orWhere('uuid', $word);
                 }
             });

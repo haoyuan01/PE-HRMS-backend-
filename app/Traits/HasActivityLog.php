@@ -27,7 +27,10 @@ trait HasActivityLog
         $memory_current_mb = round(memory_get_usage(true) / 1024 / 1024, 2); // current PHP memory allocation at execution time snapshot
         $memory_peak_mb = round(memory_get_peak_usage(true) / 1024 / 1024, 2); // peak memory usage during request lifecycle
 
+        $request_log_uuid = request()->attributes->get('request_log_uuid');
+
         $activity->uuid = (string) Str::uuid();
+        $activity->request_log_uuid = $request_log_uuid;
         $activity->event = $eventName;
         $activity->old_values = isset($properties['old']) ? json_encode($properties['old']) : null;
         $activity->new_values = isset($properties['attributes']) ? json_encode($properties['attributes']) : null;

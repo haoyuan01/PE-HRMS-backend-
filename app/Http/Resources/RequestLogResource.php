@@ -35,6 +35,8 @@ class RequestLogResource extends JsonResource
             'created_at'            => Carbon::parse($this->created_at)->utc(),
             'updated_at'            => Carbon::parse($this->updated_at)->utc(),
             'user'                  => new UserResource($this->whenLoaded('user')),
+            'activity_logs'         => ActivityLogResource::collection($this->whenLoaded('activityLogs')),
+            'error_logs'            => ErrorLogResource::collection($this->whenLoaded('errorLogs')),
         ];
 
         return $data;

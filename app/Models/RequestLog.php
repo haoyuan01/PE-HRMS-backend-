@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class RequestLog extends Model
 {
-    use HasFactory;
-
     protected $table = 'request_logs';
     public $timestamps = false;
     protected $casts = [
@@ -51,6 +48,8 @@ class RequestLog extends Model
     {
         return self::with([
             'user',
+            'activityLogs',
+            'errorLogs',
         ])->where('uuid', $uuid)
         ->firstOrFail();
     }
@@ -61,5 +60,15 @@ class RequestLog extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class, 'request_log_uuid', 'uuid');
+    }
+
+    public function errorLogs()
+    {
+        return $this->hasMany(ErrorLog::class, 'request_log_uuid', 'uuid');
     }
 }

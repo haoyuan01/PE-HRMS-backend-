@@ -19,6 +19,7 @@ class ActivityLogController extends Controller
     {
         $activity_log = ActivityLog::with([
             'user',
+            'requestLog',
         ]);
 
         $activity_log = $this->activity_log_filter->apply($request, $request->size, $activity_log);
