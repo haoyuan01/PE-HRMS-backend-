@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Constants\RegexConstants;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,14 +25,14 @@ class ActivityLogIndexRequest extends FormRequest
     {
         return [
             'uuid' => ['nullable', 'string', 'uuid'],
-            'log_name' => ['nullable', 'string'],
-            'event' => ['nullable', 'string'],
-            'description' => ['nullable', 'string'],
-            'user' => ['nullable', 'string'],
+            'log_name' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED . ''],
+            'event' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED . ''],
+            'description' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED . ''],
+            'user' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED . ''],
             'created_at_start' => ['nullable', 'date_format:Y-m-d'],
             'created_at_end' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:created_at_start'],
             'search_words' => ['nullable', 'array'],
-            'search_words.*' => ['nullable', 'string'],
+            'search_words.*' => ['nullable', 'string', 'regex:' . RegexConstants::DYNAMIC_SEARCH_INJECTION_PROTECTED . ''],
             'page' => ['nullable', 'integer', 'min:1'],
             'size' => ['nullable', 'integer', 'min:1'],
             'sortBy' => ['nullable', 'string', 'alpha_dash'],

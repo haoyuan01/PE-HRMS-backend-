@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Constants\RegexConstants;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,20 +25,20 @@ class OfficeBranchIndexRequest extends FormRequest
     {
         return [
             'uuid' => ['nullable', 'string', 'uuid'],
-            'name' => ['nullable', 'string'],
-            'address' => ['nullable', 'string'],
-            'city' => ['nullable', 'string'],
-            'state' => ['nullable', 'string'],
-            'postcode' => ['nullable', 'string'],
-            'country' => ['nullable', 'string'],
-            'phone' => ['nullable', 'string'],
-            'phone_code' => ['nullable', 'string'],
-            'fax' => ['nullable', 'string'],
-            'fax_code' => ['nullable', 'string'],
-            'email' => ['nullable', 'email'],
+            'name' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'address' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'city' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'state' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'postcode' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'country' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'phone' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'phone_code' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'fax' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'fax_code' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'email' => ['nullable', 'email', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'is_active' => ['nullable', 'integer', 'between:-1,1'],
             'search_words' => ['nullable', 'array'],
-            'search_words.*' => ['nullable', 'string'],
+            'search_words.*' => ['nullable', 'string', 'regex:' . RegexConstants::DYNAMIC_SEARCH_INJECTION_PROTECTED],
             'page' => ['nullable', 'integer', 'min:1'],
             'size' => ['nullable', 'integer', 'min:1'],
             'sortBy' => ['nullable', 'string', 'alpha_dash'],
