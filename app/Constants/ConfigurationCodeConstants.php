@@ -14,5 +14,7 @@ class ConfigurationCodeConstants
     // auth configurations
     const AUTH_RATE_LIMIT = 'auth_rate_limit';
     const AUTH_TOKEN_EXPIRY_DAYS = 'auth_token_expiry_days';
+    const AUTH_LOGIN_MAX_ATTEMPTS = 'auth_login_max_attempts';
+    const AUTH_LOGIN_LOCKOUT_DURATION_MINUTES = 'auth_login_lockout_duration_minutes';
     
 }

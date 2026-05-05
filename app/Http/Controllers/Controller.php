@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 abstract class Controller
 {
-    public function response($data = null, $message = 'success', $code = HttpStatusCodeConstants::OK)
+    public function response($data = null, $message = 'success', int $code = HttpStatusCodeConstants::OK)
     {
         return response()->json([
             'success' => true,

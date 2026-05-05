@@ -107,6 +107,18 @@ class InitialSeeder extends Seeder
                     'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
                     'description' => 'Number of days before authentication token expires',
                 ],
+                [
+                    'key' => ConfigurationCodeConstants::AUTH_LOGIN_MAX_ATTEMPTS,
+                    'value' => 5,
+                    'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
+                    'description' => 'Maximum number of login attempts before account is locked',
+                ],
+                [
+                    'key' => ConfigurationCodeConstants::AUTH_LOGIN_LOCKOUT_DURATION_MINUTES,
+                    'value' => 5,
+                    'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
+                    'description' => 'Number of minutes to lock account after maximum login attempts',
+                ],
             ];
 
             foreach($configurations as $configuration)

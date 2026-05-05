@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\BE;
 
+use App\Constants\ConfigurationCodeConstants;
+use App\Constants\HttpStatusCodeConstants;
 use App\Exceptions\AppException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthForgotPasswordRequest;
@@ -15,6 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -24,9 +28,25 @@ class AuthController extends Controller
 
     public function login(AuthLoginRequest $request)
     {
+        $key = Str::lower($request->email).'|'.$request->ip(); // key for rate limiting
+
+        // throw error if too many attempts
+        throw_if(RateLimiter::tooManyAttempts($key, ConfigurationCodeConstants::AUTH_LOGIN_MAX_ATTEMPTS), AppException::class, 'Too many login attempts. Try again later.', HttpStatusCodeConstants::TOO_MANY_REQUESTS);
+
         $user = User::findByEmail($request->email);
 
-        $this->auth_service->validatePassword($user, $request->password);
+        try {
+
+            $this->auth_service->validatePassword($user, $request->password); // validate email and password
+
+        } catch (\Exception $e) {
+
+            RateLimiter::hit($key, ConfigurationCodeConstants::AUTH_LOGIN_LOCKOUT_DURATION_MINUTES * 60); // increase failed attempts
+
+            throw $e;
+        }
+        
+        RateLimiter::clear($key); // clear failed attempts
 
         $token = $user->createToken('api-access')->plainTextToken;
 
