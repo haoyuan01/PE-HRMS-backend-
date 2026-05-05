@@ -30,28 +30,30 @@ class OfficeBranchController extends Controller
 
     public function store(OfficeBranchStoreRequest $request)
     {
-        $office_branch = new OfficeBranch();
-        $office_branch->uuid = self::uuid();
-        $office_branch->name = $request->name;
-        $office_branch->description = $request->description;
-        $office_branch->address_1 = $request->address_1;
-        $office_branch->address_2 = $request->address_2;
-        $office_branch->address_3 = $request->address_3;
-        $office_branch->city = $request->city;
-        $office_branch->state = $request->state;
-        $office_branch->postcode = $request->postcode;
-        $office_branch->country = $request->country;
-        $office_branch->phone_code = $request->phone_code;
-        $office_branch->phone_number = $request->phone_number;
-        $office_branch->phone_iso = $request->phone_iso;
-        $office_branch->fax_code = $request->fax_code;
-        $office_branch->fax_number = $request->fax_number;
-        $office_branch->fax_iso = $request->fax_iso;
-        $office_branch->email = $request->email;
-        $office_branch->is_active = StatusCodeConstants::ACTIVE;
-        $office_branch->created_by = $office_branch->updated_by = self::auth()->uuid;
-        $office_branch->created_at = $office_branch->updated_at = self::currentDateTime();
-        $office_branch->save();
+        $office_branch = OfficeBranch::create([
+            'uuid' => self::uuid(),
+            'name' => $request->name,
+            'description' => $request->description,
+            'address_1' => $request->address_1,
+            'address_2' => $request->address_2,
+            'address_3' => $request->address_3,
+            'city' => $request->city,
+            'state' => $request->state,
+            'postcode' => $request->postcode,
+            'country' => $request->country,
+            'phone_code' => $request->phone_code,
+            'phone_number' => $request->phone_number,
+            'phone_iso' => $request->phone_iso,
+            'fax_code' => $request->fax_code,
+            'fax_number' => $request->fax_number,
+            'fax_iso' => $request->fax_iso,
+            'email' => $request->email,
+            'is_active' => StatusCodeConstants::ACTIVE,
+            'created_by' => self::auth()->uuid,
+            'created_at' => self::currentDateTime(),
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
         
         return self::response(new OfficeBranchResource($office_branch));
     }
@@ -59,25 +61,27 @@ class OfficeBranchController extends Controller
     public function update(OfficeBranchUpdateRequest $request, string $uuid)
     {
         $office_branch = OfficeBranch::findByUuid($uuid);
-        $office_branch->name = $request->name;
-        $office_branch->description = $request->description;
-        $office_branch->address_1 = $request->address_1;
-        $office_branch->address_2 = $request->address_2;
-        $office_branch->address_3 = $request->address_3;
-        $office_branch->city = $request->city;
-        $office_branch->state = $request->state;
-        $office_branch->postcode = $request->postcode;
-        $office_branch->country = $request->country;
-        $office_branch->phone_code = $request->phone_code;
-        $office_branch->phone_number = $request->phone_number;
-        $office_branch->phone_iso = $request->phone_iso;
-        $office_branch->fax_code = $request->fax_code;
-        $office_branch->fax_number = $request->fax_number;
-        $office_branch->fax_iso = $request->fax_iso;
-        $office_branch->email = $request->email;
-        $office_branch->updated_by = self::auth()->uuid;
-        $office_branch->updated_at = self::currentDateTime();
-        $office_branch->save();
+        
+        $office_branch->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'address_1' => $request->address_1,
+            'address_2' => $request->address_2,
+            'address_3' => $request->address_3,
+            'city' => $request->city,
+            'state' => $request->state,
+            'postcode' => $request->postcode,
+            'country' => $request->country,
+            'phone_code' => $request->phone_code,
+            'phone_number' => $request->phone_number,
+            'phone_iso' => $request->phone_iso,
+            'fax_code' => $request->fax_code,
+            'fax_number' => $request->fax_number,
+            'fax_iso' => $request->fax_iso,
+            'email' => $request->email,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
         
         return self::response(new OfficeBranchResource($office_branch));
     }
@@ -85,10 +89,12 @@ class OfficeBranchController extends Controller
     public function updateStatus(OfficeBranchUpdateStatusRequest $request, string $uuid)
     {
         $office_branch = OfficeBranch::findByUuid($uuid);
-        $office_branch->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
-        $office_branch->updated_by = self::auth()->uuid;
-        $office_branch->updated_at = self::currentDateTime();
-        $office_branch->save();
+        
+        $office_branch->update([
+            'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
         
         return self::response(new OfficeBranchResource($office_branch));
     }

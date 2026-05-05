@@ -30,14 +30,16 @@ class DepartmentController extends Controller
 
     public function store(DepartmentStoreRequest $request)
     {
-        $department = new Department();
-        $department->uuid = self::uuid();
-        $department->name = $request->name;
-        $department->description = $request->description;
-        $department->is_active = StatusCodeConstants::ACTIVE;
-        $department->created_by = $department->updated_by = self::auth()->uuid;
-        $department->created_at = $department->updated_at = self::currentDateTime();
-        $department->save();
+        $department = Department::create([
+            'uuid' => self::uuid(),
+            'name' => $request->name,
+            'description' => $request->description,
+            'is_active' => StatusCodeConstants::ACTIVE,
+            'created_by' => self::auth()->uuid,
+            'created_at' => self::currentDateTime(),
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
         
         return self::response(new DepartmentResource($department));
     }
@@ -45,12 +47,14 @@ class DepartmentController extends Controller
     public function update(DepartmentUpdateRequest $request, string $uuid)
     {
         $department = Department::findByUuid($uuid);
-        $department->name = $request->name;
-        $department->description = $request->description;
-        $department->is_active = StatusCodeConstants::ACTIVE;
-        $department->updated_by = self::auth()->uuid;
-        $department->updated_at = self::currentDateTime();
-        $department->save();
+        
+        $department->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'is_active' => StatusCodeConstants::ACTIVE,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
         
         return self::response(new DepartmentResource($department));
     }
@@ -58,10 +62,12 @@ class DepartmentController extends Controller
     public function updateStatus(DepartmentUpdateStatusRequest $request, string $uuid)
     {
         $department = Department::findByUuid($uuid);
-        $department->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
-        $department->updated_by = self::auth()->uuid;
-        $department->updated_at = self::currentDateTime();
-        $department->save();
+        
+        $department->update([
+            'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
         
         return self::response(new DepartmentResource($department));
     }

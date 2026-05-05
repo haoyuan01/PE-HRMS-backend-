@@ -30,14 +30,16 @@ class PositionController extends Controller
 
     public function store(PositionStoreRequest $request)
     {
-        $position = new Position();
-        $position->uuid = self::uuid();
-        $position->name = $request->name;
-        $position->description = $request->description;
-        $position->is_active = StatusCodeConstants::ACTIVE;
-        $position->created_by = $position->updated_by = self::auth()->uuid;
-        $position->created_at = $position->updated_at = self::currentDateTime();
-        $position->save();
+        $position = Position::create([
+            'uuid' => self::uuid(),
+            'name' => $request->name,
+            'description' => $request->description,
+            'is_active' => StatusCodeConstants::ACTIVE,
+            'created_by' => self::auth()->uuid,
+            'created_at' => self::currentDateTime(),
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
         
         return self::response(new PositionResource($position));
     }
@@ -45,11 +47,13 @@ class PositionController extends Controller
     public function update(PositionUpdateRequest $request, string $uuid)
     {
         $position = Position::findByUuid($uuid);
-        $position->name = $request->name;
-        $position->description = $request->description;
-        $position->updated_by = self::auth()->uuid;
-        $position->updated_at = self::currentDateTime();
-        $position->save();
+
+        $position->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
         
         return self::response(new PositionResource($position));
     }
@@ -57,10 +61,12 @@ class PositionController extends Controller
     public function updateStatus(PositionUpdateStatusRequest $request, string $uuid)
     {
         $position = Position::findByUuid($uuid);
-        $position->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
-        $position->updated_by = self::auth()->uuid;
-        $position->updated_at = self::currentDateTime();
-        $position->save();
+
+        $position->update([
+            'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
         
         return self::response(new PositionResource($position));
     }

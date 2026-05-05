@@ -3,6 +3,7 @@
 use App\Constants\HttpStatusCodeConstants;
 use App\Http\Controllers\BE\ActivityLogController;
 use App\Http\Controllers\BE\AuthController;
+use App\Http\Controllers\BE\ConfigurationController;
 use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\ErrorLogController;
 use App\Http\Controllers\BE\LookupController;
@@ -54,6 +55,12 @@ Route::group([
             Route::get('/{uuid}', [ErrorLogController::class, 'show']);
         });
 
+        Route::prefix('configurations')->group(function () {
+            Route::get('/', [ConfigurationController::class, 'index']);
+            Route::get('/{uuid}', [ConfigurationController::class, 'show']);
+            Route::put('/{uuid}', [ConfigurationController::class, 'update']);
+        });
+
         Route::prefix('lookup')->group(function () {
             Route::get('permissions', [LookupController::class, 'permissions']);
             Route::get('users', [LookupController::class, 'users']);
@@ -77,7 +84,7 @@ Route::group([
             Route::put('/{uuid}', [DepartmentController::class, 'update']);
             Route::patch('/{uuid}', [DepartmentController::class, 'updateStatus']);
         });
-        
+
         Route::prefix('positions')->group(function () {
             Route::get('/', [PositionController::class, 'index']);
             Route::post('/', [PositionController::class, 'store']);
@@ -85,7 +92,7 @@ Route::group([
             Route::put('/{uuid}', [PositionController::class, 'update']);
             Route::patch('/{uuid}', [PositionController::class, 'updateStatus']);
         });
-        
+
         Route::prefix('office-branches')->group(function () {
             Route::get('/', [OfficeBranchController::class, 'index']);
             Route::post('/', [OfficeBranchController::class, 'store']);
@@ -93,7 +100,6 @@ Route::group([
             Route::put('/{uuid}', [OfficeBranchController::class, 'update']);
             Route::patch('/{uuid}', [OfficeBranchController::class, 'updateStatus']);
         });
-        
 
 
 
@@ -101,9 +107,8 @@ Route::group([
 
 
 
-        Route::get('testing', function (Request $request) {
-            return $request->user();
-        });
+
+
 
 
 

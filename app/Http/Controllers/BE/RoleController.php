@@ -37,14 +37,16 @@ class RoleController extends Controller
         DB::beginTransaction();
 
         try {
-            $role = new Role();
-            $role->uuid = self::uuid();
-            $role->name = $request->name;
-            $role->guard_name = 'web';
-            $role->is_active = StatusCodeConstants::ACTIVE;
-            $role->created_by = $role->updated_by = self::auth()->uuid;
-            $role->created_at = $role->updated_at = self::currentDateTime();
-            $role->save();
+            $role = Role::create([
+                'uuid' => self::uuid(),
+                'name' => $request->name,
+                'guard_name' => 'web',
+                'is_active' => StatusCodeConstants::ACTIVE,
+                'created_by' => self::auth()->uuid,
+                'created_at' => self::currentDateTime(),
+                'updated_by' => self::auth()->uuid,
+                'updated_at' => self::currentDateTime(),
+            ]);
 
             if ($request->filled('permissions'))
             {
@@ -82,10 +84,11 @@ class RoleController extends Controller
         DB::beginTransaction();
 
         try {
-            $role->name = $request->name;
-            $role->updated_by = self::auth()->uuid;
-            $role->updated_at = self::currentDateTime();
-            $role->save();
+            $role->update([
+                'name' => $request->name,
+                'updated_by' => self::auth()->uuid,
+                'updated_at' => self::currentDateTime(),
+            ]);
 
             if ($request->filled('permissions'))
             {
@@ -120,10 +123,11 @@ class RoleController extends Controller
     {
         $role = Role::findByUuid($uuid);
 
-        $role->is_active = $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE;
-        $role->updated_by = self::auth()->uuid;
-        $role->updated_at = self::currentDateTime();
-        $role->save();
+        $role->update([
+            'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
 
         DB::commit();
 

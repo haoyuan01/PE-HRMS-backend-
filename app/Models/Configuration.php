@@ -36,6 +36,11 @@ class Configuration extends Model
     /**
      * Data Retrieval Methods
      */
+    public static function findByUuid(string $uuid)
+    {
+        return self::where('uuid', $uuid)
+            ->firstOrFail();
+    }
 
     /**
      * Relationships
