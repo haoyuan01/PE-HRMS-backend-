@@ -10,6 +10,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class UserSeeder extends Seeder
 {
@@ -37,15 +38,15 @@ class UserSeeder extends Seeder
             foreach($users as $user)
             {
                 User::create([
-                    'uuid'          => Str::uuid(),
+                    'uuid'          => (string) Str::uuid(),
                     'username'      => $user['username'],
                     'email'         => $user['email'],
                     'password'      => bcrypt($user['password']),
                     'is_active'     => StatusCodeConstants::ACTIVE,
                     'created_by'    => 'system',
-                    'created_at'    => now(),
+                    'created_at'    => Carbon::now(),
                     'updated_by'    => 'system',
-                    'updated_at'    => now(),
+                    'updated_at'    => Carbon::now(),
                 ]);
             }
         }
@@ -83,27 +84,27 @@ class UserSeeder extends Seeder
             foreach($permissions as $permission)
             {
                 Permission::create([
-                    'uuid' => Str::uuid(),
+                    'uuid' => (string) Str::uuid(),
                     'code' => $permission['code'],
                     'name' => $permission['name'],
                     'guard_name' => 'web',
                     'created_by' => 'system',
-                    'created_at' => now(),
+                    'created_at' => Carbon::now(),
                     'updated_by' => 'system',
-                    'updated_at' => now(),
+                    'updated_at' => Carbon::now(),
                 ]);
             }
 
             foreach($roles as $role)
             {
                 Role::create([
-                    'uuid' => Str::uuid(),
+                    'uuid' => (string) Str::uuid(),
                     'name' => $role['name'],
                     'guard_name' => 'web',
                     'created_by' => 'system',
-                    'created_at' => now(),
+                    'created_at' => Carbon::now(),
                     'updated_by' => 'system',
-                    'updated_at' => now(),
+                    'updated_at' => Carbon::now(),
                 ]);
             }
 

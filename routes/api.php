@@ -24,7 +24,7 @@ $version = 'v1';
 
 Route::group([
     'prefix' => $version,
-    'middleware' => ['throttle:60,1', 'log.request'],
+    'middleware' => ['throttle:auth', 'log.request'],
 ], function () {
 
     Route::prefix('auth')->group(function () {

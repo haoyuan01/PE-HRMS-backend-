@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Constants\StatusCodeConstants;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class OfficeBranchStoreRequest extends FormRequest
 {
@@ -23,7 +25,7 @@ class OfficeBranchStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'unique:office_branches,name'],
+            'name' => ['required', 'string', Rule::unique('office_branches', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))],
             'description' => ['nullable', 'string'],
             'address_1' => ['nullable', 'string'],
             'address_2' => ['nullable', 'string'],

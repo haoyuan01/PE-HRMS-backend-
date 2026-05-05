@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Constants\StatusCodeConstants;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PositionStoreRequest extends FormRequest
 {
@@ -23,7 +25,7 @@ class PositionStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'unique:positions,name'],
+            'name' => ['required', 'string', Rule::unique('positions', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))],
             'description' => ['required', 'string'],
         ];
     }

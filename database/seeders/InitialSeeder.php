@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Constants\ConfigurationCodeConstants;
 use App\Constants\StatusCodeConstants;
+use App\Models\Configuration;
 use App\Models\Department;
 use App\Models\OfficeBranch;
 use App\Models\Position;
@@ -10,6 +12,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class InitialSeeder extends Seeder
 {
@@ -21,30 +24,41 @@ class InitialSeeder extends Seeder
         // department
         if (Schema::hasTable('departments'))
         {
-            Department::create([
-                'uuid'          => Str::uuid(),
-                'name'          => 'HR',
-                'description'   => 'Human Resource Department',
-                'is_active'     => StatusCodeConstants::ACTIVE,
-                'created_by'    => 'system',
-                'created_at'    => now(),
-                'updated_by'    => 'system',
-                'updated_at'    => now(),
-            ]);
+            $departments = [
+                'Admin',
+                'Account',
+                'Services',
+                'Logistic',
+                'Sales',
+            ];
+            
+            foreach ($departments as $department)
+            {
+                Department::create([
+                    'uuid'          => (string) Str::uuid(),
+                    'name'          => $department,
+                    'description'   => null,
+                    'is_active'     => StatusCodeConstants::ACTIVE,
+                    'created_by'    => 'system',
+                    'created_at'    => Carbon::now(),
+                    'updated_by'    => 'system',
+                    'updated_at'    => Carbon::now(),
+                ]);
+            }
         }
 
         // position
         if (Schema::hasTable('positions'))
         {
             Position::create([
-                'uuid'          => Str::uuid(),
+                'uuid'          => (string) Str::uuid(),
                 'name'          => 'Technician',
                 'description'   => 'Technical position',
                 'is_active'     => StatusCodeConstants::ACTIVE,
                 'created_by'    => 'system',
-                'created_at'    => now(),
+                'created_at'    => Carbon::now(),
                 'updated_by'    => 'system',
-                'updated_at'    => now(),
+                'updated_at'    => Carbon::now(),
             ]);
         }
 
@@ -52,7 +66,7 @@ class InitialSeeder extends Seeder
         if (Schema::hasTable('office_branches'))
         {
             OfficeBranch::create([
-                'uuid'          => Str::uuid(),
+                'uuid'          => (string) Str::uuid(),
                 'name'          => 'Miri',
                 'description'   => 'Petro-Excel Sdn Bhd provides installation & maintenance services for oil & gas related instruments & equipments.',
                 'address_1'     => 'Lot 1236 & Lot 1237',
@@ -71,10 +85,44 @@ class InitialSeeder extends Seeder
                 'email'         => 'sales@petro-excel.com.my',
                 'is_active'     => StatusCodeConstants::ACTIVE,
                 'created_by'    => 'system',
-                'created_at'    => now(),
+                'created_at'    => Carbon::now(),
                 'updated_by'    => 'system',
-                'updated_at'    => now(),
+                'updated_at'    => Carbon::now(),
             ]);
+        }
+
+        // configurations
+        if (Schema::hasTable('configurations'))
+        {
+            $configurations = [
+                [
+                    'key' => ConfigurationCodeConstants::AUTH_RATE_LIMIT,
+                    'value' => 30,
+                    'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
+                    'description' => 'Maximum number of login attempts allowed per hour',
+                ],
+                [
+                    'key' => ConfigurationCodeConstants::AUTH_TOKEN_EXPIRY_DAYS,
+                    'value' => 30,
+                    'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
+                    'description' => 'Number of days before authentication token expires',
+                ],
+            ];
+
+            foreach($configurations as $configuration)
+            {
+                Configuration::create([
+                    'uuid'          => Str::uuid(),
+                    'key'           => $configuration['key'],
+                    'value'         => $configuration['value'],
+                    'value_type'    => $configuration['value_type'],
+                    'description'   => null,
+                    'is_editable'   => StatusCodeConstants::ACTIVE,
+                    'is_viewable'   => StatusCodeConstants::ACTIVE,
+                    'created_at'    => Carbon::now(),
+                    'updated_at'    => Carbon::now(),
+                ]);
+            }
         }
 
     }
