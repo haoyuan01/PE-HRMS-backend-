@@ -12,11 +12,13 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\MessageBag;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -41,129 +43,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         /*
         |--------------------------------------------------------------------------
-        | Exception - Database Query Exception
-        |--------------------------------------------------------------------------
-        */
-        $exceptions->render(function (QueryException $e, Request $request) {
-
-            ErrorLogService::capture($e); // Log the exception in error_logs
-
-            if ($request->is('api/*'))
-            {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Database Query Error',
-                    'data'    => null,
-                ], 500);
-            }
-        });
-        
-        /*
-        |--------------------------------------------------------------------------
-        | Exception - Validation Exception
-        |--------------------------------------------------------------------------
-        */
-        $exceptions->render(function (ValidationException $e, Request $request) {
-
-            ErrorLogService::capture($e); // Log the exception in error_logs
-            
-            return null;
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Exception - Authorization Exception
-        |--------------------------------------------------------------------------
-        */
-        $exceptions->render(function (AuthorizationException $e, Request $request) {
-            
-            ErrorLogService::capture($e); // Log the exception in error_logs
-            
-            return null;
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Exception - Model Not Found
-        |--------------------------------------------------------------------------
-        */
-        $exceptions->render(function (\Throwable $e, Request $request) {
-            
-            ErrorLogService::capture($e); // Log the exception in error_logs
-
-            if (!$request->is('api/*'))
-            {
-                return null;
-            }
-
-            if ($e instanceof ModelNotFoundException || $e instanceof NotFoundHttpException)
-            {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No matching record found',
-                    'data' => null,
-                ], HttpStatusCodeConstants::NOT_FOUND);
-            }
-
-            return null;
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Exception - Authentication Failure
-        |--------------------------------------------------------------------------
-        */
-        $exceptions->render(function (AuthenticationException $e, Request $request) {
-
-            ErrorLogService::capture($e); // Log the exception in error_logs
-            
-            return response()->json([
-                'status' => false,
-                'message' => 'Access denied',
-                'data' => null,
-            ], HttpStatusCodeConstants::UNAUTHORIZED);
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Exception - Route Not Found
-        |--------------------------------------------------------------------------
-        */
-        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-
-            ErrorLogService::capture($e); // Log the exception in error_logs
-
-            if ($request->is('api/*'))
-            {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Route Not Found.',
-                    'data'    => null,
-                ], HttpStatusCodeConstants::NOT_FOUND);
-            }
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Exception - Permission Denied
-        |--------------------------------------------------------------------------
-        */
-        $exceptions->render(function (UnauthorizedException $e, Request $request) {
-
-            ErrorLogService::capture($e); // Log the exception in error_logs
-            
-            if ($request->is('api/*'))
-            {                
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Access Prohibited',
-                    'data'    => null,
-                ], HttpStatusCodeConstants::FORBIDDEN);
-            }
-        });
-
-        /*
-        |--------------------------------------------------------------------------
         | Exception - All Other Exceptions
         |--------------------------------------------------------------------------
         */
@@ -176,10 +55,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            $status = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface ? $e->getStatusCode() : HttpStatusCodeConstants::INTERNAL_SERVER_ERROR;
+            $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : HttpStatusCodeConstants::INTERNAL_SERVER_ERROR;
 
             // ValidationException handling
-            if ($e instanceof \Illuminate\Validation\ValidationException)
+            if ($e instanceof ValidationException)
             {
                 return response()->json([
                     'success' => false,
@@ -188,22 +67,59 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], HttpStatusCodeConstants::UNPROCESSABLE_ENTITY);
             }
 
-            // Default error message normalization
-            $message = $e->getMessage();
-
-            if ($message instanceof \Illuminate\Support\MessageBag)
+            // QueryException handling
+            if ($e instanceof QueryException)
             {
-                $message = $message->toArray();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Database Query Error',
+                    'data' => null,
+                ], HttpStatusCodeConstants::INTERNAL_SERVER_ERROR);
             }
 
-            if (is_array($message))
+            // ModelNotFoundException and NotFoundHttpException handling
+            if ($e instanceof ModelNotFoundException || $e instanceof NotFoundHttpException)
             {
-                $message = array_values($message);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No matching record found',
+                    'data' => null,
+                ], HttpStatusCodeConstants::NOT_FOUND);
+            }
+
+            // AuthenticationException handling
+            if ($e instanceof AuthenticationException)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access denied',
+                    'data' => null,
+                ], HttpStatusCodeConstants::UNAUTHORIZED);
+            }
+
+            // AuthorizationException and UnauthorizedException handling
+            if ($e instanceof AuthorizationException || $e instanceof UnauthorizedException)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access prohibited',
+                    'data' => null,
+                ], HttpStatusCodeConstants::FORBIDDEN);
+            }
+
+            // ValidationException handling
+            if ($e instanceof ValidationException)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->errors(),
+                    'data' => null,
+                ], HttpStatusCodeConstants::UNPROCESSABLE_ENTITY);
             }
             
             return response()->json([
                 'success' => false,
-                'message' => $message ?: 'Internal Server Error',
+                'message' => 'Internal Server Error',
                 'data' => null,
             ], $status);
         });

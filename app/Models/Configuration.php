@@ -47,6 +47,18 @@ class Configuration extends Model
         return $query->first();
     }
 
+    public static function findByKey(string $key, bool $fail = true)
+    {
+        $query = self::where('key', $key);
+
+        if ($fail)
+        {
+            return $query->firstOrFail();
+        }
+
+        return $query->first();
+    }
+
     /**
      * Relationships
      */

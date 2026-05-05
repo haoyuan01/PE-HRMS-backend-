@@ -26,7 +26,7 @@ class PositionStoreRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', Rule::unique('positions', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))],
-            'description' => ['required', 'string'],
+            'description' => ['nullable', 'string'],
         ];
     }
 }
