@@ -33,11 +33,17 @@ class Position extends Model
     /**
      * Data Retrieval Methods
      */
-    public static function findByUuid(string $uuid)
+    public static function findByUuid(string $uuid, bool $fail = true)
     {
-        return self::where('uuid', $uuid)
-            ->where('is_active', StatusCodeConstants::ACTIVE)
-            ->firstOrFail();
+        $query = self::where('uuid', $uuid)
+            ->where('is_active', StatusCodeConstants::ACTIVE);
+
+        if ($fail)
+        {
+            return $query->firstOrFail();
+        }
+
+        return $query->first();
     }
 
     /**

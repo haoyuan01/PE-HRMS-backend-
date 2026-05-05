@@ -39,13 +39,19 @@ class ActivityLog extends Model
     /**
      * Data Retrieval Methods
      */
-    public static function findByUuid(string $uuid)
+    public static function findByUuid(string $uuid, bool $fail = true)
     {
-        return self::with([
+        $query = self::with([
             'user',
             'requestLog',
-        ])->where('uuid', $uuid)
-        ->firstOrFail();
+        ])->where('uuid', $uuid);
+        
+        if ($fail)
+        {
+            return $query->firstOrFail();
+        }
+
+        return $query->first();
     }
 
     /**
