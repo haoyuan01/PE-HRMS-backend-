@@ -23,8 +23,8 @@ class ConfigurationResource extends JsonResource
             'description' => $this->description,
             'is_editable' => $this->is_editable,
             'is_viewable' => $this->is_viewable,
-            'created_at'    => Carbon::parse($this->created_at)->utc(),
-            'updated_at'    => Carbon::parse($this->updated_at)->utc(),
+            'created_at' => Carbon::parse($this->created_at)->utc(),
+            'updated_at' => Carbon::parse($this->updated_at)->utc(),
         ];
 
         return $data;

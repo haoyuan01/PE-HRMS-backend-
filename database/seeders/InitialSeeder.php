@@ -100,24 +100,42 @@ class InitialSeeder extends Seeder
                     'value' => 30,
                     'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
                     'description' => 'Maximum number of login attempts allowed per hour',
+                    'is_editable' => StatusCodeConstants::ACTIVE,
                 ],
                 [
                     'key' => ConfigurationCodeConstants::AUTH_TOKEN_EXPIRY_DAYS,
                     'value' => 30,
                     'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
                     'description' => 'Number of days before authentication token expires',
+                    'is_editable' => StatusCodeConstants::ACTIVE,
                 ],
                 [
                     'key' => ConfigurationCodeConstants::AUTH_LOGIN_MAX_ATTEMPTS,
                     'value' => 5,
                     'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
                     'description' => 'Maximum number of login attempts before account is locked',
+                    'is_editable' => StatusCodeConstants::ACTIVE,
                 ],
                 [
                     'key' => ConfigurationCodeConstants::AUTH_LOGIN_LOCKOUT_DURATION_MINUTES,
                     'value' => 5,
                     'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
                     'description' => 'Number of minutes to lock account after maximum login attempts',
+                    'is_editable' => StatusCodeConstants::ACTIVE,
+                ],
+                [
+                    'key' => ConfigurationCodeConstants::IMAGE_MAX_SIZE_MB,
+                    'value' => 5 * 1024, // 5 MB
+                    'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
+                    'description' => 'Maximum image size in MB',
+                    'is_editable' => StatusCodeConstants::ACTIVE,
+                ],
+                [
+                    'key' => ConfigurationCodeConstants::IMAGE_ALLOWED_TYPES,
+                    'value' => 'jpeg,png,jpg,gif,svg',
+                    'value_type' => ConfigurationCodeConstants::VALUE_TYPE_STRING,
+                    'description' => 'Allowed image types',
+                    'is_editable' => StatusCodeConstants::INACTIVE,
                 ],
             ];
 
@@ -129,7 +147,6 @@ class InitialSeeder extends Seeder
                     'value'         => $configuration['value'],
                     'value_type'    => $configuration['value_type'],
                     'description'   => null,
-                    'is_editable'   => StatusCodeConstants::ACTIVE,
                     'is_viewable'   => StatusCodeConstants::ACTIVE,
                     'created_at'    => Carbon::now(),
                     'updated_at'    => Carbon::now(),

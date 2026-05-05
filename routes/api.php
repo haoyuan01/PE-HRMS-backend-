@@ -2,6 +2,8 @@
 
 use App\Constants\HttpStatusCodeConstants;
 use App\Http\Controllers\BE\ActivityLogController;
+use App\Http\Controllers\BE\AnnouncementController;
+use App\Http\Controllers\BE\AnnouncementImageController;
 use App\Http\Controllers\BE\AuthController;
 use App\Http\Controllers\BE\ConfigurationController;
 use App\Http\Controllers\BE\DepartmentController;
@@ -101,7 +103,17 @@ Route::group([
             Route::patch('/{uuid}', [OfficeBranchController::class, 'updateStatus']);
         });
 
+        Route::prefix('announcements')->group(function () {
+            Route::get('/', [AnnouncementController::class, 'index']);
+            Route::post('/', [AnnouncementController::class, 'store']);
+            Route::get('/{uuid}', [AnnouncementController::class, 'show']);
+            Route::put('/{uuid}', [AnnouncementController::class, 'update']);
+            Route::patch('/{uuid}', [AnnouncementController::class, 'updateStatus']);
+        });
 
+        Route::prefix('announcement-images')->group(function () {
+            Route::patch('/{uuid}', [AnnouncementImageController::class, 'updateStatus']);
+        });
 
 
 

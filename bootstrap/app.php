@@ -77,12 +77,22 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], HttpStatusCodeConstants::INTERNAL_SERVER_ERROR);
             }
 
-            // ModelNotFoundException and NotFoundHttpException handling
-            if ($e instanceof ModelNotFoundException || $e instanceof NotFoundHttpException)
+            // ModelNotFoundException handling
+            if ($e instanceof ModelNotFoundException)
             {
                 return response()->json([
                     'success' => false,
                     'message' => 'No matching record found',
+                    'data' => null,
+                ], HttpStatusCodeConstants::NOT_FOUND);
+            }
+
+            // NotFoundHttpException handling - for routes that don't exist
+            if ($e instanceof NotFoundHttpException)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Resource not found',
                     'data' => null,
                 ], HttpStatusCodeConstants::NOT_FOUND);
             }

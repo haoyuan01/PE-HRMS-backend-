@@ -16,5 +16,9 @@ class ConfigurationCodeConstants
     const AUTH_TOKEN_EXPIRY_DAYS = 'auth_token_expiry_days';
     const AUTH_LOGIN_MAX_ATTEMPTS = 'auth_login_max_attempts';
     const AUTH_LOGIN_LOCKOUT_DURATION_MINUTES = 'auth_login_lockout_duration_minutes';
-    
+
+    // image configurations
+    const IMAGE_MAX_SIZE_MB = 'image_max_size_mb';
+    const IMAGE_ALLOWED_TYPES = 'image_allowed_types';
+
 }

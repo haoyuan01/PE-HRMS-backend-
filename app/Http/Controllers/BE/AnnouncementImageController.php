@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Http\Controllers\BE;
+
+use App\Constants\StatusCodeConstants;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\AnnouncementImageUpdateStatusRequest;
+use App\Http\Resources\AnnouncementImageResource;
+use App\Models\AnnouncementImage;
+use Illuminate\Http\Request;
+
+class AnnouncementImageController extends Controller
+{
+    public function __construct()
+    {
+    }
+
+    public function updateStatus(AnnouncementImageUpdateStatusRequest $request, string $uuid)
+    {
+        $announcement_image = AnnouncementImage::findByUuid($uuid);
+
+        $announcement_image->update([
+            'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
+        
+        return self::response(new AnnouncementImageResource($announcement_image));
+    }
+}
