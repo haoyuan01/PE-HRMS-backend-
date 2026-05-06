@@ -38,13 +38,13 @@ class ActivityLogFilter
         }
 
         if (
-            $filters->has('created_at_start') && !empty($filters->created_at_start) &&
-            $filters->has('created_at_end') && !empty($filters->created_at_end)
+            $filters->has('created_at_from') && !empty($filters->created_at_from) &&
+            $filters->has('created_at_to') && !empty($filters->created_at_to)
         )
         {
             $data->whereBetween('created_at', [
-                Carbon::parse($filters->created_at_start)->startOfDay(),
-                Carbon::parse($filters->created_at_end)->endOfDay(),
+                Carbon::parse($filters->created_at_from)->startOfDay(),
+                Carbon::parse($filters->created_at_to)->endOfDay(),
             ]);
         }
 
