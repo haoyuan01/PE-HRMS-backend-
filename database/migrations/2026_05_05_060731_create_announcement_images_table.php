@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->unsignedBigInteger('announcement_id');
-            $table->string('image_path');
+            $table->string('image_path')->nullable();
             $table->boolean('is_active')->default(1);
             $table->string('created_by', 350);
             $table->dateTime('created_at', 6);

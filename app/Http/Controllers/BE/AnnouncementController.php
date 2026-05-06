@@ -149,6 +149,7 @@ class AnnouncementController extends Controller
                 }
 
                 $image->update([
+                    'image_path' => null,
                     'is_active' => StatusCodeConstants::INACTIVE,
                     'updated_by' => self::auth()->id,
                     'updated_at' => self::currentDateTime(),

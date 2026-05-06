@@ -25,6 +25,7 @@ class AnnouncementImageController extends Controller
         }
 
         $announcement_image->update([
+            'image_path' => null,
             'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
             'updated_by' => self::auth()->uuid,
             'updated_at' => self::currentDateTime(),
