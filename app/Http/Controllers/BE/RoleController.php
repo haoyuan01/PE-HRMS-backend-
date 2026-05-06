@@ -25,7 +25,7 @@ class RoleController extends Controller
     {
         $role = Role::with([
             'permissions',
-        ]);
+        ])->active();
 
         $role = $this->role_filter->apply($request, $request->size, $role);
 

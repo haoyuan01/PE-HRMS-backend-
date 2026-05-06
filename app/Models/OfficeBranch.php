@@ -6,6 +6,7 @@ use App\Constants\StatusCodeConstants;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\HasActivityLog;
+use Illuminate\Database\Eloquent\Builder;
 
 class OfficeBranch extends Model
 {
@@ -39,8 +40,18 @@ class OfficeBranch extends Model
         'email',
         'is_active',
         'created_by',
+        'created_at',
         'updated_by',
+        'updated_at',
     ];
+
+    /**
+     * scopes
+     */
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('is_active', StatusCodeConstants::ACTIVE);
+    }
 
     /**
      * Data Retrieval Methods
@@ -48,7 +59,7 @@ class OfficeBranch extends Model
     public static function findByUuid(string $uuid, bool $fail = true)
     {
         $query = self::where('uuid', $uuid)
-            ->where('is_active', StatusCodeConstants::ACTIVE);
+            ->active();
 
         if ($fail)
         {

@@ -21,7 +21,7 @@ class DepartmentController extends Controller
 
     public function index(DepartmentIndexRequest $request)
     {
-        $department = Department::query();
+        $department = Department::query()->active();
 
         $department = $this->department_filter->apply($request, $request->size, $department);
 

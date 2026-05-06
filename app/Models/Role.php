@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Constants\StatusCodeConstants;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Models\Role as SpatieRole;
 use App\Traits\HasActivityLog;
+use Illuminate\Database\Eloquent\Builder;
 
 class Role extends SpatieRole
 {
@@ -30,13 +32,22 @@ class Role extends SpatieRole
     ];
 
     /**
+     * scopes
+     */
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('is_active', StatusCodeConstants::ACTIVE);
+    }
+
+    /**
      * Data Retrieval Methods
      */
     public static function findByUuid(string $uuid, bool $fail = true)
     {
         $query = self::with([
             'permissions',
-        ])->where('uuid', $uuid);
+        ])->where('uuid', $uuid)
+        ->active();
 
         if ($fail)
         {

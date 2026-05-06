@@ -6,6 +6,7 @@ use App\Constants\StatusCodeConstants;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasActivityLog;
+use Illuminate\Database\Eloquent\Builder;
 
 class Position extends Model
 {
@@ -31,12 +32,20 @@ class Position extends Model
     ];
 
     /**
+     * scopes
+     */
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('is_active', StatusCodeConstants::ACTIVE);
+    }
+
+    /**
      * Data Retrieval Methods
      */
     public static function findByUuid(string $uuid, bool $fail = true)
     {
         $query = self::where('uuid', $uuid)
-            ->where('is_active', StatusCodeConstants::ACTIVE);
+            ->active();
 
         if ($fail)
         {

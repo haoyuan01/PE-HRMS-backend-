@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Constants\StatusCodeConstants;
 use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Announcement extends Model
 {
@@ -33,6 +34,14 @@ class Announcement extends Model
     ];
 
     /**
+     * scopes
+     */
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('is_active', StatusCodeConstants::ACTIVE);
+    }
+
+    /**
      * Data Retrieval Methods
      */
     public static function findByUuid(string $uuid, bool $fail = true)
@@ -40,7 +49,7 @@ class Announcement extends Model
         $query = self::with([
             'announcementImages',
         ])->where('uuid', $uuid)
-        ->where('is_active', StatusCodeConstants::ACTIVE);
+        ->active();
 
         if ($fail)
         {
@@ -56,6 +65,6 @@ class Announcement extends Model
     public function announcementImages()
     {
         return $this->hasMany(AnnouncementImage::class, 'announcement_id', 'id')
-            ->where('is_active', StatusCodeConstants::ACTIVE);
+            ->active();
     }
 }

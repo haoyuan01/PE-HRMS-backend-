@@ -6,6 +6,7 @@ use App\Constants\StatusCodeConstants;
 use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 
 class Department extends Model
 {
@@ -29,6 +30,14 @@ class Department extends Model
         'updated_by',
         'updated_at',
     ];
+
+    /**
+     * Scopes
+     */
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('is_active', StatusCodeConstants::ACTIVE);
+    }
 
     /**
      * Data Retrieval Methods

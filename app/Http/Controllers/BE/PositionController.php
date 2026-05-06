@@ -21,7 +21,7 @@ class PositionController extends Controller
 
     public function index(PositionIndexRequest $request)
     {
-        $position = Position::query();
+        $position = Position::query()->active();
 
         $position = $this->position_filter->apply($request, $request->size, $position);
 

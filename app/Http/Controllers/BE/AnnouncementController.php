@@ -26,7 +26,7 @@ class AnnouncementController extends Controller
     {
         $announcement = Announcement::with([
             'announcementImages',
-        ]);
+        ])->active();
 
         $announcement = $this->announcement_filter->apply($request, $request->size, $announcement);
 

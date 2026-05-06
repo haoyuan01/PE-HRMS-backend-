@@ -21,7 +21,7 @@ class OfficeBranchController extends Controller
 
     public function index(OfficeBranchIndexRequest $request)
     {
-        $office_branch = OfficeBranch::query();
+        $office_branch = OfficeBranch::query()->active();
 
         $office_branch = $this->office_branch_filter->apply($request, $request->size, $office_branch);
 
