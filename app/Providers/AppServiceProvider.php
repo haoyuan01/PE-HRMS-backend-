@@ -7,6 +7,7 @@ use App\Models\Configuration;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (!Schema::hasTable('cache')) // prevent error if cache table doesn't exist during migration
+        {
+            return;
+        }
+
         /*
         |--------------------------------------------------------------------------
         | Rate Limiter - API Throttle Limit

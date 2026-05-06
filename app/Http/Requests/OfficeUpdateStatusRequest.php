@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class OfficeBranchShowRequest extends FormRequest
+class OfficeUpdateStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,6 +29,7 @@ class OfficeBranchShowRequest extends FormRequest
     {
         return [
             'uuid' => ['required', 'string', 'uuid'],
+            'is_active' => ['required', 'boolean'],
         ];
     }
 }

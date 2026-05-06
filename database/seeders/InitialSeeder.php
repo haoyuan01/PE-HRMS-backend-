@@ -6,7 +6,7 @@ use App\Constants\ConfigurationCodeConstants;
 use App\Constants\StatusCodeConstants;
 use App\Models\Configuration;
 use App\Models\Department;
-use App\Models\OfficeBranch;
+use App\Models\Office;
 use App\Models\Position;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -62,10 +62,10 @@ class InitialSeeder extends Seeder
             ]);
         }
 
-        // office branch
-        if (Schema::hasTable('office_branches'))
+        // office
+        if (Schema::hasTable('offices'))
         {
-            OfficeBranch::create([
+            Office::create([
                 'uuid'          => (string) Str::uuid(),
                 'name'          => 'Miri',
                 'description'   => 'Petro-Excel Sdn Bhd provides installation & maintenance services for oil & gas related instruments & equipments.',

@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LookupSearchRequest;
 use App\Http\Resources\LookupResource;
 use App\Models\Department;
-use App\Models\OfficeBranch;
+use App\Models\Office;
 use App\Models\Permission;
 use App\Models\Position;
 use App\Models\User;
@@ -125,9 +125,9 @@ class LookupController extends Controller
         return self::response(LookupResource::collection($data));
     }
 
-    public function officeBranches(LookupSearchRequest $request)
+    public function offices(LookupSearchRequest $request)
     {
-        $query = OfficeBranch::query()
+        $query = Office::query()
             ->where('is_active', StatusCodeConstants::ACTIVE);
 
         if ($request->filled('search_words'))

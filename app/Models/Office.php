@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Builder;
 
-class OfficeBranch extends Model
+class Office extends Model
 {
     use HasFactory, HasActivityLog;
 
-    protected $table = 'office_branches';
+    protected $table = 'offices';
     public $timestamps = false;
     protected $casts = [
         'is_active' => 'boolean',

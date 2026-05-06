@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class OfficeBranchStoreRequest extends FormRequest
+class OfficeStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +25,7 @@ class OfficeBranchStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', Rule::unique('office_branches', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))],
+            'name' => ['required', 'string', Rule::unique('offices', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))],
             'description' => ['nullable', 'string'],
             'address_1' => ['nullable', 'string'],
             'address_2' => ['nullable', 'string'],

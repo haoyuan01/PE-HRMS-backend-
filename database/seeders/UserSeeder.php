@@ -54,6 +54,126 @@ class UserSeeder extends Seeder
         if (Schema::hasTable('permissions'))
         {
             $permissions = [
+
+                // activity log
+                [
+                    'code' => 'activity_log_read',
+                    'name' => 'Read Activity Log',
+                ],
+
+                // request log
+                [
+                    'code' => 'request_log_read',
+                    'name' => 'Read Request Log',
+                ],
+
+                // error log
+                [
+                    'code' => 'error_log_read',
+                    'name' => 'Read Error Log',
+                ],
+
+                // configuration
+                [
+                    'code' => 'configuration_read',
+                    'name' => 'Read Configuration',
+                ],
+                [
+                    'code' => 'configuration_update',
+                    'name' => 'Update Configuration',
+                ],
+
+                // role
+                [
+                    'code' => 'role_read',
+                    'name' => 'Read Role',
+                ],
+                [
+                    'code' => 'role_create',
+                    'name' => 'Create Role',
+                ],
+                [
+                    'code' => 'role_update',
+                    'name' => 'Update Role',
+                ],
+                [
+                    'code' => 'role_delete',
+                    'name' => 'Delete Role',
+                ],
+
+                // department
+                [
+                    'code' => 'department_read',
+                    'name' => 'Read Department',
+                ],
+                [
+                    'code' => 'department_create',
+                    'name' => 'Create Department',
+                ],
+                [
+                    'code' => 'department_update',
+                    'name' => 'Update Department',
+                ],
+                [
+                    'code' => 'department_delete',
+                    'name' => 'Delete Department',
+                ],
+
+                // position
+                [
+                    'code' => 'position_read',
+                    'name' => 'Read Position',
+                ],
+                [
+                    'code' => 'position_create',
+                    'name' => 'Create Position',
+                ],
+                [
+                    'code' => 'position_update',
+                    'name' => 'Update Position',
+                ],
+                [
+                    'code' => 'position_delete',
+                    'name' => 'Delete Position',
+                ],
+
+                // office
+                [
+                    'code' => 'office_read',
+                    'name' => 'Read Office',
+                ],
+                [
+                    'code' => 'office_create',
+                    'name' => 'Create Office',
+                ],
+                [
+                    'code' => 'office_update',
+                    'name' => 'Update Office',
+                ],
+                [
+                    'code' => 'office_delete',
+                    'name' => 'Delete Office',
+                ],
+                
+                //announcement
+                [
+                    'code' => 'announcement_read',
+                    'name' => 'Read Announcement',
+                ],
+                [
+                    'code' => 'announcement_create',
+                    'name' => 'Create Announcement',
+                ],
+                [
+                    'code' => 'announcement_update',
+                    'name' => 'Update Announcement',
+                ],
+                [
+                    'code' => 'announcement_delete',
+                    'name' => 'Delete Announcement',
+                ],
+
+                // user
                 [
                     'code' => 'user_read',
                     'name' => 'Read User',

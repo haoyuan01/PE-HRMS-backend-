@@ -5,7 +5,7 @@ namespace App\Filters;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class OfficeBranchFilter
+class OfficeFilter
 {
     public function apply(Request $filters, $size, $data)
     {

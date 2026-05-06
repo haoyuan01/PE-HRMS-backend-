@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class OfficeBranchUpdateRequest extends FormRequest
+class OfficeUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,7 +31,7 @@ class OfficeBranchUpdateRequest extends FormRequest
     {
         return [
             'uuid' => ['required', 'string', 'uuid'],
-            'name' => ['required', 'string', Rule::unique('office_branches', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))->ignore($this->route('uuid'), 'uuid')],
+            'name' => ['required', 'string', Rule::unique('offices', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))->ignore($this->route('uuid'), 'uuid')],
             'description' => ['nullable', 'string'],
             'address_1' => ['nullable', 'string'],
             'address_2' => ['nullable', 'string'],

@@ -9,7 +9,7 @@ use App\Http\Controllers\BE\ConfigurationController;
 use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\ErrorLogController;
 use App\Http\Controllers\BE\LookupController;
-use App\Http\Controllers\BE\OfficeBranchController;
+use App\Http\Controllers\BE\OfficeController;
 use App\Http\Controllers\BE\RoleController;
 use App\Http\Controllers\BE\PositionController;
 use App\Http\Controllers\BE\RequestLogController;
@@ -68,7 +68,7 @@ Route::group([
             Route::get('users', [LookupController::class, 'users']);
             Route::get('departments', [LookupController::class, 'departments']);
             Route::get('positions', [LookupController::class, 'positions']);
-            Route::get('office-branches', [LookupController::class, 'officeBranches']);
+            Route::get('offices', [LookupController::class, 'offices']);
         });
 
         Route::prefix('roles')->group(function () {
@@ -95,12 +95,12 @@ Route::group([
             Route::patch('/{uuid}', [PositionController::class, 'updateStatus']);
         });
 
-        Route::prefix('office-branches')->group(function () {
-            Route::get('/', [OfficeBranchController::class, 'index']);
-            Route::post('/', [OfficeBranchController::class, 'store']);
-            Route::get('/{uuid}', [OfficeBranchController::class, 'show']);
-            Route::put('/{uuid}', [OfficeBranchController::class, 'update']);
-            Route::patch('/{uuid}', [OfficeBranchController::class, 'updateStatus']);
+        Route::prefix('offices')->group(function () {
+            Route::get('/', [OfficeController::class, 'index']);
+            Route::post('/', [OfficeController::class, 'store']);
+            Route::get('/{uuid}', [OfficeController::class, 'show']);
+            Route::put('/{uuid}', [OfficeController::class, 'update']);
+            Route::patch('/{uuid}', [OfficeController::class, 'updateStatus']);
         });
 
         Route::prefix('announcements')->group(function () {

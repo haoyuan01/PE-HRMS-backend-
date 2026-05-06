@@ -3,34 +3,34 @@
 namespace App\Http\Controllers\BE;
 
 use App\Constants\StatusCodeConstants;
-use App\Filters\OfficeBranchFilter;
+use App\Filters\OfficeFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OfficeBranchIndexRequest;
-use App\Http\Requests\OfficeBranchShowRequest;
-use App\Http\Requests\OfficeBranchStoreRequest;
-use App\Http\Requests\OfficeBranchUpdateRequest;
-use App\Http\Requests\OfficeBranchUpdateStatusRequest;
-use App\Http\Resources\OfficeBranchResource;
-use App\Models\OfficeBranch;
+use App\Http\Requests\OfficeIndexRequest;
+use App\Http\Requests\OfficeShowRequest;
+use App\Http\Requests\OfficeStoreRequest;
+use App\Http\Requests\OfficeUpdateRequest;
+use App\Http\Requests\OfficeUpdateStatusRequest;
+use App\Http\Resources\OfficeResource;
+use App\Models\Office;
 
-class OfficeBranchController extends Controller
+class OfficeController extends Controller
 {
-    public function __construct(private OfficeBranchFilter $office_branch_filter)
+    public function __construct(private OfficeFilter $office_filter)
     {
     }
 
-    public function index(OfficeBranchIndexRequest $request)
+    public function index(OfficeIndexRequest $request)
     {
-        $office_branch = OfficeBranch::query()->active();
+        $office = Office::query()->active();
 
-        $office_branch = $this->office_branch_filter->apply($request, $request->size, $office_branch);
+        $office = $this->office_filter->apply($request, $request->size, $office);
 
-        return self::responsePaginated(OfficeBranchResource::collection($office_branch), $office_branch);
+        return self::responsePaginated(OfficeResource::collection($office), $office);
     }
 
-    public function store(OfficeBranchStoreRequest $request)
+    public function store(OfficeStoreRequest $request)
     {
-        $office_branch = OfficeBranch::create([
+        $office = Office::create([
             'uuid' => self::uuid(),
             'name' => $request->name,
             'description' => $request->description,
@@ -55,14 +55,14 @@ class OfficeBranchController extends Controller
             'updated_at' => self::currentDateTime(),
         ]);
         
-        return self::response(new OfficeBranchResource($office_branch));
+        return self::response(new OfficeResource($office));
     }
 
-    public function update(OfficeBranchUpdateRequest $request, string $uuid)
+    public function update(OfficeUpdateRequest $request, string $uuid)
     {
-        $office_branch = OfficeBranch::findByUuid($uuid);
+        $office = Office::findByUuid($uuid);
         
-        $office_branch->update([
+        $office->update([
             'name' => $request->name,
             'description' => $request->description,
             'address_1' => $request->address_1,
@@ -83,27 +83,27 @@ class OfficeBranchController extends Controller
             'updated_at' => self::currentDateTime(),
         ]);
         
-        return self::response(new OfficeBranchResource($office_branch));
+        return self::response(new OfficeResource($office));
     }
 
-    public function updateStatus(OfficeBranchUpdateStatusRequest $request, string $uuid)
+    public function updateStatus(OfficeUpdateStatusRequest $request, string $uuid)
     {
-        $office_branch = OfficeBranch::findByUuid($uuid);
+        $office = Office::findByUuid($uuid);
         
-        $office_branch->update([
+        $office->update([
             'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
             'updated_by' => self::auth()->uuid,
             'updated_at' => self::currentDateTime(),
         ]);
         
-        return self::response(new OfficeBranchResource($office_branch));
+        return self::response(new OfficeResource($office));
     }
 
-    public function show(OfficeBranchShowRequest $request, string $uuid)
+    public function show(OfficeShowRequest $request, string $uuid)
     {
-        $office_branch = OfficeBranch::findByUuid($uuid);
+        $office = Office::findByUuid($uuid);
 
-        return self::response(new OfficeBranchResource($office_branch));
+        return self::response(new OfficeResource($office));
     }
 
 
