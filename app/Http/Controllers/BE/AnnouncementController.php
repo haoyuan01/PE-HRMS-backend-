@@ -14,6 +14,7 @@ use App\Http\Resources\AnnouncementResource;
 use App\Models\Announcement;
 use App\Models\AnnouncementImage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AnnouncementController extends Controller
 {
@@ -138,6 +139,24 @@ class AnnouncementController extends Controller
     {
         $announcement = Announcement::findByUuid($uuid);
         
+        if ($announcement->announcementImages->isNotEmpty() && $request->is_active == StatusCodeConstants::INACTIVE)
+        {
+            $announcement->announcementImages->each(function ($image) {
+
+                if ($image->image_path && Storage::disk('public')->exists($image->image_path))
+                {
+                    Storage::disk('public')->delete($image->image_path);
+                }
+
+                $image->update([
+                    'is_active' => StatusCodeConstants::INACTIVE,
+                    'updated_by' => self::auth()->id,
+                    'updated_at' => self::currentDateTime(),
+                ]);
+
+            });
+        }
+
         $announcement->update([
             'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
             'updated_by' => self::auth()->id,

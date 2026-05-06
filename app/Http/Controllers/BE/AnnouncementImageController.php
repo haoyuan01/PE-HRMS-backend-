@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AnnouncementImageUpdateStatusRequest;
 use App\Http\Resources\AnnouncementImageResource;
 use App\Models\AnnouncementImage;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AnnouncementImageController extends Controller
 {
@@ -18,6 +18,11 @@ class AnnouncementImageController extends Controller
     public function updateStatus(AnnouncementImageUpdateStatusRequest $request, string $uuid)
     {
         $announcement_image = AnnouncementImage::findByUuid($uuid);
+
+        if ($announcement_image->image_path && Storage::disk('public')->exists($announcement_image->image_path) && $request->is_active == StatusCodeConstants::INACTIVE)
+        {
+            Storage::disk('public')->delete($announcement_image->image_path);
+        }
 
         $announcement_image->update([
             'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
