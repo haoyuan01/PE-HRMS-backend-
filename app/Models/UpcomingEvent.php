@@ -7,11 +7,11 @@ use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
-class Announcement extends Model
+class UpcomingEvent extends Model
 {
     use HasActivityLog;
 
-    protected $table = 'announcements';
+    protected $table = 'upcoming_events';
     public $timestamps = false;
     protected $casts = [
         'start_date' => 'datetime:Y-m-d',
@@ -26,6 +26,7 @@ class Announcement extends Model
         'uuid',
         'name',
         'description',
+        'location',
         'start_date',
         'end_date',
         'is_published',
@@ -50,7 +51,7 @@ class Announcement extends Model
     public static function findByUuid(string $uuid, bool $fail = true)
     {
         $query = self::with([
-            'announcementImages',
+            'upcomingEventImages',
         ])->where('uuid', $uuid)
         ->active();
 
@@ -65,9 +66,8 @@ class Announcement extends Model
     /**
      * Relationships
      */
-    public function announcementImages()
+    public function upcomingEventImages()
     {
-        return $this->hasMany(AnnouncementImage::class, 'announcement_id', 'id')
-            ->active();
+        return $this->hasMany(UpcomingEventImage::class, 'upcoming_event_id', 'id');
     }
 }

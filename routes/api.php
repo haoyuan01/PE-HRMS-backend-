@@ -13,6 +13,7 @@ use App\Http\Controllers\BE\OfficeController;
 use App\Http\Controllers\BE\RoleController;
 use App\Http\Controllers\BE\PositionController;
 use App\Http\Controllers\BE\RequestLogController;
+use App\Http\Controllers\BE\UpcomingEventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -114,6 +115,16 @@ Route::group([
         Route::prefix('announcement-images')->group(function () {
             Route::patch('/{uuid}', [AnnouncementImageController::class, 'updateStatus']);
         });
+
+        Route::prefix('upcoming-events')->group(function () {
+            Route::get('/', [UpcomingEventController::class, 'index']);
+            Route::post('/', [UpcomingEventController::class, 'store']);
+            Route::get('/{uuid}', [UpcomingEventController::class, 'show']);
+            Route::put('/{uuid}', [UpcomingEventController::class, 'update']);
+            Route::patch('/{uuid}', [UpcomingEventController::class, 'updateStatus']);
+        });
+
+
 
 
 

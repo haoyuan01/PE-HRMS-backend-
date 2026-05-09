@@ -5,18 +5,16 @@ namespace App\Models;
 use App\Constants\StatusCodeConstants;
 use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 
-class Announcement extends Model
+class UpcomingEventImage extends Model
 {
-    use HasActivityLog;
+    use HasFactory, HasActivityLog;
 
-    protected $table = 'announcements';
+    protected $table = 'upcoming_event_images';
     public $timestamps = false;
     protected $casts = [
-        'start_date' => 'datetime:Y-m-d',
-        'end_date' => 'datetime:Y-m-d',
-        'is_published' => 'boolean',
         'is_active' => 'boolean',
         'created_at' => 'datetime:Y-m-d H:i:s.u',
         'updated_at' => 'datetime:Y-m-d H:i:s.u',
@@ -24,11 +22,8 @@ class Announcement extends Model
 
     protected $fillable = [
         'uuid',
-        'name',
-        'description',
-        'start_date',
-        'end_date',
-        'is_published',
+        'upcoming_event_id',
+        'image_path',
         'is_active',
         'created_by',
         'created_at',
@@ -50,7 +45,7 @@ class Announcement extends Model
     public static function findByUuid(string $uuid, bool $fail = true)
     {
         $query = self::with([
-            'announcementImages',
+            'upcomingEvent',
         ])->where('uuid', $uuid)
         ->active();
 
@@ -65,9 +60,8 @@ class Announcement extends Model
     /**
      * Relationships
      */
-    public function announcementImages()
+    public function upcomingEvent()
     {
-        return $this->hasMany(AnnouncementImage::class, 'announcement_id', 'id')
-            ->active();
+        return $this->belongsTo(UpcomingEvent::class, 'upcoming_event_id', 'id');
     }
 }
