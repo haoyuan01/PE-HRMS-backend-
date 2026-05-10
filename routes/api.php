@@ -85,6 +85,7 @@ Route::group([
             Route::post('/', [UserController::class, 'store']);
             Route::put('/{uuid}', [UserController::class, 'update']);
             Route::patch('/{uuid}', [UserController::class, 'updateStatus']);
+            Route::patch('/{uuid}/password', [UserController::class, 'updatePassword']);
         });
 
         Route::prefix('user-contacts')->group(function () {
