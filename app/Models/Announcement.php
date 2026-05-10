@@ -67,7 +67,6 @@ class Announcement extends Model
      */
     public function announcementImages()
     {
-        return $this->hasMany(AnnouncementImage::class, 'announcement_id', 'id')
-            ->active();
+        return $this->hasMany(AnnouncementImage::class, 'announcement_id', 'id')->active();
     }
 }

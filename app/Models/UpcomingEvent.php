@@ -68,6 +68,6 @@ class UpcomingEvent extends Model
      */
     public function upcomingEventImages()
     {
-        return $this->hasMany(UpcomingEventImage::class, 'upcoming_event_id', 'id');
+        return $this->hasMany(UpcomingEventImage::class, 'upcoming_event_id', 'id')->active();
     }
 }

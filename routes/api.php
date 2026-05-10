@@ -14,6 +14,7 @@ use App\Http\Controllers\BE\RoleController;
 use App\Http\Controllers\BE\PositionController;
 use App\Http\Controllers\BE\RequestLogController;
 use App\Http\Controllers\BE\UpcomingEventController;
+use App\Http\Controllers\BE\UpcomingEventImageController;
 use App\Http\Controllers\BE\UserContactController;
 use App\Http\Controllers\BE\UserController;
 use App\Http\Controllers\BE\UserEmergencyController;
@@ -152,6 +153,10 @@ Route::group([
             Route::get('/{uuid}', [UpcomingEventController::class, 'show']);
             Route::put('/{uuid}', [UpcomingEventController::class, 'update']);
             Route::patch('/{uuid}', [UpcomingEventController::class, 'updateStatus']);
+        });
+
+        Route::prefix('upcoming-event-images')->group(function () {
+            Route::patch('/{uuid}', [UpcomingEventImageController::class, 'updateStatus']);
         });
 
 
