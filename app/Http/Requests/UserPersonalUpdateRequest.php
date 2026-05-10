@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpcomingEventStoreRequest extends FormRequest
+class UserPersonalUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,19 +27,22 @@ class UpcomingEventStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', Rule::unique('upcoming_events', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))],
-            'description' => ['nullable', 'string'],
-            'location' => ['nullable', 'string'],
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date'],
-            'is_published' => ['required', 'boolean'],
-            'images' => ['nullable', 'array'],
-            'images.*' => [
-                'required',
+            'user_uuid' => ['required', 'string', 'uuid'],
+            'full_name' => ['nullable', 'string'],
+            'first_name' => ['nullable', 'string'],
+            'last_name' => ['nullable', 'string'],
+            'identity_number' => ['nullable', 'string'],
+            'passport_number' => ['nullable', 'string'],
+            'passport_expiry_date' => ['nullable', 'date'],
+            'blood_type' => ['nullable', 'string'],
+            'image' => [
+                'nullable',
                 'image',
                 'mimes:' . Configuration::findByKey(ConfigurationCodeConstants::IMAGE_ALLOWED_TYPES)->value,
                 'max:' . Configuration::findByKey(ConfigurationCodeConstants::IMAGE_MAX_SIZE_MB)->value * 1024, // size in MB
             ],
+            'gender' => ['nullable', 'string'],
+            'is_married' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Constants\StatusCodeConstants;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use App\Traits\HasActivityLog;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
@@ -26,10 +29,6 @@ class User extends Authenticatable
 
     protected $fillable = [
         'uuid',
-        'name',
-        'full_name',
-        'first_name',
-        'last_name',
         'email',
         'password',
         'is_active',
@@ -42,7 +41,15 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
     ];
-    
+   
+    /**
+     * scopes
+     */
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('is_active', StatusCodeConstants::ACTIVE);
+    }
+
     /**
      * Data Retrieval Methods
      */
@@ -50,7 +57,33 @@ class User extends Authenticatable
     {
         $query =  self::with([
             'roles.permissions',
-        ])->where('email', $email);
+        ])->where('email', $email)
+        ->active();
+
+        if ($fail)
+        {
+            return $query->firstOrFail();
+        }
+
+        return $query->first();
+    }
+
+    public static function findByUuid(string $uuid, bool $fail = true, bool $active = true)
+    {
+        $query = self::with([
+            'personal',
+            'contact',
+            'employment.office',
+            'employment.department',
+            'employment.position',
+            'emergency',
+            'roles.permissions',
+        ])->where('uuid', $uuid);
+
+        if ($active)
+        {
+            $query->active();
+        }
 
         if ($fail)
         {
@@ -63,4 +96,24 @@ class User extends Authenticatable
     /**
      * Relationships
      */
+    public function personal()
+    {
+        return $this->hasOne(UserPersonal::class, 'user_id', 'id')->active();
+    }
+    
+    public function contact()
+    {
+        return $this->hasOne(UserContact::class, 'user_id', 'id')->active();
+    }
+    
+    public function employment()
+    {
+        return $this->hasOne(UserEmployment::class, 'user_id', 'id')->active();
+    }
+    
+    public function emergency()
+    {
+        return $this->hasOne(UserEmergency::class, 'user_id', 'id')->active();
+    }
+    
 }

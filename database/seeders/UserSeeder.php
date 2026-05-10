@@ -6,6 +6,10 @@ use App\Constants\StatusCodeConstants;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\UserContact;
+use App\Models\UserEmergency;
+use App\Models\UserEmployment;
+use App\Models\UserPersonal;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -24,12 +28,10 @@ class UserSeeder extends Seeder
         {
             $users = [
                 [
-                    'username' => 'admin',
                     'email' => 'admin@gmail.com',
                     'password' => '123456',
                 ],
                 [
-                    'username' => 'employee',
                     'email' => 'employee@gmail.com',
                     'password' => '123456',
                 ],
@@ -39,7 +41,6 @@ class UserSeeder extends Seeder
             {
                 User::create([
                     'uuid'          => (string) Str::uuid(),
-                    'username'      => $user['username'],
                     'email'         => $user['email'],
                     'password'      => bcrypt($user['password']),
                     'is_active'     => StatusCodeConstants::ACTIVE,
@@ -173,6 +174,24 @@ class UserSeeder extends Seeder
                     'name' => 'Delete Announcement',
                 ],
 
+                // upcoming event
+                [
+                    'code' => 'upcoming_event_read',
+                    'name' => 'Read Upcoming Event',
+                ],
+                [
+                    'code' => 'upcoming_event_create',
+                    'name' => 'Create Upcoming Event',
+                ],
+                [
+                    'code' => 'upcoming_event_update',
+                    'name' => 'Update Upcoming Event',
+                ],
+                [
+                    'code' => 'upcoming_event_delete',
+                    'name' => 'Delete Upcoming Event',
+                ],
+
                 // user
                 [
                     'code' => 'user_read',
@@ -237,8 +256,8 @@ class UserSeeder extends Seeder
             $employee->givePermissionTo(Permission::where('code', 'user_read')->first());
 
             // assign role to user
-            $admin_user = User::where('username', 'admin')->first();
-            $employee_user = User::where('username', 'employee')->first();
+            $admin_user = User::where('email', 'admin@gmail.com')->first();
+            $employee_user = User::where('email', 'employee@gmail.com')->first();
             $admin_user->assignRole($admin);
             $employee_user->assignRole($employee);
         }

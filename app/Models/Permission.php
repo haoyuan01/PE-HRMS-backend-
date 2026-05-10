@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Constants\StatusCodeConstants;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 use App\Traits\HasActivityLog;
+use Illuminate\Database\Eloquent\Builder;
 
 class Permission extends SpatiePermission
 {
@@ -31,6 +33,14 @@ class Permission extends SpatiePermission
         'updated_at',
     ];
 
+    /**
+     * scopes
+     */
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('is_active', StatusCodeConstants::ACTIVE);
+    }
+    
     /**
      * Data Retrieval Methods
      */

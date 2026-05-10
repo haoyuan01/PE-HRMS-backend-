@@ -14,6 +14,11 @@ use App\Http\Controllers\BE\RoleController;
 use App\Http\Controllers\BE\PositionController;
 use App\Http\Controllers\BE\RequestLogController;
 use App\Http\Controllers\BE\UpcomingEventController;
+use App\Http\Controllers\BE\UserContactController;
+use App\Http\Controllers\BE\UserController;
+use App\Http\Controllers\BE\UserEmergencyController;
+use App\Http\Controllers\BE\UserEmploymentController;
+use App\Http\Controllers\BE\UserPersonalController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -67,9 +72,34 @@ Route::group([
         Route::prefix('lookup')->group(function () {
             Route::get('permissions', [LookupController::class, 'permissions']);
             Route::get('users', [LookupController::class, 'users']);
+            Route::get('roles', [LookupController::class, 'roles']);
             Route::get('departments', [LookupController::class, 'departments']);
             Route::get('positions', [LookupController::class, 'positions']);
             Route::get('offices', [LookupController::class, 'offices']);
+        });
+
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserController::class, 'index']);
+            Route::get('/{uuid}', [UserController::class, 'show']);
+            Route::post('/', [UserController::class, 'store']);
+            Route::put('/{uuid}', [UserController::class, 'update']);
+            Route::patch('/{uuid}', [UserController::class, 'updateStatus']);
+        });
+
+        Route::prefix('user-contacts')->group(function () {
+            Route::put('/', [UserContactController::class, 'update']);
+        });
+
+        Route::prefix('user-emergencies')->group(function () {
+            Route::put('/', [UserEmergencyController::class, 'update']);
+        });
+
+        Route::prefix('user-employments')->group(function () {
+            Route::put('/', [UserEmploymentController::class, 'update']);
+        });
+
+        Route::prefix('user-personals')->group(function () {
+            Route::put('/', [UserPersonalController::class, 'update']);
         });
 
         Route::prefix('roles')->group(function () {

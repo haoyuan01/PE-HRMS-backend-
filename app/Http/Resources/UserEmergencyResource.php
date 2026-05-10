@@ -4,10 +4,9 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
-class AnnouncementImageResource extends JsonResource
+class UserEmergencyResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,13 +17,15 @@ class AnnouncementImageResource extends JsonResource
     {
         $data = [
             'uuid' => $this->uuid,
-            'image_path' => $this->image_path ? asset(Storage::url($this->image_path)) : null,
+            'name' => $this->name,
+            'phone_number' => $this->phone_number,
+            'relationship' => $this->relationship,
             'is_active' => $this->is_active,
             'created_by' => $this->created_by,
             'created_at' => Carbon::parse($this->created_at)->utc(),
             'updated_by' => $this->updated_by,
             'updated_at' => Carbon::parse($this->updated_at)->utc(),
-            'announcement' => new AnnouncementResource($this->whenLoaded('announcement')),
+            'user' => new UserResource($this->whenLoaded('user')),
         ];
 
         return $data;

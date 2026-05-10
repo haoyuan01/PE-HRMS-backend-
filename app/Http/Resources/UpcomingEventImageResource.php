@@ -18,7 +18,7 @@ class UpcomingEventImageResource extends JsonResource
     {
         $data = [
             'uuid' => $this->uuid,
-            'image_path' => asset(Storage::url($this->image_path)),
+            'image_path' => $this->image_path ? asset(Storage::url($this->image_path)) : null,
             'is_active' => $this->is_active,
             'created_by' => $this->created_by,
             'created_at' => Carbon::parse($this->created_at)->utc(),

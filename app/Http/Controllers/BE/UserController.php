@@ -1,0 +1,375 @@
+<?php
+
+namespace App\Http\Controllers\BE;
+
+use App\Constants\StatusCodeConstants;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\UserIndexRequest;
+use App\Filters\UserFilter;
+use App\Http\Requests\UserShowRequest;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
+use App\Http\Requests\UserUpdateStatusRequest;
+use App\Http\Resources\UserResource;
+use App\Models\Department;
+use App\Models\Office;
+use App\Models\Position;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
+class UserController extends Controller
+{
+    public function __construct(private UserFilter $user_filter)
+    {
+    }
+
+    public function index(UserIndexRequest $request)
+    {
+        $user = User::with([
+            'personal',
+            'contact',
+            'employment.office',
+            'employment.department',
+            'employment.position',
+            'emergency',
+            'roles.permissions',
+        ]);
+        
+        $user = $this->user_filter->apply($request, $request->size, $user);
+        
+        return self::responsePaginated(UserResource::collection($user), $user);
+    }
+
+    public function store(UserStoreRequest $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            // create user
+            $user = User::create([
+                'uuid' => self::uuid(),
+                'email' => $request->email,
+                'password' => $request->password ? bcrypt($request->password) : null,
+                'is_active' => StatusCodeConstants::ACTIVE,
+                'created_by' => self::auth()->uuid,
+                'created_at' => self::currentDateTime(),
+                'updated_by' => self::auth()->uuid,
+                'updated_at' => self::currentDateTime(),
+            ]);
+
+            // assign role
+            $role = Role::findByUuid($request->role_uuid);
+            $user->assignRole($role);
+
+            // create personal
+            if ($request->has('personal') && $request->input('personal'))
+            {
+                $image_path = null;
+                if ($request->hasFile('personal.image'))
+                {
+                    $file = $request->file('personal.image');
+
+                    $filename = time() . '_' . self::uuid() . '.' . $file->getClientOriginalExtension();
+
+                    $image_path = $file->storeAs('users', $filename, 'public');
+                }
+
+                $user->personal()->create([
+                    'uuid' => self::uuid(),
+                    'user_id' => $user->id,
+                    'full_name' => $request->input('personal.full_name'),
+                    'first_name' => $request->input('personal.first_name'),
+                    'last_name' => $request->input('personal.last_name'),
+                    'identity_number' => $request->input('personal.identity_number'),
+                    'passport_number' => $request->input('personal.passport_number'),
+                    'passport_expiry_date' => $request->input('personal.passport_expiry_date'),
+                    'blood_type' => $request->input('personal.blood_type'),
+                    'image_path' => $image_path,
+                    'gender' => $request->input('personal.gender'),
+                    'is_married' => $request->input('personal.is_married') ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                    'is_active' => StatusCodeConstants::ACTIVE,
+                    'created_by' => self::auth()->uuid,
+                    'created_at' => self::currentDateTime(),
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ]);
+            }
+
+            // create contact
+            if ($request->has('contact') && $request->input('contact'))
+            {
+                $user->contact()->create([
+                    'uuid' => self::uuid(),
+                    'user_id' => $user->id,
+                    'company_email' => $request->input('contact.company_email'),
+                    'phone_number' => $request->input('contact.phone_number'),
+                    'address_1' => $request->input('contact.address_1'),
+                    'address_2' => $request->input('contact.address_2'),
+                    'address_3' => $request->input('contact.address_3'),
+                    'city' => $request->input('contact.city'),
+                    'state' => $request->input('contact.state'),
+                    'postcode' => $request->input('contact.postcode'),
+                    'country' => $request->input('contact.country'),
+                    'is_active' => StatusCodeConstants::ACTIVE,
+                    'created_by' => self::auth()->uuid,
+                    'created_at' => self::currentDateTime(),
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ]);
+            }
+
+            // create emergency
+            if ($request->has('emergency') && $request->input('emergency'))
+            {
+                $user->emergency()->create([
+                    'uuid' => self::uuid(),
+                    'user_id' => $user->id,
+                    'name' => $request->input('emergency.name'),
+                    'relationship' => $request->input('emergency.relationship'),
+                    'phone_number' => $request->input('emergency.phone_number'),
+                    'is_active' => StatusCodeConstants::ACTIVE,
+                    'created_by' => self::auth()->uuid,
+                    'created_at' => self::currentDateTime(),
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ]);
+            }
+
+            // create employment
+            if ($request->has('employment') && $request->input('employment'))
+            {
+                $office = Office::findByUuid($request->input('employment.office_uuid'));
+                $position = Position::findByUuid($request->input('employment.position_uuid'));
+                $department = Department::findByUuid($request->input('employment.department_uuid'));
+
+                $user->employment()->create([
+                    'uuid' => self::uuid(),
+                    'user_id' => $user->id,
+                    'position_id' => $position->id,
+                    'department_id' => $department->id,
+                    'office_id' => $office->id,
+                    'joined_date' => $request->input('employment.joined_date'),
+                    'is_active' => StatusCodeConstants::ACTIVE,
+                    'created_by' => self::auth()->uuid,
+                    'created_at' => self::currentDateTime(),
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ]);
+            }
+
+            $user->load(['personal', 'employment', 'contact', 'emergency', 'roles.permissions']);
+
+            DB::commit();
+
+            return self::response(new UserResource($user));
+
+        } catch (\Exception $exception) {
+            DB::rollback();
+            throw $exception;
+        }
+    }
+
+    public function update(UserUpdateRequest $request, string $uuid)
+    {
+        $user = User::findByUuid($uuid);
+
+        DB::beginTransaction();
+
+        try {
+            // update user
+            $user->update([
+                'email' => $request->input('email'),
+                'password' => $request->input('password') ? bcrypt($request->input('password')) : $user->password,
+                'updated_by' => self::auth()->uuid,
+                'updated_at' => self::currentDateTime(),
+            ]);
+
+            // update role
+            if ($request->has('role_uuid') && $request->input('role_uuid'))
+            {
+                $role = Role::findByUuid($request->input('role_uuid'));
+                $user->roles()->sync([$role->id]);
+            }
+
+            // update personal
+            if ($request->has('personal') && $request->input('personal'))
+            {
+                $personal = [
+                    'user_id' => $user->id,
+                    'full_name' => $request->input('personal.full_name'),
+                    'first_name' => $request->input('personal.first_name'),
+                    'last_name' => $request->input('personal.last_name'),
+                    'identity_number' => $request->input('personal.identity_number'),
+                    'passport_number' => $request->input('personal.passport_number'),
+                    'passport_expiry_date' => $request->input('personal.passport_expiry_date'),
+                    'blood_type' => $request->input('personal.blood_type'),
+                    'gender' => $request->input('personal.gender'),
+                    'is_married' => $request->input('personal.is_married') ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ];
+
+                // if image not uploaded, keep the existing image
+                if ($request->hasFile('personal.image'))
+                {
+                    if ($user->personal && $user->personal->image_path)
+                    {
+                        Storage::disk('public')->delete($user->personal->image_path);
+                    }
+
+                    $file = $request->file('personal.image');
+
+                    $filename = time() . '_' . self::uuid() . '.' . $file->getClientOriginalExtension();
+
+                    $personal['image_path'] = $file->storeAs('users', $filename, 'public');
+                }
+
+                // update or create personal
+                if ($user->personal)
+                {
+                    $user->personal->update($personal);
+                }
+                else
+                {
+                    $user->personal()->create([
+                        ...$personal,
+                        'uuid' => self::uuid(),
+                        'is_active' => StatusCodeConstants::ACTIVE,
+                        'created_by' => self::auth()->uuid,
+                        'created_at' => self::currentDateTime(),
+                    ]);
+                }
+            }
+
+            // update contact
+            if ($request->has('contact') && $request->input('contact'))
+            {
+                $contact = [
+                    'user_id' => $user->id,
+                    'company_email' => $request->input('contact.company_email'),
+                    'phone_number' => $request->input('contact.phone_number'),
+                    'address_1' => $request->input('contact.address_1'),
+                    'address_2' => $request->input('contact.address_2'),
+                    'address_3' => $request->input('contact.address_3'),
+                    'city' => $request->input('contact.city'),
+                    'state' => $request->input('contact.state'),
+                    'postcode' => $request->input('contact.postcode'),
+                    'country' => $request->input('contact.country'),
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ];
+
+                // update or create contact
+                if ($user->contact)
+                {
+                    $user->contact->update($contact);
+                }
+                else
+                {
+                    $user->contact()->create([
+                        ...$contact,
+                        'uuid' => self::uuid(),
+                        'is_active' => StatusCodeConstants::ACTIVE,
+                        'created_by' => self::auth()->uuid,
+                        'created_at' => self::currentDateTime(),
+                    ]);
+                }
+            }
+
+            // update emergency
+            if ($request->has('emergency') && $request->input('emergency'))
+            {
+                $emergency = [
+                    'user_id' => $user->id,
+                    'name' => $request->input('emergency.name'),
+                    'relationship' => $request->input('emergency.relationship'),
+                    'phone_number' => $request->input('emergency.phone_number'),
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ];
+                
+                // update or create emergency
+                if ($user->emergency)
+                {
+                    $user->emergency->update($emergency);
+                }
+                else
+                {
+                    $user->emergency()->create([
+                        ...$emergency,
+                        'uuid' => self::uuid(),
+                        'is_active' => StatusCodeConstants::ACTIVE,
+                        'created_by' => self::auth()->uuid,
+                        'created_at' => self::currentDateTime(),
+                    ]);
+                }
+            }
+
+            // update employment
+            if ($request->has('employment') && $request->input('employment'))
+            {
+                $office = Office::findByUuid($request->input('employment.office_uuid'));
+                $position = Position::findByUuid($request->input('employment.position_uuid'));
+                $department = Department::findByUuid($request->input('employment.department_uuid'));
+                
+                $employment = [
+                    'user_id' => $user->id,
+                    'position_id' => $position->id,
+                    'department_id' => $department->id,
+                    'office_id' => $office->id,
+                    'joined_date' => $request->input('employment.joined_date'),
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ];
+
+                // update or create employment
+                if ($user->employment)
+                {
+                    $user->employment->update($employment);
+                }
+                else
+                {
+                    $user->employment()->create([
+                        ...$employment,
+                        'uuid' => self::uuid(),
+                        'is_active' => StatusCodeConstants::ACTIVE,
+                        'created_by' => self::auth()->uuid,
+                        'created_at' => self::currentDateTime(),
+                    ]);
+                }
+            }
+
+            $user->load(['personal', 'employment', 'contact', 'emergency', 'roles.permissions']);
+
+            DB::commit();
+
+            return self::response(new UserResource($user));
+
+        } catch (\Exception $exception) {
+            DB::rollback();
+            throw $exception;
+        }
+    }
+
+    public function updateStatus(UserUpdateStatusRequest $request, string $uuid)
+    {
+        $user = User::findByUuid($uuid, true, false);
+        
+        $user->update([
+            'is_active' => $request->is_active,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
+        
+        return self::response(new UserResource($user));
+    }
+
+    public function show(UserShowRequest $request, string $uuid)
+    {
+        $user = User::findByUuid($uuid);
+        
+        return self::response(new UserResource($user));
+    }
+}

@@ -10,6 +10,7 @@ use App\Models\Department;
 use App\Models\Office;
 use App\Models\Permission;
 use App\Models\Position;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -21,8 +22,7 @@ class LookupController extends Controller
     
     public function permissions(LookupSearchRequest $request)
     {
-        $query = Permission::query()
-            ->where('is_active', StatusCodeConstants::ACTIVE);
+        $query = Permission::query()->active();
 
         if ($request->filled('search_words'))
         {
@@ -46,19 +46,19 @@ class LookupController extends Controller
 
     public function users(LookupSearchRequest $request)
     {
-        $query = User::query()
-            ->where('is_active', StatusCodeConstants::ACTIVE);
+        $query = User::query()->active();
 
         if ($request->filled('search_words'))
         {
             $query->where(function ($q) use ($request) {
                 foreach ($request->search_words as $word) {
                     $q->orWhere(function ($sub) use ($word) {
-                        $sub->where('username', 'like', "%$word%")
-                            ->orWhere('first_name', 'like', "%$word%")
-                            ->orWhere('last_name', 'like', "%$word%")
-                            ->orWhere('full_name', 'like', "%$word%")
-                            ->orWhere('email', 'like', "%$word%")
+                        $sub->whereHas('personal', function($query) use ($word) {
+                                $query->where('full_name', 'like', "%$word%")
+                                    ->orWhere('first_name', 'like', "%$word%")
+                                    ->orWhere('last_name', 'like', "%$word%")
+                                    ->orWhere('email', 'like', "%$word%");
+                            })
                             ->orWhere('uuid', $word);
                     });
                 }
@@ -71,7 +71,35 @@ class LookupController extends Controller
 
         $data = $data->map(fn ($user) => [
             'uuid' => $user->uuid,
-            'name' => $user->email,
+            'name' => trim(($user->personal?->first_name ?? '') . ' ' . ($user->personal?->last_name ?? '')) ?: $user->email,
+        ]);
+        
+        return self::response($data);
+    }
+
+    public function roles(LookupSearchRequest $request)
+    {
+        $query = Role::query()->active();
+
+        if ($request->filled('search_words'))
+        {
+            $query->where(function ($q) use ($request) {
+                foreach ($request->search_words as $word) {
+                    $q->orWhere(function ($sub) use ($word) {
+                        $sub->where('name', 'like', "%$word%")
+                            ->orWhere('uuid', $word);
+                    });
+                }
+            });
+        }
+
+        $data = $query->orderBy('created_at', 'asc')
+            ->limit(100)
+            ->get();
+
+        $data = $data->map(fn ($role) => [
+            'uuid' => $role->uuid,
+            'name' => $role->name,
         ]);
         
         return self::response($data);
@@ -79,8 +107,7 @@ class LookupController extends Controller
 
     public function departments(LookupSearchRequest $request)
     {
-        $query = Department::query()
-            ->where('is_active', StatusCodeConstants::ACTIVE);
+        $query = Department::query()->active();
 
         if ($request->filled('search_words'))
         {
@@ -103,8 +130,7 @@ class LookupController extends Controller
 
     public function positions(LookupSearchRequest $request)
     {
-        $query = Position::query()
-            ->where('is_active', StatusCodeConstants::ACTIVE);
+        $query = Position::query()->active();
 
         if ($request->filled('search_words'))
         {
@@ -127,8 +153,7 @@ class LookupController extends Controller
 
     public function offices(LookupSearchRequest $request)
     {
-        $query = Office::query()
-            ->where('is_active', StatusCodeConstants::ACTIVE);
+        $query = Office::query()->active();
 
         if ($request->filled('search_words'))
         {
@@ -137,8 +162,8 @@ class LookupController extends Controller
                     $q->orWhere(function ($sub) use ($word) {
                         $sub->where('name', 'like', "%$word%");
                             // ->orWhere(DB::raw("CONCAT_WS(address_1,'',address_2,'',address_3)"), 'like', "%$word%")
-                            // ->orWhere(DB::raw("CONCAT_WS(phone_code,'',phone_number)"), 'like', "%$word%")
-                            // ->orWhere(DB::raw("CONCAT_WS(fax_code,'',fax_number)"), 'like', "%$word%")
+                            // ->orWhere('phone_number', 'like', "%$word%")
+                            // ->orWhere('fax_number', 'like', "%$word%")
                             // ->orWhere('email', 'like', "%$word%")
                             // ->orWhere('city', 'like', "%$word%")
                             // ->orWhere('state', 'like', "%$word%")

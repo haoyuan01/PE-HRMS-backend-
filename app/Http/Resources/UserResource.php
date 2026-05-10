@@ -17,16 +17,16 @@ class UserResource extends JsonResource
     {
         $data = [
             'uuid' => $this->uuid,
-            'username' => $this->name,
-            'full_name' => $this->full_name,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
             'email' => $this->email,
             'is_active' => $this->is_active,
             'created_by' => $this->created_by,
             'created_at' => Carbon::parse($this->created_at)->utc(),
             'updated_by' => $this->updated_by,
             'updated_at' => Carbon::parse($this->updated_at)->utc(),
+            'personal' => new UserPersonalResource($this->whenLoaded('personal')),
+            'contact' => new UserContactResource($this->whenLoaded('contact')),
+            'employment' => new UserEmploymentResource($this->whenLoaded('employment')),
+            'emergency' => new UserEmergencyResource($this->whenLoaded('emergency')),
             'roles' => RoleResource::collection($this->whenLoaded('roles')),
         ];
         

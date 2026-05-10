@@ -3,37 +3,28 @@
 namespace App\Models;
 
 use App\Constants\StatusCodeConstants;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\HasActivityLog;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
-class Office extends Model
+class UserEmergency extends Model
 {
-    use HasFactory, HasActivityLog;
+    use HasActivityLog;
 
-    protected $table = 'offices';
+    protected $table = 'user_emergencies';
     public $timestamps = false;
-    protected $casts = [
+    public $casts = [
         'is_active' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'created_at' => 'datetime:Y-m-d H:i:s.u',
+        'updated_at' => 'datetime:Y-m-d H:i:s.u',
     ];
 
-    protected $fillable = [
+    public $fillable = [
         'uuid',
+        'user_id',
         'name',
-        'description',
-        'address_1',
-        'address_2',
-        'address_3',
-        'city',
-        'state',
-        'postcode',
-        'country',
         'phone_number',
-        'fax_number',
-        'email',
+        'relationship',
         'is_active',
         'created_by',
         'created_at',
@@ -54,8 +45,10 @@ class Office extends Model
      */
     public static function findByUuid(string $uuid, bool $fail = true)
     {
-        $query = self::where('uuid', $uuid)
-            ->active();
+        $query = self::with([
+            'user',
+        ])->where('uuid', $uuid)
+        ->active();
 
         if ($fail)
         {
@@ -68,4 +61,8 @@ class Office extends Model
     /**
      * Relationships
      */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }

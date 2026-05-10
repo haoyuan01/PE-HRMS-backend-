@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('offices', function (Blueprint $table) {
+        Schema::create('user_contacts', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->string('name', 350);
-            $table->text('description')->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->string('company_email', 350)->nullable();
+            $table->string('phone_number', 25)->nullable();
             $table->string('address_1', 255)->nullable();
             $table->string('address_2', 255)->nullable();
             $table->string('address_3', 255)->nullable();
@@ -23,18 +24,20 @@ return new class extends Migration
             $table->string('state', 100)->nullable();
             $table->string('postcode', 50)->nullable();
             $table->string('country', 100)->nullable();
-            $table->string('phone_number', 25)->nullable();
-            $table->string('fax_number', 25)->nullable();
-            $table->string('email', 350)->nullable();
             $table->boolean('is_active')->default(1);
             $table->string('created_by', 350);
             $table->dateTime('created_at', 6);
             $table->string('updated_by', 350);
             $table->dateTime('updated_at', 6);
 
-            // indexes
-            $table->index('name');
+            // index
+            $table->index('user_id');
+            $table->index('company_email');
+            $table->index('phone_number');
             $table->index('is_active');
+
+            // foreign key
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -43,6 +46,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('offices');
+        Schema::dropIfExists('user_contacts');
     }
 };

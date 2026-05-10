@@ -17,12 +17,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->string('username')->nullable()->unique();
-            $table->string('full_name', 350)->nullable();
-            $table->string('first_name', 350)->nullable();
-            $table->string('last_name', 350)->nullable();
             $table->string('email')->unique();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->dateTime('email_verified_at', 6)->nullable();
             $table->boolean('is_active')->default(1);
@@ -32,10 +28,6 @@ return new class extends Migration
             $table->dateTime('updated_at', 6);
 
             // index
-            $table->index('username');
-            $table->index('full_name');
-            $table->index('first_name');
-            $table->index('last_name');
             $table->index('email');
             $table->index('is_active');
         });

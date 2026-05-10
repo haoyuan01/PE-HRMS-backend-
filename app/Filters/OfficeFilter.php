@@ -19,24 +19,14 @@ class OfficeFilter
             $data->where('name', 'like', "%$filters->name%");
         }
 
-        if ($filters->has('phone') && !empty($filters->phone))
+        if ($filters->has('phone_number') && !empty($filters->phone_number))
         {
-            $data->where(DB::raw("CONCAT_WS(phone_code,'',phone_number)"), 'like', "%$filters->phone%");
+            $data->where('phone_number', 'like', "%$filters->phone_number%");
         }
 
-        if ($filters->has('phone_code') && !empty($filters->phone_code))
+        if ($filters->has('fax_number') && !empty($filters->fax_number))
         {
-            $data->where('phone_code', $filters->phone_code);
-        }
-
-        if ($filters->has('fax') && !empty($filters->fax))
-        {
-            $data->where(DB::raw("CONCAT_WS(fax_code,'',fax_number)"), 'like', "%$filters->fax%");
-        }
-
-        if ($filters->has('fax_code') && !empty($filters->fax_code))
-        {
-            $data->where('fax_code', $filters->fax_code);
+            $data->where('fax_number', 'like', "%$filters->fax_number%");
         }
 
         if ($filters->has('email') && !empty($filters->email))
@@ -81,8 +71,8 @@ class OfficeFilter
                     $query->where('name', 'like', "%$word%")
                         ->orWhere('uuid', $word);
                         //   ->orWhere(DB::raw("CONCAT_WS(address_1,'',address_2,'',address_3)"), 'like', "%$word%")
-                        //   ->orWhere(DB::raw("CONCAT_WS(phone_code,'',phone_number)"), 'like', "%$word%")
-                        //   ->orWhere(DB::raw("CONCAT_WS(fax_code,'',fax_number)"), 'like', "%$word%")
+                        //   ->orWhere('phone_number', 'like', "%$word%")
+                        //   ->orWhere('fax_number', 'like', "%$word%")
                         //   ->orWhere('email', 'like', "%$word%")
                         //   ->orWhere('city', 'like', "%$word%")
                         //   ->orWhere('state', 'like', "%$word%")

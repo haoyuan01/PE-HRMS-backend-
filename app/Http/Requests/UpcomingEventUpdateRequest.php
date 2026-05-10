@@ -33,7 +33,7 @@ class UpcomingEventUpdateRequest extends FormRequest
     {
         return [
             'uuid' => ['required', 'string', 'uuid'],
-            'name' => ['required', 'string', Rule::unique('announcements', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))->ignore($this->route('uuid'), 'uuid')],
+            'name' => ['required', 'string', Rule::unique('upcoming_events', 'name')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))->ignore($this->route('uuid'), 'uuid')],
             'description' => ['required', 'string'],
             'location' => ['required', 'string'],
             'start_date' => ['required', 'date'],

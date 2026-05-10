@@ -19,6 +19,7 @@ use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -115,6 +116,16 @@ return Application::configure(basePath: dirname(__DIR__))
                     'message' => 'Access prohibited',
                     'data' => null,
                 ], HttpStatusCodeConstants::FORBIDDEN);
+            }
+
+            // MethodNotAllowedHttpException handling (eg. GET/PUT/POST/PATCH requests to wrong endpoints or missing HTTP method)
+            if ($e instanceof MethodNotAllowedHttpException)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Route method not allowed',
+                    'data' => null,
+                ], HttpStatusCodeConstants::METHOD_NOT_ALLOWED);
             }
 
             // ValidationException handling

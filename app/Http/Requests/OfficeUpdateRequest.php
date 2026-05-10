@@ -40,12 +40,8 @@ class OfficeUpdateRequest extends FormRequest
             'state' => ['nullable', 'string'],
             'postcode' => ['nullable', 'numeric'],
             'country' => ['nullable', 'string'],
-            'phone_code' => ['nullable', 'string'],
             'phone_number' => ['nullable', 'numeric'],
-            'phone_iso' => ['nullable', 'string'],
-            'fax_code' => ['nullable', 'string'],
             'fax_number' => ['nullable', 'numeric'],
-            'fax_iso' => ['nullable', 'string'],
             'email' => ['nullable', 'email'],
         ];
     }
