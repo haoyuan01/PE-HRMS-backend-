@@ -19,7 +19,6 @@ use App\Http\Controllers\BE\UserController;
 use App\Http\Controllers\BE\UserEmergencyController;
 use App\Http\Controllers\BE\UserEmploymentController;
 use App\Http\Controllers\BE\UserPersonalController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -38,6 +37,7 @@ Route::group([
 
     Route::prefix('auth')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
+        Route::post('forgot-password-email', [AuthController::class, 'forgotPasswordEmail']);
         Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
         Route::post('reset-password', [AuthController::class, 'resetPassword']);
     });

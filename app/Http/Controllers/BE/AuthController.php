@@ -4,7 +4,7 @@ namespace App\Http\Controllers\BE;
 
 use App\Exceptions\AppException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AuthForgotPasswordRequest;
+use App\Http\Requests\AuthForgotPasswordEmailRequest;
 use App\Http\Requests\AuthLoginRequest;
 use App\Http\Requests\AuthResetPasswordRequest;
 use App\Http\Resources\UserResource;
@@ -48,7 +48,20 @@ class AuthController extends Controller
         return self::response(null, 'Logout success');
     }
 
-    public function forgotPassword(AuthForgotPasswordRequest $request)
+    public function forgotPassword(AuthForgotPasswordEmailRequest $request)
+    {
+        $user = User::findByEmail($request->email, false);
+
+        $token = Password::createToken($user);
+
+        $data = [
+            'reset_password_token' => $token,
+        ];
+
+        return self::response($data);
+    }
+
+    public function forgotPasswordEmail(AuthForgotPasswordEmailRequest $request)
     {
         $user = User::findByEmail($request->email, false);
         
@@ -71,7 +84,7 @@ class AuthController extends Controller
     {
         $user = User::findByEmail($request->email);
 
-        throw_if(!Password::tokenExists($user, $request->token), AppException::class, 'Invalid token');
+        throw_if(!Password::tokenExists($user, $request->reset_password_token), AppException::class, 'Invalid token');
         
         $user->password = Hash::make($request->password);
         $user->save();
