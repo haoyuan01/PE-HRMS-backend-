@@ -31,7 +31,7 @@ class ForgotPasswordMail extends Mailable
     {
         return new Envelope(
             subject: $this->data['subject'],
-            from: new Address(config('mail.from.address')),
+            from: new Address(config('mail.from.address'), config('mail.from.name')),
         );
     }
 
