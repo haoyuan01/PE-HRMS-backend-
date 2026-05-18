@@ -141,16 +141,31 @@ class UserController extends Controller
             // create employment
             if ($request->has('employment') && $request->input('employment'))
             {
-                $office = Office::findByUuid($request->input('employment.office_uuid'));
-                $position = Position::findByUuid($request->input('employment.position_uuid'));
-                $department = Department::findByUuid($request->input('employment.department_uuid'));
+                $office = null;
+                $position = null;
+                $department = null;
+                
+                if ($request->input('employment.office_uuid'))
+                {
+                    $office = Office::findByUuid($request->input('employment.office_uuid'), false);
+                }
+
+                if ($request->input('employment.position_uuid'))
+                {
+                    $position = Position::findByUuid($request->input('employment.position_uuid'), false);
+                }
+
+                if ($request->input('employment.department_uuid'))
+                {
+                    $department = Department::findByUuid($request->input('employment.department_uuid'), false);
+                }
 
                 $user->employment()->create([
                     'uuid' => self::uuid(),
                     'user_id' => $user->id,
-                    'position_id' => $position->id,
-                    'department_id' => $department->id,
-                    'office_id' => $office->id,
+                    'position_id' => $position?->id,
+                    'department_id' => $department?->id,
+                    'office_id' => $office?->id,
                     'joined_date' => $request->input('employment.joined_date'),
                     'is_active' => StatusCodeConstants::ACTIVE,
                     'created_by' => self::auth()->uuid,
@@ -311,15 +326,28 @@ class UserController extends Controller
             // update employment
             if ($request->has('employment') && $request->input('employment'))
             {
-                $office = Office::findByUuid($request->input('employment.office_uuid'));
-                $position = Position::findByUuid($request->input('employment.position_uuid'));
-                $department = Department::findByUuid($request->input('employment.department_uuid'));
+                $office = null;
+                $position = null;
+                $department = null;
+                
+                if ($request->input('employment.office_uuid'))
+                {
+                    $office = Office::findByUuid($request->input('employment.office_uuid'), false);
+                }
+                if ($request->input('employment.position_uuid'))
+                {
+                    $position = Position::findByUuid($request->input('employment.position_uuid'), false);
+                }
+                if ($request->input('employment.department_uuid'))
+                {
+                    $department = Department::findByUuid($request->input('employment.department_uuid'), false);
+                }
                 
                 $employment = [
                     'user_id' => $user->id,
-                    'position_id' => $position->id,
-                    'department_id' => $department->id,
-                    'office_id' => $office->id,
+                    'position_id' => $position?->id,
+                    'department_id' => $department?->id,
+                    'office_id' => $office?->id,
                     'joined_date' => $request->input('employment.joined_date'),
                     'updated_by' => self::auth()->uuid,
                     'updated_at' => self::currentDateTime(),
@@ -369,7 +397,7 @@ class UserController extends Controller
 
     public function show(UserShowRequest $request, string $uuid)
     {
-        $user = User::findByUuid($uuid);
+        $user = User::findByUuid($uuid, true, false);
         
         return self::response(new UserResource($user));
     }

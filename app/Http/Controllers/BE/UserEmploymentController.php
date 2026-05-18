@@ -57,6 +57,8 @@ class UserEmploymentController extends Controller
                 'is_active' => StatusCodeConstants::ACTIVE,
                 'created_by' => self::auth()->uuid,
                 'created_at' => self::currentDateTime(),
+                'updated_by' => self::auth()->uuid,
+                'updated_at' => self::currentDateTime(),
             ]);
         }
 
