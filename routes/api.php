@@ -5,6 +5,7 @@ use App\Http\Controllers\BE\ActivityLogController;
 use App\Http\Controllers\BE\AnnouncementController;
 use App\Http\Controllers\BE\AnnouncementImageController;
 use App\Http\Controllers\BE\AuthController;
+use App\Http\Controllers\BE\ClaimHeaderController;
 use App\Http\Controllers\BE\ConfigurationController;
 use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\ErrorLogController;
@@ -73,6 +74,7 @@ Route::group([
         Route::prefix('lookup')->group(function () {
             Route::get('permissions', [LookupController::class, 'permissions']);
             Route::get('users', [LookupController::class, 'users']);
+            Route::get('claim-approvers', [LookupController::class, 'claimApprovers']);
             Route::get('roles', [LookupController::class, 'roles']);
             Route::get('departments', [LookupController::class, 'departments']);
             Route::get('positions', [LookupController::class, 'positions']);
@@ -158,6 +160,17 @@ Route::group([
 
         Route::prefix('upcoming-event-images')->group(function () {
             Route::patch('/{uuid}', [UpcomingEventImageController::class, 'updateStatus']);
+        });
+
+        Route::prefix('claim-headers')->group(function () {
+            Route::get('/', [ClaimHeaderController::class, 'index']);
+            Route::post('/', [ClaimHeaderController::class, 'store']);
+            Route::get('/{uuid}', [ClaimHeaderController::class, 'show']);
+            Route::put('/{uuid}', [ClaimHeaderController::class, 'update']);
+            Route::patch('/{uuid}', [ClaimHeaderController::class, 'updateStatus']);
+            Route::patch('/{uuid}/approve', [ClaimHeaderController::class, 'approve']);
+            Route::patch('/{uuid}/paid', [ClaimHeaderController::class, 'paid']);
+            Route::patch('/{uuid}/reject', [ClaimHeaderController::class, 'reject']);
         });
 
 

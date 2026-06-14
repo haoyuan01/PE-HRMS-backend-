@@ -21,4 +21,8 @@ class ConfigurationCodeConstants
     const IMAGE_MAX_SIZE_MB = 'image_max_size_mb';
     const IMAGE_ALLOWED_TYPES = 'image_allowed_types';
 
+    // file configurations
+    const FILE_MAX_SIZE_MB = 'file_max_size_mb';
+    const FILE_ALLOWED_TYPES = 'file_allowed_types';
+
 }

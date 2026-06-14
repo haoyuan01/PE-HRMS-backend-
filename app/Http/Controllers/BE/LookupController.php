@@ -38,7 +38,7 @@ class LookupController extends Controller
         }
 
         $data = $query->orderBy('created_at', 'asc')
-            ->limit(100)
+            // ->limit(100)
             ->get();
 
         return self::response(LookupResource::collection($data));
@@ -59,6 +59,55 @@ class LookupController extends Controller
                                     ->orWhere('last_name', 'like', "%$word%")
                                     ->orWhere('email', 'like', "%$word%");
                             })
+                            ->orWhere('email', 'like', "%$word%")
+                            ->orWhere('uuid', $word);
+                    });
+                }
+            });
+        }
+
+        $data = $query->orderBy('created_at', 'asc')
+            ->limit(100)
+            ->get();
+
+        $data = $data->map(fn ($user) => [
+            'uuid' => $user->uuid,
+            'name' => trim(($user->personal?->first_name ?? '') . ' ' . ($user->personal?->last_name ?? '')) ?: $user->email,
+        ]);
+        
+        return self::response($data);
+    }
+
+    public function claimApprovers(LookupSearchRequest $request)
+    {
+        $permission = Permission::query()
+            ->where('code', 'claim_header_approve')
+            ->active()
+            ->first();
+
+        $query = User::query()->active();
+
+        if ($permission)
+        {
+            $query->permission($permission);
+        }
+        else
+        {
+            $query->whereNull('id');
+        }
+
+        if ($request->filled('search_words'))
+        {
+            $query->where(function ($q) use ($request) {
+                foreach ($request->search_words as $word) {
+                    $q->orWhere(function ($sub) use ($word) {
+                        $sub->whereHas('personal', function($query) use ($word) {
+                                $query->where('full_name', 'like', "%$word%")
+                                    ->orWhere('first_name', 'like', "%$word%")
+                                    ->orWhere('last_name', 'like', "%$word%")
+                                    ->orWhere('email', 'like', "%$word%");
+                            })
+                            ->orWhere('email', 'like', "%$word%")
                             ->orWhere('uuid', $word);
                     });
                 }

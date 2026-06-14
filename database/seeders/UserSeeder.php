@@ -209,6 +209,36 @@ class UserSeeder extends Seeder
                     'code' => 'user_delete',
                     'name' => 'Delete User',
                 ],
+
+                // claim header
+                [
+                    'code' => 'claim_header_read',
+                    'name' => 'Read Claim Header',
+                ],
+                [
+                    'code' => 'claim_header_create',
+                    'name' => 'Create Claim Header',
+                ],
+                [
+                    'code' => 'claim_header_update',
+                    'name' => 'Update Claim Header',
+                ],
+                [
+                    'code' => 'claim_header_delete',
+                    'name' => 'Delete Claim Header',
+                ],
+                [
+                    'code' => 'claim_header_approve',
+                    'name' => 'Approve Claim Header',
+                ],
+                [
+                    'code' => 'claim_header_paid',
+                    'name' => 'Paid Claim Header',
+                ],
+                [
+                    'code' => 'claim_header_reject',
+                    'name' => 'Reject Claim Header',
+                ],
             ];
 
             $roles = [

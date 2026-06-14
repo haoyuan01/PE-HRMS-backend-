@@ -52,7 +52,7 @@ class AnnouncementController extends Controller
                 'updated_at' => self::currentDateTime(),
             ]);
 
-            if ($request->hasFile('images') && is_array($request->images))
+            if ($request->hasFile('images') && !empty($request->images))
             {
                 foreach($request->images as $image)
                 {
@@ -87,11 +87,11 @@ class AnnouncementController extends Controller
 
     public function update(AnnouncementUpdateRequest $request, string $uuid)
     {
+        $announcement = Announcement::findByUuid($uuid);
+        
         DB::beginTransaction();
 
         try {
-            $announcement = Announcement::findByUuid($uuid);
-
             $announcement->update([
                 'name' => $request->name,
                 'description' => $request->description,
@@ -102,7 +102,7 @@ class AnnouncementController extends Controller
                 'updated_at' => self::currentDateTime(),
             ]);
 
-            if ($request->hasFile('images') && is_array($request->images))
+            if ($request->hasFile('images') && !empty($request->images))
             {
                 foreach($request->images as $image)
                 {

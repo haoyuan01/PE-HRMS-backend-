@@ -133,6 +133,20 @@ class InitialSeeder extends Seeder
                     'description' => 'Allowed image types',
                     'is_editable' => StatusCodeConstants::INACTIVE,
                 ],
+                [
+                    'key' => ConfigurationCodeConstants::FILE_MAX_SIZE_MB,
+                    'value' => 5 * 1024, // 5 MB
+                    'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
+                    'description' => 'Maximum file size in MB',
+                    'is_editable' => StatusCodeConstants::ACTIVE,
+                ],
+                [
+                    'key' => ConfigurationCodeConstants::FILE_ALLOWED_TYPES,
+                    'value' => 'jpeg,png,jpg,gif,svg,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
+                    'value_type' => ConfigurationCodeConstants::VALUE_TYPE_STRING,
+                    'description' => 'Allowed file types',
+                    'is_editable' => StatusCodeConstants::INACTIVE,
+                ],
             ];
 
             foreach($configurations as $configuration)
