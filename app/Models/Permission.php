@@ -25,6 +25,7 @@ class Permission extends SpatiePermission
         'uuid',
         'code',
         'name',
+        'module',
         'guard_name',
         'is_active',
         'created_by',

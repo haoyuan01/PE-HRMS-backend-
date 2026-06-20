@@ -28,6 +28,7 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->string('code')->unique();
             $table->string('name')->unique();
+            $table->string('module')->nullable();
             $table->string('guard_name');
             $table->boolean('is_active')->default(1);
             $table->string('created_by', 350);

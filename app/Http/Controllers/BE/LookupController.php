@@ -41,7 +41,13 @@ class LookupController extends Controller
             // ->limit(100)
             ->get();
 
-        return self::response(LookupResource::collection($data));
+        $data = $data->groupBy('module')
+            ->map(fn ($permissions) => $permissions->map(fn ($permission) => [
+                'uuid' => $permission->uuid,
+                'name' => $permission->name,
+            ])->values());
+
+        return self::response($data);
     }
 
     public function users(LookupSearchRequest $request)

@@ -60,184 +60,224 @@ class UserSeeder extends Seeder
                 [
                     'code' => 'activity_log_read',
                     'name' => 'Read Activity Log',
+                    'module' => 'activity_log',
                 ],
 
                 // request log
                 [
                     'code' => 'request_log_read',
                     'name' => 'Read Request Log',
+                    'module' => 'request_log',
                 ],
 
                 // error log
                 [
                     'code' => 'error_log_read',
                     'name' => 'Read Error Log',
+                    'module' => 'error_log',
                 ],
 
                 // configuration
                 [
                     'code' => 'configuration_read',
                     'name' => 'Read Configuration',
+                    'module' => 'configuration',
                 ],
                 [
                     'code' => 'configuration_update',
                     'name' => 'Update Configuration',
+                    'module' => 'configuration',
                 ],
 
                 // role
                 [
                     'code' => 'role_read',
                     'name' => 'Read Role',
+                    'module' => 'role',
                 ],
                 [
                     'code' => 'role_create',
                     'name' => 'Create Role',
+                    'module' => 'role',
                 ],
                 [
                     'code' => 'role_update',
                     'name' => 'Update Role',
+                    'module' => 'role',
                 ],
                 [
                     'code' => 'role_delete',
                     'name' => 'Delete Role',
+                    'module' => 'role',
                 ],
 
                 // department
                 [
                     'code' => 'department_read',
                     'name' => 'Read Department',
+                    'module' => 'department',
                 ],
                 [
                     'code' => 'department_create',
                     'name' => 'Create Department',
+                    'module' => 'department',
                 ],
                 [
                     'code' => 'department_update',
                     'name' => 'Update Department',
+                    'module' => 'department',
                 ],
                 [
                     'code' => 'department_delete',
                     'name' => 'Delete Department',
+                    'module' => 'department',
                 ],
 
                 // position
                 [
                     'code' => 'position_read',
                     'name' => 'Read Position',
+                    'module' => 'position',
                 ],
                 [
                     'code' => 'position_create',
                     'name' => 'Create Position',
+                    'module' => 'position',
                 ],
                 [
                     'code' => 'position_update',
                     'name' => 'Update Position',
+                    'module' => 'position',
                 ],
                 [
                     'code' => 'position_delete',
                     'name' => 'Delete Position',
+                    'module' => 'position',
                 ],
 
                 // office
                 [
                     'code' => 'office_read',
                     'name' => 'Read Office',
+                    'module' => 'office',
                 ],
                 [
                     'code' => 'office_create',
                     'name' => 'Create Office',
+                    'module' => 'office',
                 ],
                 [
                     'code' => 'office_update',
                     'name' => 'Update Office',
+                    'module' => 'office',
                 ],
                 [
                     'code' => 'office_delete',
                     'name' => 'Delete Office',
+                    'module' => 'office',
                 ],
                 
                 //announcement
                 [
                     'code' => 'announcement_read',
                     'name' => 'Read Announcement',
+                    'module' => 'announcement',
                 ],
                 [
                     'code' => 'announcement_create',
                     'name' => 'Create Announcement',
+                    'module' => 'announcement',
                 ],
                 [
                     'code' => 'announcement_update',
                     'name' => 'Update Announcement',
+                    'module' => 'announcement',
                 ],
                 [
                     'code' => 'announcement_delete',
                     'name' => 'Delete Announcement',
+                    'module' => 'announcement',
                 ],
 
                 // upcoming event
                 [
                     'code' => 'upcoming_event_read',
                     'name' => 'Read Upcoming Event',
+                    'module' => 'upcoming_event',
                 ],
                 [
                     'code' => 'upcoming_event_create',
                     'name' => 'Create Upcoming Event',
+                    'module' => 'upcoming_event',
                 ],
                 [
                     'code' => 'upcoming_event_update',
                     'name' => 'Update Upcoming Event',
+                    'module' => 'upcoming_event',
                 ],
                 [
                     'code' => 'upcoming_event_delete',
                     'name' => 'Delete Upcoming Event',
+                    'module' => 'upcoming_event',
                 ],
 
                 // user
                 [
                     'code' => 'user_read',
                     'name' => 'Read User',
+                    'module' => 'user',
                 ],
                 [
                     'code' => 'user_create',
                     'name' => 'Create User',
+                    'module' => 'user',
                 ],
                 [
                     'code' => 'user_update',
                     'name' => 'Update User',
+                    'module' => 'user',
                 ],
                 [
                     'code' => 'user_delete',
                     'name' => 'Delete User',
+                    'module' => 'user',
                 ],
 
                 // claim header
                 [
                     'code' => 'claim_header_read',
                     'name' => 'Read Claim Header',
+                    'module' => 'claim',
                 ],
                 [
                     'code' => 'claim_header_create',
                     'name' => 'Create Claim Header',
+                    'module' => 'claim',
                 ],
                 [
                     'code' => 'claim_header_update',
                     'name' => 'Update Claim Header',
+                    'module' => 'claim',
                 ],
                 [
                     'code' => 'claim_header_delete',
                     'name' => 'Delete Claim Header',
+                    'module' => 'claim',
                 ],
                 [
                     'code' => 'claim_header_approve',
                     'name' => 'Approve Claim Header',
+                    'module' => 'claim',
                 ],
                 [
                     'code' => 'claim_header_paid',
                     'name' => 'Paid Claim Header',
+                    'module' => 'claim',
                 ],
                 [
                     'code' => 'claim_header_reject',
                     'name' => 'Reject Claim Header',
+                    'module' => 'claim',
                 ],
             ];
 
@@ -256,6 +296,7 @@ class UserSeeder extends Seeder
                     'uuid' => (string) Str::uuid(),
                     'code' => $permission['code'],
                     'name' => $permission['name'],
+                    'module' => $permission['module'] ?? null,
                     'guard_name' => 'web',
                     'created_by' => 'system',
                     'created_at' => Carbon::now(),
