@@ -143,7 +143,7 @@ class AuthController extends Controller
 
             $data = [
                 'name' => trim($user->first_name . ' ' . $user->last_name),
-                'subject' => 'PE Portal - Reset Passcode',
+                'subject' => 'PE Portal - Reset System PIN',
                 'reset_passcode_link' => $reset_passcode_link,
             ];
 

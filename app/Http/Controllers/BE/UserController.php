@@ -8,6 +8,7 @@ use App\Http\Requests\UserIndexRequest;
 use App\Filters\UserFilter;
 use App\Http\Requests\UserShowRequest;
 use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdatePasscodeRequest;
 use App\Http\Requests\UserUpdatePasswordRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateStatusRequest;
@@ -413,6 +414,19 @@ class UserController extends Controller
         
         $user->update([
             'password' => bcrypt($request->password),
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
+        
+        return self::response(new UserResource($user));
+    }
+
+    public function updatePasscode(UserUpdatePasscodeRequest $request, string $uuid)
+    {
+        $user = User::findByUuid($uuid);
+        
+        $user->update([
+            'passcode' => bcrypt($request->passcode),
             'updated_by' => self::auth()->uuid,
             'updated_at' => self::currentDateTime(),
         ]);

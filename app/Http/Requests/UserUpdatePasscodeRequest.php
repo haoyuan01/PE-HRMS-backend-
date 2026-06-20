@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserUpdatePasswordRequest extends FormRequest
+class UserUpdatePasscodeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,7 +29,7 @@ class UserUpdatePasswordRequest extends FormRequest
     {
         return [
             'uuid' => ['required', 'string', 'uuid'],
-            'password' => ['required', 'min:6', 'confirmed'],
+            'passcode' => ['required', 'digits:6'],
         ];
     }
 }
