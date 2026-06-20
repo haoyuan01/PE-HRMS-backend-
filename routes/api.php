@@ -48,6 +48,7 @@ Route::group([
 
         Route::prefix('auth')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
+            Route::post('forgot-passcode-email', [AuthController::class, 'forgotPasscodeEmail']);
         });
 
         Route::prefix('activity-logs')->group(function () {

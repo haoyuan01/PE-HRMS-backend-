@@ -35,6 +35,7 @@ class UserUpdateRequest extends FormRequest
             'uuid' => ['required', 'string', 'uuid'],
             'email' => ['required', 'string', Rule::unique('users', 'email')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))->ignore($this->route('uuid'), 'uuid')],
             'password' => ['nullable', 'string', 'min:6'],
+            'passcode' => ['nullable', 'string', 'min:6'],
             'role_uuid' => ['required', 'string', 'uuid'],
 
             // personal

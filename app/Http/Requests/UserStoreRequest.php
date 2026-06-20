@@ -29,6 +29,7 @@ class UserStoreRequest extends FormRequest
         return [
             'email' => ['required', 'string', Rule::unique('users', 'email')->where(fn ($query) => $query->where('is_active', StatusCodeConstants::ACTIVE))],
             'password' => ['required', 'string', 'min:6'],
+            'passcode' => ['nullable', 'string', 'min:6'],
             'role_uuid' => ['required', 'string', 'uuid'],
 
             // personal

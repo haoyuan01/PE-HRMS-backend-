@@ -4,6 +4,7 @@ namespace App\Http\Controllers\BE;
 
 use App\Constants\StatusCodeConstants;
 use App\Filters\RoleFilter;
+use App\Exceptions\AppException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RoleIndexRequest;
 use App\Http\Requests\RoleShowRequest;
@@ -13,11 +14,12 @@ use App\Http\Requests\RoleUpdateStatusRequest;
 use App\Http\Resources\RoleResource;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Services\AuthService;
 use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
-    public function __construct(private RoleFilter $role_filter)
+    public function __construct(private RoleFilter $role_filter, private AuthService $auth_service)
     {
     }
 
@@ -121,17 +123,29 @@ class RoleController extends Controller
 
     public function updateStatus(RoleUpdateStatusRequest $request, string $uuid)
     {
-        $role = Role::findByUuid($uuid);
+        DB::beginTransaction();
 
-        $role->update([
-            'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
-            'updated_by' => self::auth()->uuid,
-            'updated_at' => self::currentDateTime(),
-        ]);
+        try {
+            $role = Role::findByUuid($uuid);
 
-        DB::commit();
+            $this->auth_service->validatePasscode(self::auth(), $request->passcode);
 
-        return self::response(new RoleResource($role));
+            throw_if($request->is_active == StatusCodeConstants::INACTIVE && $role->users()->exists(), new AppException('Role is assigned to user'));
+
+            $role->update([
+                'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                'updated_by' => self::auth()->uuid,
+                'updated_at' => self::currentDateTime(),
+            ]);
+
+            DB::commit();
+
+            return self::response(new RoleResource($role));
+
+        } catch (\Exception $exception) {
+            DB::rollback();
+            throw $exception;
+        }
     }
 
     public function show(RoleShowRequest $request, string $uuid)

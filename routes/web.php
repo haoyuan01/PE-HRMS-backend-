@@ -18,5 +18,8 @@ Route::group([
     Route::get('/reset-password', [AuthControllerFE::class, 'resetPassword']);
     Route::get('/reset-password-success', [AuthControllerFE::class, 'resetPasswordSuccess']);
     Route::post('/reset-password', [AuthControllerFE::class, 'resetPasswordAction']);
+    Route::get('/reset-passcode', [AuthControllerFE::class, 'resetPasscode']);
+    Route::get('/reset-passcode-success', [AuthControllerFE::class, 'resetPasscodeSuccess']);
+    Route::post('/reset-passcode', [AuthControllerFE::class, 'resetPasscodeAction']);
 
 });

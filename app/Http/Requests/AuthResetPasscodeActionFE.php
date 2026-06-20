@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RoleUpdateStatusRequest extends FormRequest
+class AuthResetPasscodeActionFE extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,11 +13,6 @@ class RoleUpdateStatusRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge(['uuid' => $this->route('uuid')]);
     }
 
     /**
@@ -28,9 +23,9 @@ class RoleUpdateStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'uuid' => ['required', 'string', 'uuid'],
-            'is_active' => ['required', 'boolean'],
-            'passcode' => ['required', 'integer', 'min:6'],
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'passcode' => ['required', 'digits:6'],
         ];
     }
 }

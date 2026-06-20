@@ -19,6 +19,7 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->string('email')->unique();
             $table->string('password')->nullable();
+            $table->string('passcode')->nullable();
             $table->rememberToken();
             $table->dateTime('email_verified_at', 6)->nullable();
             $table->boolean('is_active')->default(1);

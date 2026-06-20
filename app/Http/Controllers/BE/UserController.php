@@ -36,6 +36,9 @@ class UserController extends Controller
             'employment.position',
             'emergency',
             'roles.permissions',
+            'roles' => function ($query) {
+                $query->where('is_active', StatusCodeConstants::ACTIVE);  
+            },
         ]);
         
         $user = $this->user_filter->apply($request, $request->size, $user);
@@ -53,6 +56,7 @@ class UserController extends Controller
                 'uuid' => self::uuid(),
                 'email' => $request->email,
                 'password' => $request->password ? bcrypt($request->password) : null,
+                'passcode' => $request->passcode ? bcrypt($request->passcode) : null,
                 'is_active' => StatusCodeConstants::ACTIVE,
                 'created_by' => self::auth()->uuid,
                 'created_at' => self::currentDateTime(),
@@ -198,6 +202,7 @@ class UserController extends Controller
             $user->update([
                 'email' => $request->input('email'),
                 'password' => $request->input('password') ? bcrypt($request->input('password')) : $user->password,
+                'passcode' => $request->input('passcode') ? bcrypt($request->input('passcode')) : $user->passcode,
                 'updated_by' => self::auth()->uuid,
                 'updated_at' => self::currentDateTime(),
             ]);

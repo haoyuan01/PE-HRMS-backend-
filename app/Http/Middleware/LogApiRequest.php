@@ -18,6 +18,7 @@ class LogApiRequest
     private const SENSITIVE_FIELDS = [
         'password',
         'password_confirmation',
+        'passcode',
         'token',
         'secret',
         'card_number',

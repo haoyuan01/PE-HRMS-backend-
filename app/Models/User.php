@@ -31,6 +31,7 @@ class User extends Authenticatable
         'uuid',
         'email',
         'password',
+        'passcode',
         'is_active',
         'created_by',
         'created_at',
@@ -40,6 +41,7 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
+        'passcode',
     ];
    
     /**
@@ -78,6 +80,9 @@ class User extends Authenticatable
             'employment.position',
             'emergency',
             'roles.permissions',
+            'roles' => function ($query) {
+                $query->where('is_active', StatusCodeConstants::ACTIVE);
+            },
         ])->where('uuid', $uuid);
 
         if ($active)
