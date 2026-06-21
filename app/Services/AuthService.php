@@ -50,11 +50,14 @@ class AuthService
 
     public function validatePasscode(User $user, string $passcode): bool
     {
-        throw_if(!$user->passcode, AppException::class, 'Passcode not set');
+        if ($passcode)
+        {
+            $check_passcode = Hash::check($passcode, $user->passcode);
+            throw_if(!$check_passcode, AppException::class, 'Incorrect passcode');
 
-        $check_passcode = Hash::check($passcode, $user->passcode);
-        throw_if(!$check_passcode, AppException::class, 'Incorrect passcode');
+            return $check_passcode;
+        }
 
-        return $check_passcode;
+        throw new AppException('Incorrect passcode');
     }
 }
