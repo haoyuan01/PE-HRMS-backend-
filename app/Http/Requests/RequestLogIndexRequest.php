@@ -27,7 +27,7 @@ class RequestLogIndexRequest extends FormRequest
             'uuid' => ['nullable', 'string', 'uuid'],
             'method' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'path' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
-            'ip_address' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'ip' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'user_agent' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'status_code' => ['nullable', 'integer', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'success' => ['nullable', 'integer', 'between:-1,1'],

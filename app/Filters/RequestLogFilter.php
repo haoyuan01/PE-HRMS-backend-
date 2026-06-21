@@ -24,9 +24,9 @@ class RequestLogFilter
             $data->where('path', 'like', "%$filters->path%");
         }
 
-        if ($filters->has('ip_address') && !empty($filters->ip_address))
+        if ($filters->has('ip') && !empty($filters->ip))
         {
-            $data->where('ip_address', 'like', "%$filters->ip_address%");
+            $data->where('ip', 'like', "%$filters->ip%");
         }
 
         if ($filters->has('user_agent') && !empty($filters->user_agent))
@@ -61,7 +61,7 @@ class RequestLogFilter
                 foreach ($filters->search_words as $word) {
                     $query->where('method', 'like', "%$word%")
                         ->orWhere('path', 'like', "%$word%")
-                        ->orWhere('ip_address', 'like', "%$word%")
+                        ->orWhere('ip', 'like', "%$word%")
                         ->orWhere('user_agent', 'like', "%$word%")
                         ->orWhere('status_code', 'like', "%$word%")
                         ->orWhere('uuid', $word);
