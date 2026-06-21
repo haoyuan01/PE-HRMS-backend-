@@ -15,6 +15,10 @@ class ActivityLogService
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
+            ->dontLogIfAttributesChangedOnly([
+                'updated_by',
+                'updated_at',
+            ])
             ->dontSubmitEmptyLogs();
     }
 }
