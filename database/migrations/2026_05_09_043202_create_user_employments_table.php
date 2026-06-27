@@ -19,6 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('department_id')->nullable();
             $table->unsignedBigInteger('office_id')->nullable();
             $table->date('joined_date')->nullable();
+            $table->boolean('is_manager')->default(0);
+            $table->boolean('is_accountant')->default(0);
             $table->boolean('is_active')->default(1);
             $table->string('created_by', 350);
             $table->dateTime('created_at', 6);

@@ -172,6 +172,8 @@ class UserController extends Controller
                     'department_id' => $department?->id,
                     'office_id' => $office?->id,
                     'joined_date' => $request->input('employment.joined_date'),
+                    'is_manager' => $request->input('employment.is_manager') ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                    'is_accountant' => $request->input('employment.is_accountant') ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
                     'is_active' => StatusCodeConstants::ACTIVE,
                     'created_by' => self::auth()->uuid,
                     'created_at' => self::currentDateTime(),
@@ -355,6 +357,8 @@ class UserController extends Controller
                     'department_id' => $department?->id,
                     'office_id' => $office?->id,
                     'joined_date' => $request->input('employment.joined_date'),
+                    'is_manager' => $request->input('employment.is_manager') ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                    'is_accountant' => $request->input('employment.is_accountant') ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
                     'updated_by' => self::auth()->uuid,
                     'updated_at' => self::currentDateTime(),
                 ];

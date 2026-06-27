@@ -15,12 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('approver_id')->nullable();
-            $table->dateTime('approved_at', 6)->nullable();
-            $table->unsignedBigInteger('payer_id')->nullable();
-            $table->dateTime('paid_at', 6)->nullable();
-            $table->unsignedBigInteger('rejected_by')->nullable();
-            $table->dateTime('rejected_at', 6)->nullable();
+            $table->unsignedBigInteger('manager_approver_id')->nullable();
             $table->string('name');
             $table->text('remark')->nullable();
             $table->decimal('total_amount', 10, 2);
@@ -34,16 +29,13 @@ return new class extends Migration
 
             // index
             $table->index('user_id');
-            $table->index('approver_id');
-            $table->index('payer_id');
+            $table->index('manager_approver_id');
             $table->index('name');
             $table->index('is_active');
 
             // foreign keys
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('approver_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('payer_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('rejected_by')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('manager_approver_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

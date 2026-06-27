@@ -26,10 +26,10 @@ class ClaimHeaderStoreRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'approver_uuid' => ['nullable', 'string', 'uuid'],
             'remark' => ['nullable', 'string'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'manager_approver_uuid' => ['nullable', 'string', 'uuid'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.name' => ['required', 'string'],
             'items.*.amount' => ['required', 'numeric', 'min:0'],

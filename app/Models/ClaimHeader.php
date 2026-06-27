@@ -16,9 +16,6 @@ class ClaimHeader extends Model
     protected $casts = [
         'start_date' => 'datetime:Y-m-d',
         'end_date' => 'datetime:Y-m-d',
-        'approved_at' => 'datetime:Y-m-d H:i:s.u',
-        'paid_at' => 'datetime:Y-m-d H:i:s.u',
-        'rejected_at' => 'datetime:Y-m-d H:i:s.u',
         'is_active' => 'boolean',
         'created_at' => 'datetime:Y-m-d H:i:s.u',
         'updated_at' => 'datetime:Y-m-d H:i:s.u',
@@ -27,12 +24,7 @@ class ClaimHeader extends Model
     protected $fillable = [
         'uuid',
         'user_id',
-        'approver_id',
-        'approved_at',
-        'payer_id',
-        'paid_at',
-        'rejected_by',
-        'rejected_at',
+        'manager_approver_id',
         'name',
         'remark',
         'total_amount',
@@ -59,11 +51,40 @@ class ClaimHeader extends Model
     public static function findByUuid(string $uuid, bool $fail = true)
     {
         $query = self::with([
-            'claimItems',
-            'user',
-            'approver',
-            'payer',
-            'rejectedBy',
+            'user.personal',
+            'user.contact',
+            'user.employment.office',
+            'user.employment.position',
+            'user.employment.department',
+            'user.emergency',
+
+            'managerApprover.personal',
+            'managerApprover.contact',
+            'managerApprover.employment.office',
+            'managerApprover.employment.position',
+            'managerApprover.employment.department',
+            'managerApprover.emergency',
+
+            'claimItems.approvedBy.personal',
+            'claimItems.approvedBy.contact',
+            'claimItems.approvedBy.employment.office',
+            'claimItems.approvedBy.employment.position',
+            'claimItems.approvedBy.employment.department',
+            'claimItems.approvedBy.emergency',
+
+            'claimItems.rejectedBy.personal',
+            'claimItems.rejectedBy.contact',
+            'claimItems.rejectedBy.employment.office',
+            'claimItems.rejectedBy.employment.position',
+            'claimItems.rejectedBy.employment.department',
+            'claimItems.rejectedBy.emergency',
+            
+            'claimItems.releasedBy.personal',
+            'claimItems.releasedBy.contact',
+            'claimItems.releasedBy.employment.office',
+            'claimItems.releasedBy.employment.position',
+            'claimItems.releasedBy.employment.department',
+            'claimItems.releasedBy.emergency',
         ])->where('uuid', $uuid)
             ->where('is_active', StatusCodeConstants::ACTIVE);
 
@@ -83,24 +104,9 @@ class ClaimHeader extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function approver()
+    public function managerApprover()
     {
-        return $this->belongsTo(User::class, 'approver_id', 'id');
-    }
-
-    public function payer()
-    {
-        return $this->belongsTo(User::class, 'payer_id', 'id');
-    }
-
-    public function rejectedBy()
-    {
-        return $this->belongsTo(User::class, 'rejected_by', 'id');
-    }
-
-    public function items()
-    {
-        return $this->claimItems();
+        return $this->belongsTo(User::class, 'manager_approver_id', 'id')->active();
     }
 
     public function claimItems()

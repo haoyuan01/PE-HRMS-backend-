@@ -43,6 +43,10 @@ class UserEmploymentController extends Controller
             'department_id' => $request->department_uuid ? $department->id : null,
             'office_id' => $request->office_uuid ? $office->id : null,
             'joined_date' => $request->joined_date,
+            'is_manager' => $request->is_manager ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+            'is_accountant' => $request->is_accountant ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
         ];
 
         if ($user->employment)
@@ -57,8 +61,6 @@ class UserEmploymentController extends Controller
                 'is_active' => StatusCodeConstants::ACTIVE,
                 'created_by' => self::auth()->uuid,
                 'created_at' => self::currentDateTime(),
-                'updated_by' => self::auth()->uuid,
-                'updated_at' => self::currentDateTime(),
             ]);
         }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\BE\AnnouncementController;
 use App\Http\Controllers\BE\AnnouncementImageController;
 use App\Http\Controllers\BE\AuthController;
 use App\Http\Controllers\BE\ClaimHeaderController;
+use App\Http\Controllers\BE\ClaimItemController;
 use App\Http\Controllers\BE\ConfigurationController;
 use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\ErrorLogController;
@@ -170,12 +171,13 @@ Route::group([
             Route::get('/{uuid}', [ClaimHeaderController::class, 'show']);
             Route::put('/{uuid}', [ClaimHeaderController::class, 'update']);
             Route::patch('/{uuid}', [ClaimHeaderController::class, 'updateStatus']);
-            Route::patch('/{uuid}/approve', [ClaimHeaderController::class, 'approve']);
-            Route::patch('/{uuid}/paid', [ClaimHeaderController::class, 'paid']);
-            Route::patch('/{uuid}/reject', [ClaimHeaderController::class, 'reject']);
         });
 
-
+        Route::prefix('claim-items')->group(function () {
+            Route::patch('/approve/{uuid}', [ClaimItemController::class, 'approve']);
+            Route::patch('/reject/{uuid}', [ClaimItemController::class, 'reject']);
+            Route::patch('/release/{uuid}', [ClaimItemController::class, 'release']);
+        });
 
 
 

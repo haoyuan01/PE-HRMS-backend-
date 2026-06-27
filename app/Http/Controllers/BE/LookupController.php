@@ -86,21 +86,11 @@ class LookupController extends Controller
 
     public function claimApprovers(LookupSearchRequest $request)
     {
-        $permission = Permission::query()
-            ->where('code', 'claim_header_approve')
-            ->active()
-            ->first();
-
-        $query = User::query()->active();
-
-        if ($permission)
-        {
-            $query->permission($permission);
-        }
-        else
-        {
-            $query->whereNull('id');
-        }
+        $query = User::whereHas('employment', function ($query) {
+            $query->where('is_active', StatusCodeConstants::ACTIVE)
+                ->where('is_manager', StatusCodeConstants::ACTIVE);
+        })
+            ->where('is_active', StatusCodeConstants::ACTIVE);
 
         if ($request->filled('search_words'))
         {

@@ -31,12 +31,13 @@ class ClaimHeaderUpdateRequest extends FormRequest
     {
         return [
             'uuid' => ['required', 'string', 'uuid'],
-            'approver_uuid' => ['nullable', 'string', 'uuid'],
             'name' => ['required', 'string'],
             'remark' => ['nullable', 'string'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'manager_approver_uuid' => ['nullable', 'string', 'uuid'],
             'items' => ['nullable', 'array', 'min:1'],
+            'items.*.uuid' => ['nullable', 'string', 'uuid'],
             'items.*.name' => ['required', 'string'],
             'items.*.amount' => ['required', 'numeric', 'min:0'],
             'items.*.date' => ['nullable', 'date'],

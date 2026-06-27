@@ -28,6 +28,12 @@ class ClaimItemResource extends JsonResource
             'created_at' => Carbon::parse($this->created_at)->utc(),
             'updated_by' => $this->updated_by,
             'updated_at' => Carbon::parse($this->updated_at)->utc(),
+            'approved_by' => new UserResource($this->whenLoaded('approvedBy')),
+            'approved_at' => $this->approved_at ? Carbon::parse($this->approved_at)->utc() : null,
+            'released_by' => new UserResource($this->whenLoaded('releasedBy')),
+            'released_at' => $this->released_at ? Carbon::parse($this->released_at)->utc() : null,
+            'rejected_by' => new UserResource($this->whenLoaded('rejectedBy')),
+            'rejected_at' => $this->rejected_at ? Carbon::parse($this->rejected_at)->utc() : null,
             'claim_header' => new ClaimHeaderResource($this->whenLoaded('claimHeader')),
         ];
 

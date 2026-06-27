@@ -28,6 +28,8 @@ class UserEmploymentUpdateRequest extends FormRequest
             'department_uuid' => ['nullable', 'string', 'uuid'],
             'office_uuid' => ['nullable', 'string', 'uuid'],
             'joined_date' => ['nullable', 'date'],
+            'is_manager' => ['nullable', 'boolean'],
+            'is_accountant' => ['nullable', 'boolean'],
         ];
     }
 }

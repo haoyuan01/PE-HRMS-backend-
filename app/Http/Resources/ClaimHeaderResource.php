@@ -30,11 +30,9 @@ class ClaimHeaderResource extends JsonResource
             'created_at' => Carbon::parse($this->created_at)->utc(),
             'updated_by' => $this->updated_by,
             'updated_at' => Carbon::parse($this->updated_at)->utc(),
-            'claim_items' => ClaimItemResource::collection($this->whenLoaded('claimItems')),
             'user' => new UserResource($this->whenLoaded('user')),
-            'approver' => new UserResource($this->whenLoaded('approver')),
-            'payer' => new UserResource($this->whenLoaded('payer')),
-            'rejected_by' => new UserResource($this->whenLoaded('rejectedBy')),
+            'manager_approver' => new UserResource($this->whenLoaded('managerApprover')),
+            'claim_items' => ClaimItemResource::collection($this->whenLoaded('claimItems')),
         ];
 
         return $data;

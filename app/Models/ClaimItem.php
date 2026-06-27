@@ -14,6 +14,9 @@ class ClaimItem extends Model
     protected $table = 'claim_items';
     public $timestamps = false;
     protected $casts = [
+        'approved_at' => 'datetime:Y-m-d H:i:s.u',
+        'released_at' => 'datetime:Y-m-d H:i:s.u',
+        'rejected_at' => 'datetime:Y-m-d H:i:s.u',
         'is_active' => 'boolean',
         'created_at' => 'datetime:Y-m-d H:i:s.u',
         'updated_at' => 'datetime:Y-m-d H:i:s.u',
@@ -22,6 +25,12 @@ class ClaimItem extends Model
     protected $fillable = [
         'uuid',
         'claim_header_id',
+        'approved_by',
+        'approved_at',
+        'released_by',
+        'released_at',
+        'rejected_by',
+        'rejected_at',
         'name',
         'amount',
         'date',
@@ -64,5 +73,20 @@ class ClaimItem extends Model
     public function claimHeader()
     {
         return $this->belongsTo(ClaimHeader::class, 'claim_header_id');
+    }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by', 'id');
+    }
+
+    public function releasedBy()
+    {
+        return $this->belongsTo(User::class, 'released_by', 'id');
+    }
+
+    public function rejectedBy()
+    {
+        return $this->belongsTo(User::class, 'rejected_by', 'id');
     }
 }

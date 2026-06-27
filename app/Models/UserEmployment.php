@@ -15,6 +15,8 @@ class UserEmployment extends Model
     public $timestamps = false;
     public $casts = [
         'joined_date' => 'date:Y-m-d',
+        'is_manager' => 'boolean',
+        'is_accountant' => 'boolean',
         'is_active' => 'boolean',
         'created_at' => 'datetime:Y-m-d H:i:s.u',
         'updated_at' => 'datetime:Y-m-d H:i:s.u',
@@ -27,6 +29,8 @@ class UserEmployment extends Model
         'department_id',
         'office_id',
         'joined_date',
+        'is_manager',
+        'is_accountant',
         'is_active',
         'created_by',
         'created_at',
