@@ -58,7 +58,16 @@ class User extends Authenticatable
     public static function findByEmail(string $email, bool $fail = true)
     {
         $query =  self::with([
+            'personal',
+            'contact',
+            'employment.office',
+            'employment.department',
+            'employment.position',
+            'emergency',
             'roles.permissions',
+            'roles' => function ($query) {
+                $query->where('is_active', StatusCodeConstants::ACTIVE);
+            },
         ])->where('email', $email)
         ->active();
 
