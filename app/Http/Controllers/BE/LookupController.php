@@ -84,7 +84,7 @@ class LookupController extends Controller
         return self::response($data);
     }
 
-    public function claimApprovers(LookupSearchRequest $request)
+    public function managerApprovers(LookupSearchRequest $request)
     {
         $query = User::whereHas('employment', function ($query) {
             $query->where('is_active', StatusCodeConstants::ACTIVE)

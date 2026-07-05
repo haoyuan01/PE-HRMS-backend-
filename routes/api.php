@@ -75,7 +75,7 @@ Route::group([
         Route::prefix('lookup')->group(function () {
             Route::get('permissions', [LookupController::class, 'permissions']);
             Route::get('users', [LookupController::class, 'users']);
-            Route::get('claim-approvers', [LookupController::class, 'claimApprovers']);
+            Route::get('manager-approvers', [LookupController::class, 'managerApprovers']);
             Route::get('roles', [LookupController::class, 'roles']);
             Route::get('departments', [LookupController::class, 'departments']);
             Route::get('positions', [LookupController::class, 'positions']);
