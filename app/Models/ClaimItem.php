@@ -14,9 +14,10 @@ class ClaimItem extends Model
     protected $table = 'claim_items';
     public $timestamps = false;
     protected $casts = [
-        'approved_at' => 'datetime:Y-m-d H:i:s.u',
-        'released_at' => 'datetime:Y-m-d H:i:s.u',
-        'rejected_at' => 'datetime:Y-m-d H:i:s.u',
+        'manager_action_at' => 'datetime:Y-m-d H:i:s.u',
+        'manager_approved' => 'boolean',
+        'director_action_at' => 'datetime:Y-m-d H:i:s.u',
+        'director_approved' => 'boolean',
         'is_active' => 'boolean',
         'created_at' => 'datetime:Y-m-d H:i:s.u',
         'updated_at' => 'datetime:Y-m-d H:i:s.u',
@@ -25,12 +26,12 @@ class ClaimItem extends Model
     protected $fillable = [
         'uuid',
         'claim_header_id',
-        'approved_by',
-        'approved_at',
-        'released_by',
-        'released_at',
-        'rejected_by',
-        'rejected_at',
+        'manager_action_by',
+        'manager_action_at',
+        'manager_approved',
+        'director_action_by',
+        'director_action_at',
+        'director_approved',
         'name',
         'amount',
         'date',
@@ -75,18 +76,13 @@ class ClaimItem extends Model
         return $this->belongsTo(ClaimHeader::class, 'claim_header_id');
     }
 
-    public function approvedBy()
+    public function managerActionBy()
     {
-        return $this->belongsTo(User::class, 'approved_by', 'id');
+        return $this->belongsTo(User::class, 'manager_action_by', 'id')->active();
     }
 
-    public function releasedBy()
+    public function directorActionBy()
     {
-        return $this->belongsTo(User::class, 'released_by', 'id');
-    }
-
-    public function rejectedBy()
-    {
-        return $this->belongsTo(User::class, 'rejected_by', 'id');
+        return $this->belongsTo(User::class, 'director_action_by', 'id')->active();
     }
 }

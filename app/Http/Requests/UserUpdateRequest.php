@@ -71,6 +71,7 @@ class UserUpdateRequest extends FormRequest
             'employment.department_uuid' => ['nullable', 'string', 'uuid'],
             'employment.office_uuid' => ['nullable', 'string', 'uuid'],
             'employment.joined_date' => ['nullable', 'date'],
+            'employment.is_director' => ['nullable', 'boolean'],
             'employment.is_manager' => ['nullable', 'boolean'],
             'employment.is_accountant' => ['nullable', 'boolean'],
 

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ClaimItemRejectRequest extends FormRequest
+class ClaimHeaderDirectorReviewRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,7 +28,7 @@ class ClaimItemRejectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'uuid' => ['required', 'string', 'uuid'],
+            'uuid' => ['required', 'exists:claim_headers,uuid'],
         ];
     }
 }

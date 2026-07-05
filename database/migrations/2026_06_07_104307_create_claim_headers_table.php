@@ -16,6 +16,10 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('manager_approver_id')->nullable();
+            $table->unsignedBigInteger('manager_reviewed_by')->nullable();
+            $table->dateTime('manager_reviewed_at', 6)->nullable();
+            $table->unsignedBigInteger('director_reviewed_by')->nullable();
+            $table->dateTime('director_reviewed_at', 6)->nullable();
             $table->string('name');
             $table->text('remark')->nullable();
             $table->decimal('total_amount', 10, 2);
@@ -36,6 +40,8 @@ return new class extends Migration
             // foreign keys
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('manager_approver_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('manager_reviewed_by')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('director_reviewed_by')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

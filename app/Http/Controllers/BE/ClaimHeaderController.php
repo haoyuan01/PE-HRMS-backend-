@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\BE;
 
 use App\Constants\StatusCodeConstants;
+use App\Exceptions\AppException;
 use App\Http\Controllers\Controller;
 use App\Filters\ClaimHeaderFilter;
+use App\Http\Requests\ClaimHeaderDirectorReviewRequest;
 use App\Http\Requests\ClaimHeaderIndexRequest;
+use App\Http\Requests\ClaimHeaderManagerReviewRequest;
 use App\Http\Requests\ClaimHeaderShowRequest;
 use App\Http\Requests\ClaimHeaderStoreRequest;
 use App\Http\Requests\ClaimHeaderUpdateRequest;
@@ -41,26 +44,33 @@ class ClaimHeaderController extends Controller
             'managerApprover.employment.department',
             'managerApprover.emergency',
 
-            'claimItems.approvedBy.personal',
-            'claimItems.approvedBy.contact',
-            'claimItems.approvedBy.employment.office',
-            'claimItems.approvedBy.employment.position',
-            'claimItems.approvedBy.employment.department',
-            'claimItems.approvedBy.emergency',
+            'managerReviewedBy.personal',
+            'managerReviewedBy.contact',
+            'managerReviewedBy.employment.office',
+            'managerReviewedBy.employment.position',
+            'managerReviewedBy.employment.department',
+            'managerReviewedBy.emergency',
 
-            'claimItems.rejectedBy.personal',
-            'claimItems.rejectedBy.contact',
-            'claimItems.rejectedBy.employment.office',
-            'claimItems.rejectedBy.employment.position',
-            'claimItems.rejectedBy.employment.department',
-            'claimItems.rejectedBy.emergency',
+            'directorReviewedBy.personal',
+            'directorReviewedBy.contact',
+            'directorReviewedBy.employment.office',
+            'directorReviewedBy.employment.position',
+            'directorReviewedBy.employment.department',
+            'directorReviewedBy.emergency',
 
-            'claimItems.releasedBy.personal',
-            'claimItems.releasedBy.contact',
-            'claimItems.releasedBy.employment.office',
-            'claimItems.releasedBy.employment.position',
-            'claimItems.releasedBy.employment.department',
-            'claimItems.releasedBy.emergency',
+            'claimItems.managerActionBy.personal',
+            'claimItems.managerActionBy.contact',
+            'claimItems.managerActionBy.employment.office',
+            'claimItems.managerActionBy.employment.position',
+            'claimItems.managerActionBy.employment.department',
+            'claimItems.managerActionBy.emergency',
+
+            'claimItems.directorActionBy.personal',
+            'claimItems.directorActionBy.contact',
+            'claimItems.directorActionBy.employment.office',
+            'claimItems.directorActionBy.employment.position',
+            'claimItems.directorActionBy.employment.department',
+            'claimItems.directorActionBy.emergency',
         ])->active();
 
         $claim_header = $this->claim_header_filter->apply($request, $request->size, $claim_header);
@@ -131,29 +141,19 @@ class ClaimHeaderController extends Controller
 
             if ($request->manager_approver_uuid)
             {
-                $accountants = User::whereHas('employment', function ($query) {
-                    $query->where('is_active', StatusCodeConstants::ACTIVE)
-                        ->where('is_accountant', StatusCodeConstants::ACTIVE);
-                })
-                    ->where('is_active', StatusCodeConstants::ACTIVE)
-                    ->pluck('email')
-                    ->toArray();
-
                 $data = [
-                    'name' => trim(($manager_approver->personal?->first_name ?? '') . ' ' . ($manager_approver->personal?->last_name ?? '')) ?: $manager_approver->email,
+                    'name' => 'Manager',
                     'applicant_name' => trim(($user->personal?->first_name ?? '') . ' ' . ($user->personal?->last_name ?? '')) ?: $user->email,
                     'applicant_email' => $user->email,
                     'applicant_phone_number' => $user->contact?->phone_number,
                     'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
-                    'subject' => 'PE Portal - Claim Pending Approval',
+                    'subject' => 'PE Portal - Claim Pending Manager Approval',
                     'claim_header' => $claim_header,
                     'claim_items' => $claim_header->claimItems()->get(),
                     'total_amount' => $total_amount,
                 ];
 
-                Mail::to($manager_approver->email)
-                    ->cc($accountants ?? [])
-                    ->send(new ClaimApplicationMail($data));
+                Mail::to($manager_approver->email)->send(new ClaimApplicationMail($data));
             }
 
             $claim_header->load([
@@ -170,27 +170,6 @@ class ClaimHeaderController extends Controller
                 'managerApprover.employment.position',
                 'managerApprover.employment.department',
                 'managerApprover.emergency',
-
-                'claimItems.approvedBy.personal',
-                'claimItems.approvedBy.contact',
-                'claimItems.approvedBy.employment.office',
-                'claimItems.approvedBy.employment.position',
-                'claimItems.approvedBy.employment.department',
-                'claimItems.approvedBy.emergency',
-
-                'claimItems.rejectedBy.personal',
-                'claimItems.rejectedBy.contact',
-                'claimItems.rejectedBy.employment.office',
-                'claimItems.rejectedBy.employment.position',
-                'claimItems.rejectedBy.employment.department',
-                'claimItems.rejectedBy.emergency',
-
-                'claimItems.releasedBy.personal',
-                'claimItems.releasedBy.contact',
-                'claimItems.releasedBy.employment.office',
-                'claimItems.releasedBy.employment.position',
-                'claimItems.releasedBy.employment.department',
-                'claimItems.releasedBy.emergency',
             ]);
 
             DB::commit();
@@ -296,30 +275,20 @@ class ClaimHeaderController extends Controller
             ]);
 
             if ($request->manager_approver_uuid && $new_manager->id != $old_manager_id) // only send email if manager is updated
-            {
-                $accountants = User::whereHas('employment', function ($query) {
-                    $query->where('is_active', StatusCodeConstants::ACTIVE)
-                        ->where('is_accountant', StatusCodeConstants::ACTIVE);
-                })
-                    ->where('is_active', StatusCodeConstants::ACTIVE)
-                    ->pluck('email')
-                    ->toArray();
-                    
+            {                    
                 $data = [
                     'name' => trim(($new_manager->personal?->first_name ?? '') . ' ' . ($new_manager->personal?->last_name ?? '')) ?: $new_manager->email,
                     'applicant_name' => trim(($user->personal?->first_name ?? '') . ' ' . ($user->personal?->last_name ?? '')) ?: $user->email,
                     'applicant_email' => $user->email,
                     'applicant_phone_number' => $user->contact?->phone_number,
                     'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
-                    'subject' => 'PE Portal - Claim Pending Approval',
+                    'subject' => 'PE Portal - Claim Pending Manager Approval',
                     'claim_header' => $claim_header,
                     'claim_items' => $claim_header->claimItems()->get(),
                     'total_amount' => $total_amount,
                 ];
 
-                Mail::to($new_manager->email)
-                    ->cc($accountants ?? [])
-                    ->send(new ClaimApplicationMail($data));
+                Mail::to($new_manager->email)->send(new ClaimApplicationMail($data));
             }
 
             $claim_header->load([
@@ -337,26 +306,33 @@ class ClaimHeaderController extends Controller
                 'managerApprover.employment.department',
                 'managerApprover.emergency',
 
-                'claimItems.approvedBy.personal',
-                'claimItems.approvedBy.contact',
-                'claimItems.approvedBy.employment.office',
-                'claimItems.approvedBy.employment.position',
-                'claimItems.approvedBy.employment.department',
-                'claimItems.approvedBy.emergency',
+                'managerReviewedBy.personal',
+                'managerReviewedBy.contact',
+                'managerReviewedBy.employment.office',
+                'managerReviewedBy.employment.position',
+                'managerReviewedBy.employment.department',
+                'managerReviewedBy.emergency',
 
-                'claimItems.rejectedBy.personal',
-                'claimItems.rejectedBy.contact',
-                'claimItems.rejectedBy.employment.office',
-                'claimItems.rejectedBy.employment.position',
-                'claimItems.rejectedBy.employment.department',
-                'claimItems.rejectedBy.emergency',
+                'directorReviewedBy.personal',
+                'directorReviewedBy.contact',
+                'directorReviewedBy.employment.office',
+                'directorReviewedBy.employment.position',
+                'directorReviewedBy.employment.department',
+                'directorReviewedBy.emergency',
 
-                'claimItems.releasedBy.personal',
-                'claimItems.releasedBy.contact',
-                'claimItems.releasedBy.employment.office',
-                'claimItems.releasedBy.employment.position',
-                'claimItems.releasedBy.employment.department',
-                'claimItems.releasedBy.emergency',
+                'claimItems.managerActionBy.personal',
+                'claimItems.managerActionBy.contact',
+                'claimItems.managerActionBy.employment.office',
+                'claimItems.managerActionBy.employment.position',
+                'claimItems.managerActionBy.employment.department',
+                'claimItems.managerActionBy.emergency',
+
+                'claimItems.directorActionBy.personal',
+                'claimItems.directorActionBy.contact',
+                'claimItems.directorActionBy.employment.office',
+                'claimItems.directorActionBy.employment.position',
+                'claimItems.directorActionBy.employment.department',
+                'claimItems.directorActionBy.emergency',
             ]);
 
             DB::commit();
@@ -395,6 +371,147 @@ class ClaimHeaderController extends Controller
     public function show(ClaimHeaderShowRequest $request, string $uuid)
     {
         $claim_header = ClaimHeader::findByUuid($uuid);
+
+        return self::response(new ClaimHeaderResource($claim_header));
+    }
+
+    public function managerReview(ClaimHeaderManagerReviewRequest $request, string $uuid)
+    {
+        try {
+            $claim_header = ClaimHeader::findByUuid($uuid);
+
+            $manager = User::findByUuid(self::auth()->uuid);
+
+            throw_if($manager->employment?->is_manager != StatusCodeConstants::ACTIVE, AppException::class, 'Manager access only');
+            throw_if($claim_header->manager_reviewed_at, AppException::class, 'Claim already reviewed');
+            throw_if($claim_header->claimItems()->where('manager_action_at', '=', null)->count() > 0, AppException::class, 'Claim item has pending action');
+
+            $claim_header->update([
+                'manager_reviewed_by' => $manager->id,
+                'manager_reviewed_at' => self::currentDateTime(),
+            ]);
+
+            $directors = User::whereHas('employment', function ($query) {
+                $query->where('is_director', '=', StatusCodeConstants::ACTIVE);
+            })
+                ->where('is_active', StatusCodeConstants::ACTIVE)
+                ->pluck('email')
+                ->filter()
+                ->values();
+
+            if ($directors->isNotEmpty())
+            {
+                $data = [
+                    'name' => 'Director',
+                    'applicant_name' => trim(($claim_header->user->personal?->first_name ?? '') . ' ' . ($claim_header->user->personal?->last_name ?? '')) ?: $claim_header->user->email,
+                    'applicant_email' => $claim_header->user->email,
+                    'applicant_phone_number' => $claim_header->user->contact?->phone_number,
+                    'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
+                    'subject' => 'PE Portal - Claim Pending Director Approval',
+                    'claim_header' => $claim_header,
+                    'claim_items' => $claim_header->claimItems()->get(),
+                    'total_amount' => $claim_header->total_amount,
+                ];
+
+                Mail::to($directors ?? [])->send(new ClaimApplicationMail($data));
+            }
+            
+            $claim_header->load([
+                'user.personal',
+                'user.contact',
+                'user.employment.office',
+                'user.employment.position',
+                'user.employment.department',
+                'user.emergency',
+
+                'managerApprover.personal',
+                'managerApprover.contact',
+                'managerApprover.employment.office',
+                'managerApprover.employment.position',
+                'managerApprover.employment.department',
+                'managerApprover.emergency',
+
+                'managerReviewedBy.personal',
+                'managerReviewedBy.contact',
+                'managerReviewedBy.employment.office',
+                'managerReviewedBy.employment.position',
+                'managerReviewedBy.employment.department',
+                'managerReviewedBy.emergency',
+
+                'claimItems.managerActionBy.personal',
+                'claimItems.managerActionBy.contact',
+                'claimItems.managerActionBy.employment.office',
+                'claimItems.managerActionBy.employment.position',
+                'claimItems.managerActionBy.employment.department',
+                'claimItems.managerActionBy.emergency',
+            ]);
+
+            return self::response(new ClaimHeaderResource($claim_header));
+        } catch (\Exception $exception) {
+            DB::rollback();
+            throw $exception;
+        }
+    }
+
+    public function directorReview(ClaimHeaderDirectorReviewRequest $request, string $uuid)
+    {
+        $claim_header = ClaimHeader::findByUuid($uuid);
+
+        $director = User::findByUuid(self::auth()->uuid);
+
+        throw_if($director->employment?->is_director != StatusCodeConstants::ACTIVE, AppException::class, 'Director access only');
+        throw_if($claim_header->manager_reviewed_at == null, AppException::class, 'Manager not yet reviewed');
+        throw_if($claim_header->director_reviewed_at, AppException::class, 'Claim already reviewed');
+        throw_if($claim_header->claimItems()->where('director_action_at', '=', null)->count() > 0, AppException::class, 'Claim item has pending action');
+
+        $claim_header->update([
+            'director_reviewed_by' => $director->id,
+            'director_reviewed_at' => self::currentDateTime(),
+        ]);
+
+        $claim_header->load([
+            'user.personal',
+            'user.contact',
+            'user.employment.office',
+            'user.employment.position',
+            'user.employment.department',
+            'user.emergency',
+
+            'managerApprover.personal',
+            'managerApprover.contact',
+            'managerApprover.employment.office',
+            'managerApprover.employment.position',
+            'managerApprover.employment.department',
+            'managerApprover.emergency',
+
+            'managerReviewedBy.personal',
+            'managerReviewedBy.contact',
+            'managerReviewedBy.employment.office',
+            'managerReviewedBy.employment.position',
+            'managerReviewedBy.employment.department',
+            'managerReviewedBy.emergency',
+
+            'directorReviewedBy.personal',
+            'directorReviewedBy.contact',
+            'directorReviewedBy.employment.office',
+            'directorReviewedBy.employment.position',
+            'directorReviewedBy.employment.department',
+            'directorReviewedBy.emergency',
+
+            'claimItems.managerActionBy.personal',
+            'claimItems.managerActionBy.contact',
+            'claimItems.managerActionBy.employment.office',
+            'claimItems.managerActionBy.employment.position',
+            'claimItems.managerActionBy.employment.department',
+            'claimItems.managerActionBy.emergency',
+
+            'claimItems.directorActionBy.personal',
+            'claimItems.directorActionBy.contact',
+            'claimItems.directorActionBy.employment.office',
+            'claimItems.directorActionBy.employment.position',
+            'claimItems.directorActionBy.employment.department',
+            'claimItems.directorActionBy.emergency',
+        ]);
 
         return self::response(new ClaimHeaderResource($claim_header));
     }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Constants\HttpStatusCodeConstants;
 use App\Http\Controllers\BE\ActivityLogController;
 use App\Http\Controllers\BE\AnnouncementController;
 use App\Http\Controllers\BE\AnnouncementImageController;
@@ -170,13 +169,14 @@ Route::group([
             Route::post('/', [ClaimHeaderController::class, 'store']);
             Route::get('/{uuid}', [ClaimHeaderController::class, 'show']);
             Route::put('/{uuid}', [ClaimHeaderController::class, 'update']);
+            Route::patch('/manager-reviews/{uuid}', [ClaimHeaderController::class, 'managerReview']);
+            Route::patch('/director-reviews/{uuid}', [ClaimHeaderController::class, 'directorReview']);
             Route::patch('/{uuid}', [ClaimHeaderController::class, 'updateStatus']);
         });
 
         Route::prefix('claim-items')->group(function () {
-            Route::patch('/approve/{uuid}', [ClaimItemController::class, 'approve']);
-            Route::patch('/reject/{uuid}', [ClaimItemController::class, 'reject']);
-            Route::patch('/release/{uuid}', [ClaimItemController::class, 'release']);
+            Route::patch('/manager-approves/{uuid}', [ClaimItemController::class, 'managerApprove']);
+            Route::patch('/director-approves/{uuid}', [ClaimItemController::class, 'directorApprove']);
         });
 
 

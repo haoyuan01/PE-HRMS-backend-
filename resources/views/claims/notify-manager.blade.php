@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="https://www.petro-excel.com.my/wp-content/uploads/2018/09/Oil-Drop-Out-line-e1736841035299.png" type="image/png">
+<link rel="icon" href="https://www.petro-excel.com.my/img/Petro-Excel-logo-1.png" type="image/png">
 <title>{{ $data['subject'] }}</title>
 <style>
     /* Mobile responsiveness */
