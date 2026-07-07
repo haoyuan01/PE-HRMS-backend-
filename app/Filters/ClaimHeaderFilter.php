@@ -27,6 +27,11 @@ class ClaimHeaderFilter
             });
         }
 
+        if ($filters->has('is_director') && $filters->is_director >= 0)
+        {
+            $data->where('manager_reviewed_at', '!=', null);
+        }
+
         if ($filters->has('user_office_uuid') && !empty($filters->user_office_uuid))
         {
             $data->whereHas('user.employment.office', function($query) use ($filters) {

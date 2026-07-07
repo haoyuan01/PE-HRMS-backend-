@@ -35,6 +35,7 @@ class ClaimHeaderIndexRequest extends FormRequest
             'end_date'   => ['nullable', 'date', 'after_or_equal:start_date'],
             'created_at_from' => ['nullable', 'date_format:Y-m-d'],
             'created_at_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:created_at_start'],
+            'is_director' => ['nullable', 'integer', 'between:0,1'],
             'is_active' => ['nullable', 'integer', 'between:0,1'],
             'search_words' => ['nullable', 'array'],
             'search_words.*' => ['nullable', 'string', 'regex:' . RegexConstants::DYNAMIC_SEARCH_INJECTION_PROTECTED],
