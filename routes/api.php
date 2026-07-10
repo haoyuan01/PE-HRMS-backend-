@@ -14,6 +14,7 @@ use App\Http\Controllers\BE\LeavePolicyController;
 use App\Http\Controllers\BE\LeaveRequestController;
 use App\Http\Controllers\BE\LookupController;
 use App\Http\Controllers\BE\OfficeController;
+use App\Http\Controllers\BE\OvertimeController;
 use App\Http\Controllers\BE\RoleController;
 use App\Http\Controllers\BE\PositionController;
 use App\Http\Controllers\BE\RequestLogController;
@@ -189,6 +190,14 @@ Route::group([
             Route::patch('/manager-approves/{uuid}', [LeaveRequestController::class, 'managerApprove']);
             Route::patch('/director-approves/{uuid}', [LeaveRequestController::class, 'directorApprove']);
             Route::patch('/{uuid}', [LeaveRequestController::class, 'updateStatus']);
+        });
+
+        Route::prefix('overtimes')->group(function () {
+            Route::get('/', [OvertimeController::class, 'index']);
+            Route::post('/', [OvertimeController::class, 'store']);
+            Route::get('/{uuid}', [OvertimeController::class, 'show']);
+            Route::put('/{uuid}', [OvertimeController::class, 'update']);
+            Route::patch('/{uuid}', [OvertimeController::class, 'updateStatus']);
         });
 
         Route::prefix('claim-headers')->group(function () {
