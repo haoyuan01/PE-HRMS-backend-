@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FE\AuthControllerFE;
+use App\Http\Controllers\FE\LeaveRequestControllerFE;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -21,5 +22,8 @@ Route::group([
     Route::get('/reset-passcode', [AuthControllerFE::class, 'resetPasscode']);
     Route::get('/reset-passcode-success', [AuthControllerFE::class, 'resetPasscodeSuccess']);
     Route::post('/reset-passcode', [AuthControllerFE::class, 'resetPasscodeAction']);
+    Route::get('/leave-request-review', [LeaveRequestControllerFE::class, 'handover']);
+    Route::post('/leave-request-review', [LeaveRequestControllerFE::class, 'handoverAction']);
+    Route::get('/leave-request-review-success', [LeaveRequestControllerFE::class, 'handoverSuccess']);
 
 });

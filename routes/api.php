@@ -9,6 +9,9 @@ use App\Http\Controllers\BE\ClaimItemController;
 use App\Http\Controllers\BE\ConfigurationController;
 use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\ErrorLogController;
+use App\Http\Controllers\BE\LeaveEntitlementController;
+use App\Http\Controllers\BE\LeavePolicyController;
+use App\Http\Controllers\BE\LeaveRequestController;
 use App\Http\Controllers\BE\LookupController;
 use App\Http\Controllers\BE\OfficeController;
 use App\Http\Controllers\BE\RoleController;
@@ -162,6 +165,30 @@ Route::group([
 
         Route::prefix('upcoming-event-images')->group(function () {
             Route::patch('/{uuid}', [UpcomingEventImageController::class, 'updateStatus']);
+        });
+
+        Route::prefix('leave-policies')->group(function () {
+            Route::get('/', [LeavePolicyController::class, 'index']);
+            Route::post('/', [LeavePolicyController::class, 'store']);
+            Route::get('/{uuid}', [LeavePolicyController::class, 'show']);
+            Route::put('/{uuid}', [LeavePolicyController::class, 'update']);
+            Route::patch('/{uuid}', [LeavePolicyController::class, 'updateStatus']);
+        });
+
+        Route::prefix('leave-entitlements')->group(function () {
+            Route::get('/', [LeaveEntitlementController::class, 'index']);
+            Route::get('/{uuid}', [LeaveEntitlementController::class, 'show']);
+            Route::put('/{uuid}', [LeaveEntitlementController::class, 'update']);
+        });
+
+        Route::prefix('leave-requests')->group(function () {
+            Route::get('/', [LeaveRequestController::class, 'index']);
+            Route::post('/', [LeaveRequestController::class, 'store']);
+            Route::get('/{uuid}', [LeaveRequestController::class, 'show']);
+            Route::put('/{uuid}', [LeaveRequestController::class, 'update']);
+            Route::patch('/manager-approves/{uuid}', [LeaveRequestController::class, 'managerApprove']);
+            Route::patch('/director-approves/{uuid}', [LeaveRequestController::class, 'directorApprove']);
+            Route::patch('/{uuid}', [LeaveRequestController::class, 'updateStatus']);
         });
 
         Route::prefix('claim-headers')->group(function () {

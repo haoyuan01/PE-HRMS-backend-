@@ -129,5 +129,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserEmergency::class, 'user_id', 'id')->active();
     }
+
+    public function leaveEntitlements()
+    {
+        return $this->hasMany(LeaveEntitlement::class, 'user_id', 'id')->active();
+    }
     
 }

@@ -13,11 +13,14 @@ use App\Http\Requests\UserUpdatePasswordRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateStatusRequest;
 use App\Http\Resources\UserResource;
+use App\Models\LeaveEntitlement;
+use App\Models\LeavePolicy;
 use App\Models\Department;
 use App\Models\Office;
 use App\Models\Position;
 use App\Models\Role;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -143,6 +146,8 @@ class UserController extends Controller
                 ]);
             }
 
+            $user_employment = null;
+
             // create employment
             if ($request->has('employment') && $request->input('employment'))
             {
@@ -165,7 +170,7 @@ class UserController extends Controller
                     $department = Department::findByUuid($request->input('employment.department_uuid'), false);
                 }
 
-                $user->employment()->create([
+                $user_employment = $user->employment()->create([
                     'uuid' => self::uuid(),
                     'user_id' => $user->id,
                     'position_id' => $position?->id,
@@ -181,6 +186,63 @@ class UserController extends Controller
                     'updated_by' => self::auth()->uuid,
                     'updated_at' => self::currentDateTime(),
                 ]);
+            }
+
+            // create leave entitlement
+            $year = self::currentDateTime()->format('Y');
+            $years_of_service = $user_employment?->joined_date ? Carbon::parse($user_employment->joined_date)->diffInYears(self::currentDateTime()) : 0;
+            $leave_policies = LeavePolicy::with(['leavePolicyTiers'])->active()->get();
+
+            foreach($leave_policies as $leave_policy)
+            {
+                $leave_policy_tier = $leave_policy->leavePolicyTiers
+                    ->where('service_year_from', '<=', $years_of_service)
+                    ->filter(function($tier) use ($years_of_service) {
+                        return $tier->service_year_to === null || $tier->service_year_to > $years_of_service;
+                    })
+                    ->first();
+
+                if (!$leave_policy_tier)
+                {
+                    $leave_policy_tier = $leave_policy->leavePolicyTiers->first();
+                }
+
+                $entitled_days = $leave_policy_tier?->entitlement_days ?? 0;
+                $carry_forward_expiry_date = null;
+
+                if ($leave_policy->carry_forward_expiry_month && $leave_policy->carry_forward_expiry_date)
+                {
+                    $carry_forward_expiry_month = Carbon::create($year + 1, $leave_policy->carry_forward_expiry_month, 1);
+                    $carry_forward_expiry_date = $carry_forward_expiry_month
+                        ->copy()
+                        ->day(min($leave_policy->carry_forward_expiry_date, $carry_forward_expiry_month->daysInMonth))
+                        ->format('Y-m-d');
+                }
+
+                $leave_entitlement = LeaveEntitlement::where('user_id', $user->id)
+                    ->where('leave_policy_id', $leave_policy->id)
+                    ->where('year', $year)
+                    ->first();
+
+                if (!$leave_entitlement)
+                {
+                    LeaveEntitlement::create([
+                        'uuid' => self::uuid(),
+                        'user_id' => $user->id,
+                        'leave_policy_id' => $leave_policy->id,
+                        'year' => $year,
+                        'entitled_days' => $entitled_days,
+                        'used_days' => 0,
+                        'balance_days' => $entitled_days,
+                        'carried_forward_days' => 0,
+                        'carry_forward_expiry_date' => $carry_forward_expiry_date,
+                        'is_active' => StatusCodeConstants::ACTIVE,
+                        'created_by' => self::auth()->uuid,
+                        'created_at' => self::currentDateTime(),
+                        'updated_by' => self::auth()->uuid,
+                        'updated_at' => self::currentDateTime(),
+                    ]);
+                }
             }
 
             $user->load(['personal', 'employment', 'contact', 'emergency', 'roles.permissions']);
