@@ -99,6 +99,7 @@ class LeaveEntitlementController extends Controller
                     $entitled_days = $leave_policy_tier?->entitlement_days ?? 0;
                     $carry_forward_expiry_date = null;
 
+                    // alternative solution
                     if ($leave_policy->carry_forward_expiry_month && $leave_policy->carry_forward_expiry_date)
                     {
                         $carry_forward_expiry_month = Carbon::create($year + 1, $leave_policy->carry_forward_expiry_month, 1);
@@ -107,6 +108,27 @@ class LeaveEntitlementController extends Controller
                             ->day(min($leave_policy->carry_forward_expiry_date, $carry_forward_expiry_month->daysInMonth))
                             ->format('Y-m-d');
                     }
+
+                    // if ($leave_policy->carry_forward_expiry_month && $leave_policy->carry_forward_expiry_date)
+                    // {
+                    //     $expiry_year = $year + 1;
+                    //     $expiry_month = (int) $leave_policy->carry_forward_expiry_month;
+                    //     $requested_day = (int) $leave_policy->carry_forward_expiry_date;
+
+                    //     $last_day_of_month = Carbon::create($expiry_year, $expiry_month, 1)->endOfMonth()->day;
+
+                    //     if ($requested_day > $last_day_of_month)
+                    //     {
+                    //         $requested_day = $last_day_of_month;
+                    //     }
+
+                    //     if ($requested_day < 1)
+                    //     {
+                    //         $requested_day = 1;
+                    //     }
+
+                    //     $carry_forward_expiry_date = Carbon::createSafe($expiry_year, $expiry_month, $requested_day)->format('Y-m-d');
+                    // }
 
                     $leave_entitlement = LeaveEntitlement::where('user_id', $user->id)
                         ->where('leave_policy_id', $leave_policy->id)
