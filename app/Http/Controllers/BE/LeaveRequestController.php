@@ -88,10 +88,13 @@ class LeaveRequestController extends Controller
 
         $leave_policy = $leave_entitlement->leavePolicy;
         $is_handover_required = $leave_policy?->is_handover_required == StatusCodeConstants::ACTIVE && $request->total_days >= ($leave_policy->handover_min_days ?? 0);
+        $notice_days = self::currentDateTime()->startOfDay()->diffInDays(\Carbon\Carbon::parse($request->start_date)->startOfDay(), false);
 
         throw_if($leave_entitlement->user_id != $user->id, AppException::class, 'Invalid leave entitlement');
         throw_if($leave_entitlement->balance_days < $request->total_days, AppException::class, 'Insufficient leave balance');
+        throw_if($notice_days < ($leave_policy->min_notice_days ?? 0), AppException::class, 'Minimum notice days is not fulfilled');
         throw_if($is_handover_required && !$request->handover_by_uuid, AppException::class, 'Handover is required');
+        throw_if($leave_policy->requires_attachment == StatusCodeConstants::ACTIVE && !$request->hasFile('attachment'), AppException::class, 'Attachment is required');
 
         DB::beginTransaction();
 
