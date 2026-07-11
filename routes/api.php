@@ -184,6 +184,8 @@ Route::group([
 
         Route::prefix('leave-requests')->group(function () {
             Route::get('/', [LeaveRequestController::class, 'index']);
+            Route::get('/calendar-summaries', [LeaveRequestController::class, 'calendarSummaries']);
+            Route::get('/status-summaries', [LeaveRequestController::class, 'statusSummaries']);
             Route::post('/', [LeaveRequestController::class, 'store']);
             Route::get('/{uuid}', [LeaveRequestController::class, 'show']);
             Route::put('/{uuid}', [LeaveRequestController::class, 'update']);

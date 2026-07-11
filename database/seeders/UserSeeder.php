@@ -264,6 +264,48 @@ class UserSeeder extends Seeder
                     'name' => 'Delete Claim Header',
                     'module' => 'claim',
                 ],
+
+                // leave policy
+                [
+                    'code' => 'leave_policy_read',
+                    'name' => 'Read Leave Policy',
+                    'module' => 'leave_policy',
+                ],
+                [
+                    'code' => 'leave_policy_create',
+                    'name' => 'Create Leave Policy',
+                    'module' => 'leave_policy',
+                ],
+                [
+                    'code' => 'leave_policy_update',
+                    'name' => 'Update Leave Policy',
+                    'module' => 'leave_policy',
+                ],
+                [
+                    'code' => 'leave_policy_delete',
+                    'name' => 'Delete Leave Policy',
+                    'module' => 'leave_policy',
+                ],
+                [
+                    'code' => 'leave_entitlement_read',
+                    'name' => 'Read Leave Entitlement',
+                    'module' => 'leave_entitlement',
+                ],
+                [
+                    'code' => 'leave_entitlement_create',
+                    'name' => 'Create Leave Entitlement',
+                    'module' => 'leave_entitlement',
+                ],
+                [
+                    'code' => 'leave_entitlement_update',
+                    'name' => 'Update Leave Entitlement',
+                    'module' => 'leave_entitlement',
+                ],
+                [
+                    'code' => 'leave_entitlement_delete',
+                    'name' => 'Delete Leave Entitlement',
+                    'module' => 'leave_entitlement',
+                ],
             ];
 
             $roles = [

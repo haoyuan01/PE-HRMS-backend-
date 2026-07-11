@@ -6,6 +6,7 @@ use App\Constants\StatusCodeConstants;
 use App\Exceptions\AppException;
 use App\Filters\LeaveRequestFilter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LeaveRequestCalendarSummaryRequest;
 use App\Http\Requests\LeaveRequestDirectorApproveRequest;
 use App\Http\Requests\LeaveRequestIndexRequest;
 use App\Http\Requests\LeaveRequestManagerApproveRequest;
@@ -18,6 +19,7 @@ use App\Mail\LeaveApplicationMail;
 use App\Models\LeaveEntitlement;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
@@ -376,6 +378,96 @@ class LeaveRequestController extends Controller
         $leave_request = LeaveRequest::findByUuid($uuid);
 
         return self::response(new LeaveRequestResource($leave_request));
+    }
+
+    public function calendarSummaries(LeaveRequestCalendarSummaryRequest $request)
+    {
+        $start_date = Carbon::parse($request->start_date)->startOfDay();
+        $end_date = Carbon::parse($request->end_date)->endOfDay();
+
+        $leave_requests = LeaveRequest::with([
+            'user.personal',
+            'user.contact',
+            'user.employment.office',
+            'user.employment.position',
+            'user.employment.department',
+            'user.emergency',
+
+            'managerApprover.personal',
+            'managerApprover.contact',
+            'managerApprover.employment.office',
+            'managerApprover.employment.position',
+            'managerApprover.employment.department',
+            'managerApprover.emergency',
+
+            'leaveEntitlement.leavePolicy.leavePolicyTiers',
+
+            'managerActionBy.personal',
+            'managerActionBy.contact',
+            'managerActionBy.employment.office',
+            'managerActionBy.employment.position',
+            'managerActionBy.employment.department',
+            'managerActionBy.emergency',
+
+            'directorActionBy.personal',
+            'directorActionBy.contact',
+            'directorActionBy.employment.office',
+            'directorActionBy.employment.position',
+            'directorActionBy.employment.department',
+            'directorActionBy.emergency',
+
+            'handoverBy.personal',
+            'handoverBy.contact',
+            'handoverBy.employment.office',
+            'handoverBy.employment.position',
+            'handoverBy.employment.department',
+            'handoverBy.emergency',
+        ])
+            ->whereBetween('created_at', [$start_date, $end_date])
+            ->active()
+            ->get()
+            ->groupBy(function ($leave_request) {
+                return Carbon::parse($leave_request->created_at)->format('Y-m-d');
+            });
+
+        $data = [];
+        $date = $start_date->copy();
+
+        while($date->lte($end_date))
+        {
+            $date_key = $date->format('Y-m-d');
+            $daily_leave_requests = $leave_requests->get($date_key, collect());
+
+            $data[$date_key] = [
+                'date' => $date_key,
+                'total' => $daily_leave_requests->count(),
+                'leave_requests' => LeaveRequestResource::collection($daily_leave_requests),
+            ];
+
+            $date->addDay();
+        }
+
+        return self::response($data);
+    }
+
+    public function statusSummaries()
+    {
+        $data = [
+            'total' => LeaveRequest::active()->count(),
+            'pending' => LeaveRequest::active()
+                ->whereNull('director_action_at')
+                ->count(),
+            'approved' => LeaveRequest::active()
+                ->whereNotNull('director_action_at')
+                ->where('director_approved', StatusCodeConstants::ACTIVE)
+                ->count(),
+            'rejected' => LeaveRequest::active()
+                ->whereNotNull('director_action_at')
+                ->where('director_approved', StatusCodeConstants::INACTIVE)
+                ->count(),
+        ];
+
+        return self::response($data);
     }
 
     public function managerApprove(LeaveRequestManagerApproveRequest $request, string $uuid)
