@@ -33,8 +33,6 @@ class OvertimeUpdateRequest extends FormRequest
             'uuid' => ['required', 'string', 'uuid'],
             'manager_approver_uuid' => ['required', 'string', 'uuid'],
             'description' => ['nullable', 'string'],
-            'start_datetime' => ['required', 'date'],
-            'end_datetime' => ['required', 'date', 'after_or_equal:start_datetime'],
             'total_days' => ['nullable', 'numeric', 'min:0'],
             'attachment' => [
                 'nullable',

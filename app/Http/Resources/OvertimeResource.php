@@ -25,8 +25,6 @@ class OvertimeResource extends JsonResource
             'manager_approved' => $this->manager_approved,
             'manager_remark' => $this->manager_remark,
             'description' => $this->description,
-            'start_datetime' => Carbon::parse($this->start_datetime)->utc(),
-            'end_datetime' => Carbon::parse($this->end_datetime)->utc(),
             'total_days' => $this->total_days,
             'attachment_path' => $this->attachment_path ? asset(Storage::url($this->attachment_path)) : null,
             'is_active' => $this->is_active,

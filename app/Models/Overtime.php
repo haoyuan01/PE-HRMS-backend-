@@ -17,8 +17,6 @@ class Overtime extends Model
     protected $casts = [
         'manager_action_at' => 'datetime:Y-m-d H:i:s.u',
         'manager_approved' => 'boolean',
-        'start_datetime' => 'datetime:Y-m-d H:i:s.u',
-        'end_datetime' => 'datetime:Y-m-d H:i:s.u',
         'is_active' => 'boolean',
         'created_at' => 'datetime:Y-m-d H:i:s.u',
         'updated_at' => 'datetime:Y-m-d H:i:s.u',
@@ -33,8 +31,6 @@ class Overtime extends Model
         'manager_approved',
         'manager_remark',
         'description',
-        'start_datetime',
-        'end_datetime',
         'total_days',
         'attachment_path',
         'is_active',

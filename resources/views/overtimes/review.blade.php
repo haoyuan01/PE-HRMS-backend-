@@ -48,10 +48,14 @@
 
             <div class="detail-box">
                 <div><strong>Applicant:</strong> {{ $overtime->user->email }}</div>
-                <div><strong>Start Date Time:</strong> {{ \Carbon\Carbon::parse($overtime->start_datetime)->format('Y-m-d h:i:s A') }}</div>
-                <div><strong>End Date Time:</strong> {{ \Carbon\Carbon::parse($overtime->end_datetime)->format('Y-m-d h:i:s A') }}</div>
                 <div><strong>Total Days:</strong> {{ number_format($overtime->total_days, 2) }}</div>
                 <div><strong>Description:</strong> {{ $overtime->description ?: '-' }}</div>
+                @if($overtime->attachment_path)
+                    <div>
+                        <strong>Attachment:</strong>
+                        <a href="{{ asset(\Illuminate\Support\Facades\Storage::url($overtime->attachment_path)) }}" target="_blank" style="color:#17a2b8; text-decoration:none; font-weight:600;">View Attachment</a>
+                    </div>
+                @endif
             </div>
 
             <form method="POST" action="{{ $action_url }}">

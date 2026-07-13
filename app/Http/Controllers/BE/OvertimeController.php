@@ -16,7 +16,6 @@ use App\Http\Resources\OvertimeResource;
 use App\Mail\OvertimeApplicationMail;
 use App\Models\Overtime;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
@@ -81,9 +80,7 @@ class OvertimeController extends Controller
                 'user_id' => $user->id,
                 'manager_approver_id' => $manager_approver->id,
                 'description' => $request->description,
-                'start_datetime' => $request->start_datetime,
-                'end_datetime' => $request->end_datetime,
-                'total_days' => $request->total_days ?? $this->calculateTotalDays($request->start_datetime, $request->end_datetime),
+                'total_days' => $request->total_days ?? null,
                 'attachment_path' => $attachment_path,
                 'is_active' => StatusCodeConstants::ACTIVE,
                 'created_by' => self::auth()->uuid,
@@ -154,9 +151,7 @@ class OvertimeController extends Controller
                 'user_id' => $user->id,
                 'manager_approver_id' => $manager_approver->id,
                 'description' => $request->description,
-                'start_datetime' => $request->start_datetime,
-                'end_datetime' => $request->end_datetime,
-                'total_days' => $request->total_days ?? $this->calculateTotalDays($request->start_datetime, $request->end_datetime),
+                'total_days' => $request->total_days ?? null,
                 'attachment_path' => $attachment_path ? $attachment_path : $overtime->attachment_path,
                 'updated_by' => self::auth()->uuid,
                 'updated_at' => self::currentDateTime(),
@@ -259,11 +254,6 @@ class OvertimeController extends Controller
         return self::response(new OvertimeResource($overtime));
     }
 
-    private function calculateTotalDays($start_datetime, $end_datetime)
-    {
-        return round(Carbon::parse($start_datetime)->diffInMinutes(Carbon::parse($end_datetime)) / 1440, 2);
-    }
-
     private function sendManagerEmail($overtime, $manager_approver)
     {
         $token = Password::createToken($manager_approver);
@@ -275,7 +265,7 @@ class OvertimeController extends Controller
             'applicant_phone_number' => $overtime->user->contact?->phone_number,
             'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
             'subject' => 'PE Portal - Overtime Pending Manager Approval',
-            'title' => 'Overtime Pending Manager Approval',
+            'title' => 'Overtime Manager Approval',
             'overtime' => $overtime,
             'action_url' => url('/overtime-review?token=' . $token . '&email=' . urlencode($manager_approver->email) . '&overtime_uuid=' . $overtime->uuid),
             'action_label' => 'Review Overtime',

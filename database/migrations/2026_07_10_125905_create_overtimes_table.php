@@ -24,9 +24,7 @@ return new class extends Migration
             $table->text('manager_remark')->nullable();
 
             $table->text('description')->nullable();
-            $table->dateTime('start_datetime', 6);
-            $table->dateTime('end_datetime', 6);
-            $table->decimal('total_days', 8, 2)->default(0);
+            $table->decimal('total_days', 8, 2)->nullable();
             $table->string('attachment_path')->nullable();
             $table->boolean('is_active')->default(1);
             $table->string('created_by', 350);

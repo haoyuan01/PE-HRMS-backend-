@@ -71,21 +71,19 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">
-                                    <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Start Date Time</div>
-                                    <div style="font-size:15px; font-weight:600; color:#111827;">{{ \Carbon\Carbon::parse($data['overtime']->start_datetime)->format('Y-m-d h:i:s A') }}</div>
-                                </td>
-                                <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">
-                                    <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">End Date Time</div>
-                                    <div style="font-size:15px; font-weight:600; color:#111827;">{{ \Carbon\Carbon::parse($data['overtime']->end_datetime)->format('Y-m-d h:i:s A') }}</div>
-                                </td>
-                            </tr>
-                            <tr>
                                 <td colspan="2" style="padding:14px 16px; background:#f9fafb;">
                                     <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Description</div>
                                     <div style="font-size:14px; line-height:1.5; color:#111827;">{{ $data['overtime']->description ?: '-' }}</div>
                                 </td>
                             </tr>
+                            @if($data['overtime']->attachment_path)
+                                <tr>
+                                    <td colspan="2" style="padding:14px 16px; background:#ffffff;">
+                                        <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Attachment</div>
+                                        <a href="{{ asset(\Illuminate\Support\Facades\Storage::url($data['overtime']->attachment_path)) }}" target="_blank" style="color:#17a2b8; text-decoration:none; font-size:14px; font-weight:600;">View Attachment</a>
+                                    </td>
+                                </tr>
+                            @endif
                         </table>
 
                         @if(isset($data['action_url']) && $data['action_url'])

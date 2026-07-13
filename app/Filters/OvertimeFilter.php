@@ -81,17 +81,6 @@ class OvertimeFilter
             });
         }
 
-        if ($filters->filled('start_datetime') && $filters->filled('end_datetime'))
-        {
-            $data->where(function ($q) use ($filters) {
-                if ($filters->start_datetime && $filters->end_datetime)
-                {
-                    $q->where('start_datetime', '<=', $filters->end_datetime)
-                        ->where('end_datetime', '>=', $filters->start_datetime);
-                }
-            });
-        }
-
         if ($filters->has('is_active') && $filters->is_active >= 0)
         {
             $data->where('is_active', "$filters->is_active");
