@@ -26,6 +26,7 @@ class OvertimeIndexRequest extends FormRequest
         return [
             'uuid' => ['nullable', 'string', 'uuid'],
             'user_uuid' => ['nullable', 'string', 'uuid'],
+            'manager_approver_uuid' => ['nullable', 'string', 'uuid'],
             'user_name' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'email' => ['nullable', 'string', 'regex:' . RegexConstants::EMAIL],
             'company_email' => ['nullable', 'string', 'regex:' . RegexConstants::EMAIL],
