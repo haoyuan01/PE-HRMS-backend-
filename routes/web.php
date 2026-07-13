@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\FE\AuthControllerFE;
 use App\Http\Controllers\FE\LeaveRequestControllerFE;
+use App\Http\Controllers\FE\OvertimeControllerFE;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -25,5 +26,8 @@ Route::group([
     Route::get('/leave-request-review', [LeaveRequestControllerFE::class, 'handover']);
     Route::post('/leave-request-review', [LeaveRequestControllerFE::class, 'handoverAction']);
     Route::get('/leave-request-review-success', [LeaveRequestControllerFE::class, 'handoverSuccess']);
+    Route::get('/overtime-review', [OvertimeControllerFE::class, 'review']);
+    Route::post('/overtime-review', [OvertimeControllerFE::class, 'reviewAction']);
+    Route::get('/overtime-review-success', [OvertimeControllerFE::class, 'reviewSuccess']);
 
 });

@@ -14,8 +14,16 @@ return new class extends Migration
         Schema::create('overtimes', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->text('description')->nullable();
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('manager_approver_id');
+
+            // manager
+            $table->unsignedBigInteger('manager_action_by')->nullable();
+            $table->dateTime('manager_action_at', 6)->nullable();
+            $table->boolean('manager_approved')->default(0);
+            $table->text('manager_remark')->nullable();
+
+            $table->text('description')->nullable();
             $table->dateTime('start_datetime', 6);
             $table->dateTime('end_datetime', 6);
             $table->decimal('total_days', 8, 2)->default(0);
@@ -25,6 +33,10 @@ return new class extends Migration
             $table->dateTime('created_at', 6);
             $table->string('updated_by', 350);
             $table->dateTime('updated_at', 6);
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('manager_approver_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('manager_action_by')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

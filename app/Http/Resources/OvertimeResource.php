@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class OvertimeResource extends JsonResource
 {
@@ -18,11 +19,16 @@ class OvertimeResource extends JsonResource
         $data = [
             'uuid' => $this->uuid,
             'user' => new UserResource($this->whenLoaded('user')),
+            'manager_approver' => new UserResource($this->whenLoaded('managerApprover')),
+            'manager_action_by' => new UserResource($this->whenLoaded('managerActionBy')),
+            'manager_action_at' => $this->manager_action_at ? Carbon::parse($this->manager_action_at)->utc() : null,
+            'manager_approved' => $this->manager_approved,
+            'manager_remark' => $this->manager_remark,
             'description' => $this->description,
             'start_datetime' => Carbon::parse($this->start_datetime)->utc(),
             'end_datetime' => Carbon::parse($this->end_datetime)->utc(),
             'total_days' => $this->total_days,
-            'attachment_path' => $this->attachment_path,
+            'attachment_path' => $this->attachment_path ? asset(Storage::url($this->attachment_path)) : null,
             'is_active' => $this->is_active,
             'created_by' => $this->created_by,
             'created_at' => Carbon::parse($this->created_at)->utc(),

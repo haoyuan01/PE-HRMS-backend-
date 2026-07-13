@@ -15,6 +15,8 @@ class Overtime extends Model
     protected $table = 'overtimes';
     public $timestamps = false;
     protected $casts = [
+        'manager_action_at' => 'datetime:Y-m-d H:i:s.u',
+        'manager_approved' => 'boolean',
         'start_datetime' => 'datetime:Y-m-d H:i:s.u',
         'end_datetime' => 'datetime:Y-m-d H:i:s.u',
         'is_active' => 'boolean',
@@ -25,6 +27,11 @@ class Overtime extends Model
     protected $fillable = [
         'uuid',
         'user_id',
+        'manager_approver_id',
+        'manager_action_by',
+        'manager_action_at',
+        'manager_approved',
+        'manager_remark',
         'description',
         'start_datetime',
         'end_datetime',
@@ -57,6 +64,18 @@ class Overtime extends Model
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
+            'managerApprover.personal',
+            'managerApprover.contact',
+            'managerApprover.employment.office',
+            'managerApprover.employment.position',
+            'managerApprover.employment.department',
+            'managerApprover.emergency',
+            'managerActionBy.personal',
+            'managerActionBy.contact',
+            'managerActionBy.employment.office',
+            'managerActionBy.employment.position',
+            'managerActionBy.employment.department',
+            'managerActionBy.emergency',
         ])->where('uuid', $uuid)
             ->active();
 
@@ -74,5 +93,15 @@ class Overtime extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function managerApprover()
+    {
+        return $this->belongsTo(User::class, 'manager_approver_id', 'id')->active();
+    }
+
+    public function managerActionBy()
+    {
+        return $this->belongsTo(User::class, 'manager_action_by', 'id')->active();
     }
 }
