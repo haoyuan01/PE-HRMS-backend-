@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\BE;
 
 use App\Constants\StatusCodeConstants;
+use App\Exceptions\AppException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserIndexRequest;
 use App\Filters\UserFilter;
@@ -151,6 +152,10 @@ class UserController extends Controller
             // create employment
             if ($request->has('employment') && $request->input('employment'))
             {
+                $position_count = ($request->input('employment.is_director') ? 1 : 0) + ($request->input('employment.is_manager') ? 1 : 0) + ($request->input('employment.is_accountant') ? 1 : 0);
+
+                throw_if($position_count > 1, AppException::class, 'User can only have one position');
+
                 $office = null;
                 $position = null;
                 $department = null;
@@ -397,6 +402,10 @@ class UserController extends Controller
             // update employment
             if ($request->has('employment') && $request->input('employment'))
             {
+                $position_count = ($request->input('employment.is_director') ? 1 : 0) + ($request->input('employment.is_manager') ? 1 : 0) + ($request->input('employment.is_accountant') ? 1 : 0);
+
+                throw_if($position_count > 1, AppException::class, 'User can only have one position');
+
                 $office = null;
                 $position = null;
                 $department = null;

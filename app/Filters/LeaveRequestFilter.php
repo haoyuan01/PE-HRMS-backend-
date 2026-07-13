@@ -38,9 +38,7 @@ class LeaveRequestFilter
 
         if ($filters->has('is_director') && $filters->is_director >= 0)
         {
-            $data->whereHas('user.employment', function($query) use ($filters) {
-                $query->where('is_director', "$filters->is_director");
-            });
+            $data->where('manager_action_at', '!=', null);
         }
 
         if ($filters->has('created_at_from') && $filters->has('created_at_to'))

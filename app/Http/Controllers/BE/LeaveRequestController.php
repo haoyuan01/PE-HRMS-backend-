@@ -11,6 +11,7 @@ use App\Http\Requests\LeaveRequestDirectorApproveRequest;
 use App\Http\Requests\LeaveRequestIndexRequest;
 use App\Http\Requests\LeaveRequestManagerApproveRequest;
 use App\Http\Requests\LeaveRequestShowRequest;
+use App\Http\Requests\LeaveRequestStatusSummaryRequest;
 use App\Http\Requests\LeaveRequestStoreRequest;
 use App\Http\Requests\LeaveRequestUpdateRequest;
 use App\Http\Requests\LeaveRequestUpdateStatusRequest;
@@ -450,18 +451,27 @@ class LeaveRequestController extends Controller
         return self::response($data);
     }
 
-    public function statusSummaries()
+    public function statusSummaries(LeaveRequestStatusSummaryRequest $request)
     {
+        $leave_request = LeaveRequest::active();
+
+        if ($request->user_uuid)
+        {
+            $user = User::findByUuid($request->user_uuid);
+
+            $leave_request->where('user_id', $user->id);
+        }
+
         $data = [
-            'total' => LeaveRequest::active()->count(),
-            'pending' => LeaveRequest::active()
+            'total' => (clone $leave_request)->count(),
+            'pending' => (clone $leave_request)
                 ->whereNull('director_action_at')
                 ->count(),
-            'approved' => LeaveRequest::active()
+            'approved' => (clone $leave_request)
                 ->whereNotNull('director_action_at')
                 ->where('director_approved', StatusCodeConstants::ACTIVE)
                 ->count(),
-            'rejected' => LeaveRequest::active()
+            'rejected' => (clone $leave_request)
                 ->whereNotNull('director_action_at')
                 ->where('director_approved', StatusCodeConstants::INACTIVE)
                 ->count(),
