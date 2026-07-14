@@ -23,9 +23,11 @@ Route::group([
     Route::get('/reset-passcode', [AuthControllerFE::class, 'resetPasscode']);
     Route::get('/reset-passcode-success', [AuthControllerFE::class, 'resetPasscodeSuccess']);
     Route::post('/reset-passcode', [AuthControllerFE::class, 'resetPasscodeAction']);
-    Route::get('/leave-request-review', [LeaveRequestControllerFE::class, 'handover']);
-    Route::post('/leave-request-review', [LeaveRequestControllerFE::class, 'handoverAction']);
-    Route::get('/leave-request-review-success', [LeaveRequestControllerFE::class, 'handoverSuccess']);
+
+    Route::get('/leave-request-review', [LeaveRequestControllerFE::class, 'approveLeave']);
+    Route::post('/leave-request-review', [LeaveRequestControllerFE::class, 'approveLeaveAction']);
+    Route::get('/leave-request-review-success', [LeaveRequestControllerFE::class, 'approveLeaveSuccess']);
+    
     Route::get('/overtime-review', [OvertimeControllerFE::class, 'review']);
     Route::post('/overtime-review', [OvertimeControllerFE::class, 'reviewAction']);
     Route::get('/overtime-review-success', [OvertimeControllerFE::class, 'reviewSuccess']);

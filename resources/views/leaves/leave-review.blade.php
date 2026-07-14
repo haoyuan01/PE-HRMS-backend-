@@ -42,7 +42,9 @@
         <div class="divider"></div>
 
         <div class="content">
-            <h2>Leave Review</h2>
+            <h2>
+                {{ $title }}
+            </h2>
 
             <p>Hello <strong>{{ $name }}</strong>,</p>
             <p>Please accept or reject the leave request below.</p>

@@ -145,6 +145,7 @@ class LeaveRequestController extends Controller
                     'applicant_phone_number' => $user->contact?->phone_number,
                     'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
                     'subject' => 'PE Portal - Leave Pending Handover Approval',
+                    'title' => 'Leave Handover Approval',
                     'leave_request' => $leave_request,
                     'leave_entitlement' => $leave_entitlement,
                     'action_url' => url('/leave-request-review?token=' . $token . '&email=' . urlencode($handover_by->email) . '&leave_request_uuid=' . $leave_request->uuid),
@@ -162,6 +163,7 @@ class LeaveRequestController extends Controller
                     'applicant_phone_number' => $user->contact?->phone_number,
                     'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
                     'subject' => 'PE Portal - Leave Pending Manager Approval',
+                    'title' => 'Leave Manager Approval',
                     'leave_request' => $leave_request,
                     'leave_entitlement' => $leave_entitlement,
                     'action_url' => url('/leave-request-review?token=' . Password::createToken($manager_approver) . '&email=' . urlencode($manager_approver->email) . '&leave_request_uuid=' . $leave_request->uuid . '&type=manager'),
@@ -276,6 +278,7 @@ class LeaveRequestController extends Controller
                     'applicant_phone_number' => $user->contact?->phone_number,
                     'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
                     'subject' => 'PE Portal - Leave Pending Handover Approval',
+                    'title' => 'Leave Handover Approval',
                     'leave_request' => $leave_request,
                     'leave_entitlement' => $leave_entitlement,
                     'action_url' => url('/leave-request-review?token=' . $token . '&email=' . urlencode($handover_by->email) . '&leave_request_uuid=' . $leave_request->uuid),
@@ -293,6 +296,7 @@ class LeaveRequestController extends Controller
                     'applicant_phone_number' => $user->contact?->phone_number,
                     'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
                     'subject' => 'PE Portal - Leave Pending Manager Approval',
+                    'title' => 'Leave Manager Approval',
                     'leave_request' => $leave_request,
                     'leave_entitlement' => $leave_entitlement,
                     'action_url' => url('/leave-request-review?token=' . Password::createToken($new_manager) . '&email=' . urlencode($new_manager->email) . '&leave_request_uuid=' . $leave_request->uuid . '&type=manager'),
@@ -491,47 +495,60 @@ class LeaveRequestController extends Controller
         throw_if($leave_request->manager_approver_id != $manager->id, AppException::class, 'Invalid manager approver');
         throw_if($leave_request->handover_by && $leave_request->handover_action_at == null, AppException::class, 'Handover not yet approved or rejected');
         throw_if($leave_request->handover_by && $leave_request->handover_approved != StatusCodeConstants::ACTIVE, AppException::class, 'Handover not approved');
+        throw_if($request->approve && $this->availableLeaveDays($leave_request->leaveEntitlement) < $leave_request->total_days, AppException::class, 'Insufficient leave balance');
 
-        $leave_request->update([
-            'manager_action_by' => $manager->id,
-            'manager_action_at' => self::currentDateTime(),
-            'manager_approved' => $request->approve ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
-            'manager_remark' => $request->remark,
-        ]);
+        try {
 
-        if ($request->approve)
-        {
-            $directors = User::whereHas('employment', function ($query) {
-                $query->where('is_director', '=', StatusCodeConstants::ACTIVE);
-            })
-                ->where('is_active', StatusCodeConstants::ACTIVE)
-                ->get();
+            DB::beginTransaction();
 
-            if ($directors->isNotEmpty())
+            $leave_request->update([
+                'manager_action_by' => $manager->id,
+                'manager_action_at' => self::currentDateTime(),
+                'manager_approved' => $request->approve ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                'manager_remark' => $request->remark,
+            ]);
+
+            if ($request->approve)
             {
-                foreach($directors as $director)
-                {
-                    $data = [
-                        'name' => trim(($director->personal?->first_name ?? '') . ' ' . ($director->personal?->last_name ?? '')) ?: $director->email,
-                        'applicant_name' => trim(($leave_request->user->personal?->first_name ?? '') . ' ' . ($leave_request->user->personal?->last_name ?? '')) ?: $leave_request->user->email,
-                        'applicant_email' => $leave_request->user->email,
-                        'applicant_phone_number' => $leave_request->user->contact?->phone_number,
-                        'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
-                        'subject' => 'PE Portal - Leave Pending Director Approval',
-                        'leave_request' => $leave_request,
-                        'leave_entitlement' => $leave_request->leaveEntitlement,
-                        'action_url' => url('/leave-request-review?token=' . Password::createToken($director) . '&email=' . urlencode($director->email) . '&leave_request_uuid=' . $leave_request->uuid . '&type=director'),
-                        'action_label' => 'Review Leave',
-                    ];
+                $directors = User::whereHas('employment', function ($query) {
+                    $query->where('is_director', '=', StatusCodeConstants::ACTIVE);
+                })
+                    ->where('is_active', StatusCodeConstants::ACTIVE)
+                    ->get();
 
-                    Mail::to($director->email)->send(new LeaveApplicationMail($data));
+                if ($directors->isNotEmpty())
+                {
+                    foreach($directors as $director)
+                    {
+                        $data = [
+                            'name' => trim(($director->personal?->first_name ?? '') . ' ' . ($director->personal?->last_name ?? '')) ?: $director->email,
+                            'applicant_name' => trim(($leave_request->user->personal?->first_name ?? '') . ' ' . ($leave_request->user->personal?->last_name ?? '')) ?: $leave_request->user->email,
+                            'applicant_email' => $leave_request->user->email,
+                            'applicant_phone_number' => $leave_request->user->contact?->phone_number,
+                            'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
+                            'subject' => 'PE Portal - Leave Pending Director Approval',
+                            'title' => 'Leave Pending Director Approval',
+                            'leave_request' => $leave_request,
+                            'leave_entitlement' => $leave_request->leaveEntitlement,
+                            'handover_remark' => $leave_request->handover_remark,
+                            'manager_remark' => $leave_request->manager_remark,
+                            'action_url' => url('/leave-request-review?token=' . Password::createToken($director) . '&email=' . urlencode($director->email) . '&leave_request_uuid=' . $leave_request->uuid . '&type=director'),
+                            'action_label' => 'Review Leave',
+                        ];
+
+                        Mail::to($director->email)->send(new LeaveApplicationMail($data));
+                    }
                 }
             }
+
+            $leave_request = LeaveRequest::findByUuid($uuid);
+
+            return self::response(new LeaveRequestResource($leave_request));
+
+        } catch (\Exception $exception) {
+            DB::rollback();
+            throw $exception;
         }
-
-        $leave_request = LeaveRequest::findByUuid($uuid);
-
-        return self::response(new LeaveRequestResource($leave_request));
     }
 
     public function directorApprove(LeaveRequestDirectorApproveRequest $request, string $uuid)
@@ -547,6 +564,7 @@ class LeaveRequestController extends Controller
             throw_if($leave_request->manager_action_at == null, AppException::class, 'Manager not yet approved or rejected');
             throw_if($leave_request->manager_approved != StatusCodeConstants::ACTIVE, AppException::class, 'Manager not approved');
             throw_if($leave_request->director_action_at, AppException::class, 'Leave request already reviewed by director');
+            throw_if($request->approve && $this->availableLeaveDays($leave_request->leaveEntitlement) < $leave_request->total_days, AppException::class, 'Insufficient leave balance');
 
             $leave_request->update([
                 'director_action_by' => $director->id,
@@ -559,17 +577,7 @@ class LeaveRequestController extends Controller
             {
                 $leave_entitlement = $leave_request->leaveEntitlement;
 
-                throw_if($leave_entitlement->balance_days < $leave_request->total_days, AppException::class, 'Insufficient leave balance');
-
-                $used_days = $leave_entitlement->used_days + $leave_request->total_days;
-                $balance_days = $leave_entitlement->balance_days - $leave_request->total_days;
-
-                $leave_entitlement->update([
-                    'used_days' => $used_days,
-                    'balance_days' => $balance_days,
-                    'updated_by' => self::auth()->uuid,
-                    'updated_at' => self::currentDateTime(),
-                ]);
+                $this->deductLeaveDays($leave_entitlement, $leave_request->total_days, self::auth()->uuid);
             }
 
             $leave_request = LeaveRequest::findByUuid($uuid);
@@ -582,5 +590,38 @@ class LeaveRequestController extends Controller
             DB::rollback();
             throw $exception;
         }
+    }
+
+    private function availableLeaveDays($leave_entitlement)
+    {
+        $carried_forward_days = 0;
+
+        if ($leave_entitlement->carry_forward_expiry_date && Carbon::parse($leave_entitlement->carry_forward_expiry_date)->endOfDay()->gte(self::currentDateTime()))
+        {
+            $carried_forward_days = $leave_entitlement->carried_forward_days;
+        }
+
+        return $leave_entitlement->balance_days + $carried_forward_days;
+    }
+
+    private function deductLeaveDays($leave_entitlement, $total_days, $updated_by)
+    {
+        $carried_forward_days = 0;
+
+        if ($leave_entitlement->carry_forward_expiry_date && Carbon::parse($leave_entitlement->carry_forward_expiry_date)->endOfDay()->gte(self::currentDateTime()))
+        {
+            $carried_forward_days = $leave_entitlement->carried_forward_days;
+        }
+
+        $deduct_carried_forward_days = min($carried_forward_days, $total_days);
+        $remaining_days = $total_days - $deduct_carried_forward_days;
+
+        $leave_entitlement->update([
+            'used_days' => $leave_entitlement->used_days + $total_days,
+            'carried_forward_days' => $leave_entitlement->carried_forward_days - $deduct_carried_forward_days,
+            'balance_days' => $leave_entitlement->balance_days - $remaining_days,
+            'updated_by' => $updated_by,
+            'updated_at' => self::currentDateTime(),
+        ]);
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Requests\LeaveRequestHandoverActionFE;
 use App\Mail\LeaveApplicationMail;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -19,7 +20,7 @@ class LeaveRequestControllerFE extends Controller
     {
     }
 
-    public function handover(Request $request)
+    public function approveLeave(Request $request)
     {
         $token = $request->query('token');
         $email = $request->query('email');
@@ -45,7 +46,13 @@ class LeaveRequestControllerFE extends Controller
             return view('leaves.leave-review-invalid');
         }
 
+        if ($this->availableLeaveDays($leave_request->leaveEntitlement) < $leave_request->total_days)
+        {
+            return view('leaves.leave-insufficient');
+        }
+
         return view('leaves.leave-review', [
+            'title' => $type == 'handover' ? 'Handover Leave Review' : ($type == 'manager' ? 'Manager Leave Review' : 'Director Leave Review'),
             'token' => $token,
             'email' => $email,
             'leave_request_uuid' => $leave_request_uuid,
@@ -58,7 +65,7 @@ class LeaveRequestControllerFE extends Controller
         ]);
     }
 
-    public function handoverAction(LeaveRequestHandoverActionFE $request)
+    public function approveLeaveAction(LeaveRequestHandoverActionFE $request)
     {
         $user = User::findByEmail($request->email, false);
 
@@ -74,11 +81,18 @@ class LeaveRequestControllerFE extends Controller
             return view('leaves.leave-review-invalid');
         }
 
+        $type = $request->type ?? 'handover';
+
+        if ($type == 'director' && $request->approve && $this->availableLeaveDays($leave_request->leaveEntitlement) < $leave_request->total_days)
+        {
+            return view('leaves.leave-insufficient');
+        }
+
         DB::beginTransaction();
 
         try {
-            $type = $request->type ?? 'handover';
-
+            Password::deleteToken($user);
+            
             if ($type == 'handover')
             {
                 $leave_request->update([
@@ -98,8 +112,10 @@ class LeaveRequestControllerFE extends Controller
                         'applicant_phone_number' => $leave_request->user->contact?->phone_number,
                         'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
                         'subject' => 'PE Portal - Leave Pending Manager Approval',
+                        'title' => 'Leave Pending Manager Approval',
                         'leave_request' => $leave_request,
                         'leave_entitlement' => $leave_request->leaveEntitlement,
+                        'handover_remark' => $leave_request->handover_remark,
                         'action_url' => url('/leave-request-review?token=' . Password::createToken($leave_request->managerApprover) . '&email=' . urlencode($leave_request->managerApprover->email) . '&leave_request_uuid=' . $leave_request->uuid . '&type=manager'),
                         'action_label' => 'Review Leave',
                     ];
@@ -135,8 +151,11 @@ class LeaveRequestControllerFE extends Controller
                             'applicant_phone_number' => $leave_request->user->contact?->phone_number,
                             'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
                             'subject' => 'PE Portal - Leave Pending Director Approval',
+                            'title' => 'Leave Pending Director Approval',
                             'leave_request' => $leave_request,
                             'leave_entitlement' => $leave_request->leaveEntitlement,
+                            'handover_remark' => $leave_request->handover_remark,
+                            'manager_remark' => $leave_request->manager_remark,
                             'action_url' => url('/leave-request-review?token=' . Password::createToken($director) . '&email=' . urlencode($director->email) . '&leave_request_uuid=' . $leave_request->uuid . '&type=director'),
                             'action_label' => 'Review Leave',
                         ];
@@ -160,16 +179,9 @@ class LeaveRequestControllerFE extends Controller
                 {
                     $leave_entitlement = $leave_request->leaveEntitlement;
 
-                    $leave_entitlement->update([
-                        'used_days' => $leave_entitlement->used_days + $leave_request->total_days,
-                        'balance_days' => $leave_entitlement->balance_days - $leave_request->total_days,
-                        'updated_by' => $user->uuid,
-                        'updated_at' => self::currentDateTime(),
-                    ]);
+                    $this->deductLeaveDays($leave_entitlement, $leave_request->total_days, $user->uuid);
                 }
             }
-
-            Password::deleteToken($user);
 
             DB::commit();
 
@@ -181,8 +193,41 @@ class LeaveRequestControllerFE extends Controller
         }
     }
 
-    public function handoverSuccess()
+    public function approveLeaveSuccess()
     {
         return view('leaves.leave-review-success');
+    }
+
+    private function availableLeaveDays($leave_entitlement)
+    {
+        $carried_forward_days = 0;
+
+        if ($leave_entitlement->carry_forward_expiry_date && Carbon::parse($leave_entitlement->carry_forward_expiry_date)->endOfDay()->gte(self::currentDateTime()))
+        {
+            $carried_forward_days = $leave_entitlement->carried_forward_days;
+        }
+
+        return $leave_entitlement->balance_days + $carried_forward_days;
+    }
+
+    private function deductLeaveDays($leave_entitlement, $total_days, $updated_by)
+    {
+        $carried_forward_days = 0;
+
+        if ($leave_entitlement->carry_forward_expiry_date && Carbon::parse($leave_entitlement->carry_forward_expiry_date)->endOfDay()->gte(self::currentDateTime()))
+        {
+            $carried_forward_days = $leave_entitlement->carried_forward_days;
+        }
+
+        $deduct_carried_forward_days = min($carried_forward_days, $total_days);
+        $remaining_days = $total_days - $deduct_carried_forward_days;
+
+        $leave_entitlement->update([
+            'used_days' => $leave_entitlement->used_days + $total_days,
+            'carried_forward_days' => $leave_entitlement->carried_forward_days - $deduct_carried_forward_days,
+            'balance_days' => $leave_entitlement->balance_days - $remaining_days,
+            'updated_by' => $updated_by,
+            'updated_at' => self::currentDateTime(),
+        ]);
     }
 }

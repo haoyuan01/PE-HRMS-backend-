@@ -68,7 +68,7 @@
                     <td class="content" style="padding: 40px; color: #374151;">
 
                         <h2 style="margin: 0 0 20px 0; font-size: 20px; color: #111827; font-weight: 600; text-align: center;">
-                            Leave Pending Approval
+                            {{ $data['title'] }}
                         </h2>
 
                         <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.5;">
@@ -121,6 +121,22 @@
                                     <div style="font-size:14px; line-height:1.5; color:#111827;">{{ $data['leave_request']->reason ?: '-' }}</div>
                                 </td>
                             </tr>
+                            @if(isset($data['handover_remark']) && $data['handover_remark'])
+                                <tr>
+                                    <td colspan="2" style="padding:14px 16px; background:#ffffff; border-top:1px solid #e5e7eb;">
+                                        <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Handover Remark</div>
+                                        <div style="font-size:14px; line-height:1.5; color:#111827;">{{ $data['handover_remark'] }}</div>
+                                    </td>
+                                </tr>
+                            @endif
+                            @if(isset($data['manager_remark']) && $data['manager_remark'])
+                                <tr>
+                                    <td colspan="2" style="padding:14px 16px; background:#ffffff; border-top:1px solid #e5e7eb;">
+                                        <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Manager Remark</div>
+                                        <div style="font-size:14px; line-height:1.5; color:#111827;">{{ $data['manager_remark'] }}</div>
+                                    </td>
+                                </tr>
+                            @endif
                         </table>
 
                         @if(isset($data['action_url']) && $data['action_url'])
