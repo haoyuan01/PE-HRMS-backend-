@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FE\AuthControllerFE;
+use App\Http\Controllers\FE\ClaimHeaderControllerFE;
 use App\Http\Controllers\FE\LeaveRequestControllerFE;
 use App\Http\Controllers\FE\OvertimeControllerFE;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,10 @@ Route::group([
     Route::get('/leave-request-review', [LeaveRequestControllerFE::class, 'approveLeave']);
     Route::post('/leave-request-review', [LeaveRequestControllerFE::class, 'approveLeaveAction']);
     Route::get('/leave-request-review-success', [LeaveRequestControllerFE::class, 'approveLeaveSuccess']);
+
+    Route::get('/claim-header-review', [ClaimHeaderControllerFE::class, 'reviewClaim']);
+    Route::post('/claim-header-review', [ClaimHeaderControllerFE::class, 'reviewClaimAction']);
+    Route::get('/claim-header-review-success', [ClaimHeaderControllerFE::class, 'reviewClaimSuccess']);
     
     Route::get('/overtime-review', [OvertimeControllerFE::class, 'review']);
     Route::post('/overtime-review', [OvertimeControllerFE::class, 'reviewAction']);

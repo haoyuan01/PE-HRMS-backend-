@@ -20,6 +20,7 @@ use App\Models\ClaimItem;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 
 class ClaimHeaderController extends Controller
 {
@@ -142,15 +143,18 @@ class ClaimHeaderController extends Controller
             if ($request->manager_approver_uuid)
             {
                 $data = [
-                    'name' => 'Manager',
+                    'name' => trim(($manager_approver->personal?->first_name ?? '') . ' ' . ($manager_approver->personal?->last_name ?? '')) ?: $manager_approver->email,
                     'applicant_name' => trim(($user->personal?->first_name ?? '') . ' ' . ($user->personal?->last_name ?? '')) ?: $user->email,
                     'applicant_email' => $user->email,
                     'applicant_phone_number' => $user->contact?->phone_number,
                     'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
                     'subject' => 'PE Portal - Claim Pending Manager Approval',
+                    'title' => 'Claim Pending Manager Approval',
                     'claim_header' => $claim_header,
                     'claim_items' => $claim_header->claimItems()->get(),
                     'total_amount' => $total_amount,
+                    'action_url' => url('/claim-header-review?token=' . Password::createToken($manager_approver) . '&email=' . urlencode($manager_approver->email) . '&claim_header_uuid=' . $claim_header->uuid . '&type=manager'),
+                    'action_label' => 'Review Claim',
                 ];
 
                 Mail::to($manager_approver->email)->send(new ClaimApplicationMail($data));
@@ -283,9 +287,12 @@ class ClaimHeaderController extends Controller
                     'applicant_phone_number' => $user->contact?->phone_number,
                     'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
                     'subject' => 'PE Portal - Claim Pending Manager Approval',
+                    'title' => 'Claim Pending Manager Approval',
                     'claim_header' => $claim_header,
                     'claim_items' => $claim_header->claimItems()->get(),
                     'total_amount' => $total_amount,
+                    'action_url' => url('/claim-header-review?token=' . Password::createToken($new_manager) . '&email=' . urlencode($new_manager->email) . '&claim_header_uuid=' . $claim_header->uuid . '&type=manager'),
+                    'action_label' => 'Review Claim',
                 ];
 
                 Mail::to($new_manager->email)->send(new ClaimApplicationMail($data));
@@ -377,6 +384,8 @@ class ClaimHeaderController extends Controller
 
     public function managerReview(ClaimHeaderManagerReviewRequest $request, string $uuid)
     {
+        DB::beginTransaction();
+
         try {
             $claim_header = ClaimHeader::findByUuid($uuid);
 
@@ -389,31 +398,37 @@ class ClaimHeaderController extends Controller
             $claim_header->update([
                 'manager_reviewed_by' => $manager->id,
                 'manager_reviewed_at' => self::currentDateTime(),
+                'updated_by' => self::auth()->uuid,
+                'updated_at' => self::currentDateTime(),
             ]);
 
             $directors = User::whereHas('employment', function ($query) {
                 $query->where('is_director', '=', StatusCodeConstants::ACTIVE);
             })
                 ->where('is_active', StatusCodeConstants::ACTIVE)
-                ->pluck('email')
-                ->filter()
-                ->values();
+                ->get();
 
             if ($directors->isNotEmpty())
             {
-                $data = [
-                    'name' => 'Director',
-                    'applicant_name' => trim(($claim_header->user->personal?->first_name ?? '') . ' ' . ($claim_header->user->personal?->last_name ?? '')) ?: $claim_header->user->email,
-                    'applicant_email' => $claim_header->user->email,
-                    'applicant_phone_number' => $claim_header->user->contact?->phone_number,
-                    'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
-                    'subject' => 'PE Portal - Claim Pending Director Approval',
-                    'claim_header' => $claim_header,
-                    'claim_items' => $claim_header->claimItems()->get(),
-                    'total_amount' => $claim_header->total_amount,
-                ];
+                foreach($directors as $director)
+                {
+                    $data = [
+                        'name' => trim(($director->personal?->first_name ?? '') . ' ' . ($director->personal?->last_name ?? '')) ?: $director->email,
+                        'applicant_name' => trim(($claim_header->user->personal?->first_name ?? '') . ' ' . ($claim_header->user->personal?->last_name ?? '')) ?: $claim_header->user->email,
+                        'applicant_email' => $claim_header->user->email,
+                        'applicant_phone_number' => $claim_header->user->contact?->phone_number,
+                        'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
+                        'subject' => 'PE Portal - Claim Pending Director Approval',
+                        'title' => 'Claim Pending Director Approval',
+                        'claim_header' => $claim_header,
+                        'claim_items' => $claim_header->claimItems()->get(),
+                        'total_amount' => $claim_header->total_amount,
+                        'action_url' => url('/claim-header-review?token=' . Password::createToken($director) . '&email=' . urlencode($director->email) . '&claim_header_uuid=' . $claim_header->uuid . '&type=director'),
+                        'action_label' => 'Review Claim',
+                    ];
 
-                Mail::to($directors ?? [])->send(new ClaimApplicationMail($data));
+                    Mail::to($director->email)->send(new ClaimApplicationMail($data));
+                }
             }
             
             $claim_header->load([
@@ -445,6 +460,8 @@ class ClaimHeaderController extends Controller
                 'claimItems.managerActionBy.employment.department',
                 'claimItems.managerActionBy.emergency',
             ]);
+
+            DB::commit();
 
             return self::response(new ClaimHeaderResource($claim_header));
         } catch (\Exception $exception) {

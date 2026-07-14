@@ -68,7 +68,7 @@
                     <td class="content" style="padding: 40px; color: #374151;">
 
                         <h2 style="margin: 0 0 20px 0; font-size: 20px; color: #111827; font-weight: 600; text-align: center;">
-                            Claim Pending Approval
+                            {{ $data['title'] ?? 'Claim Pending Approval' }}
                         </h2>
 
                         <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.5;">
@@ -134,9 +134,22 @@
                             </tr>
                         </table>
 
-                        <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
-                            Please log in to PE Portal to review the claim application.
-                        </p>
+                        @if(isset($data['action_url']) && $data['action_url'])
+                            <table cellpadding="0" cellspacing="0" align="center" style="margin: 28px auto 0 auto;">
+                                <tr>
+                                    <td align="center" style="background-color:#111827; border-radius:6px;">
+                                        <a href="{{ $data['action_url'] }}"
+                                           style="display:inline-block; padding:13px 24px; color:#ffffff; text-decoration:none; font-size:14px; font-weight:600;">
+                                            {{ $data['action_label'] ?? 'Review Claim' }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        @else
+                            <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
+                                Please log in to PE Portal to review the claim application.
+                            </p>
+                        @endif
 
                     </td>
                 </tr>
