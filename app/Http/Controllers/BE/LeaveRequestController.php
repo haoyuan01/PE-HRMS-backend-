@@ -497,9 +497,9 @@ class LeaveRequestController extends Controller
         throw_if($leave_request->handover_by && $leave_request->handover_approved != StatusCodeConstants::ACTIVE, AppException::class, 'Handover not approved');
         throw_if($request->approve && $this->availableLeaveDays($leave_request->leaveEntitlement) < $leave_request->total_days, AppException::class, 'Insufficient leave balance');
 
-        try {
+        DB::beginTransaction();
 
-            DB::beginTransaction();
+        try {
 
             $leave_request->update([
                 'manager_action_by' => $manager->id,
@@ -543,6 +543,8 @@ class LeaveRequestController extends Controller
 
             $leave_request = LeaveRequest::findByUuid($uuid);
 
+            DB::commit();
+            
             return self::response(new LeaveRequestResource($leave_request));
 
         } catch (\Exception $exception) {
