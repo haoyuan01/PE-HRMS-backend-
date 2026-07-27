@@ -68,7 +68,7 @@ class LeaveRequest extends Model
     public static function findByUuid(string $uuid, bool $fail = true)
     {
         $query = self::with([
-            'leaveRequestDays',
+            'leaveRequestDates',
 
             'user.personal',
             'user.contact',

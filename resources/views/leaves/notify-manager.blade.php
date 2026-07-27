@@ -96,13 +96,38 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">
-                                    <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Start Date</div>
-                                    <div style="font-size:15px; font-weight:600; color:#111827;">{{ \Carbon\Carbon::parse($data['leave_request']->start_date)->format('Y-m-d') }}</div>
-                                </td>
-                                <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">
-                                    <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">End Date</div>
-                                    <div style="font-size:15px; font-weight:600; color:#111827;">{{ \Carbon\Carbon::parse($data['leave_request']->end_date)->format('Y-m-d') }}</div>
+                                <td colspan="2" style="padding:0; border-bottom:1px solid #e5e7eb;">
+                                    <table width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td colspan="3" style="padding:12px 16px; background:#f9fafb; color:#6b7280; font-size:13px; font-weight:600;">
+                                                Applied Dates
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:10px 16px; background:#ffffff; color:#6b7280; font-size:13px; font-weight:600; border-top:1px solid #e5e7eb;">
+                                                Date
+                                            </td>
+                                            <td style="padding:10px 16px; background:#ffffff; color:#6b7280; font-size:13px; font-weight:600; border-top:1px solid #e5e7eb;">
+                                                Duration
+                                            </td>
+                                            <td style="padding:10px 16px; background:#ffffff; color:#6b7280; font-size:13px; font-weight:600; border-top:1px solid #e5e7eb;">
+                                                Session
+                                            </td>
+                                        </tr>
+                                        @foreach($data['leave_request']->leaveRequestDates as $leave_request_date)
+                                            <tr>
+                                                <td style="padding:10px 16px; color:#111827; font-size:14px; border-top:1px solid #e5e7eb;">
+                                                    {{ \Carbon\Carbon::parse($leave_request_date->date)->format('Y-m-d') }}
+                                                </td>
+                                                <td style="padding:10px 16px; color:#111827; font-size:14px; border-top:1px solid #e5e7eb;">
+                                                    {{ $leave_request_date->is_half_day ? 'Half Day' : 'Full Day' }}
+                                                </td>
+                                                <td style="padding:10px 16px; color:#111827; font-size:14px; border-top:1px solid #e5e7eb;">
+                                                    {{ $leave_request_date->is_half_day ? ($leave_request_date->is_first_half ? 'First Half' : 'Second Half') : '-' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </table>
                                 </td>
                             </tr>
                             <tr>
