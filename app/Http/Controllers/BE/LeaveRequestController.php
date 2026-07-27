@@ -15,10 +15,12 @@ use App\Http\Requests\LeaveRequestStatusSummaryRequest;
 use App\Http\Requests\LeaveRequestStoreRequest;
 use App\Http\Requests\LeaveRequestUpdateRequest;
 use App\Http\Requests\LeaveRequestUpdateStatusRequest;
+use App\Http\Resources\LeaveRequestDateResource;
 use App\Http\Resources\LeaveRequestResource;
 use App\Mail\LeaveApplicationMail;
 use App\Models\LeaveEntitlement;
 use App\Models\LeaveRequest;
+use App\Models\LeaveRequestDate;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +36,8 @@ class LeaveRequestController extends Controller
     public function index(LeaveRequestIndexRequest $request)
     {
         $leave_request = LeaveRequest::with([
+            'leaveRequestDates',
+
             'user.personal',
             'user.contact',
             'user.employment.office',
@@ -91,11 +95,14 @@ class LeaveRequestController extends Controller
 
         $leave_policy = $leave_entitlement->leavePolicy;
         $is_handover_required = $leave_policy?->is_handover_required == StatusCodeConstants::ACTIVE && $request->total_days >= ($leave_policy->handover_min_days ?? 0);
-        $notice_days = self::currentDateTime()->startOfDay()->diffInDays(\Carbon\Carbon::parse($request->start_date)->startOfDay(), false);
+        $start_date = collect($request->request_dates)->min('date');
+        $last_date = collect($request->request_dates)->max('date');
+        $notice_days = self::currentDateTime()->startOfDay()->diffInDays(Carbon::parse($start_date)->startOfDay(), false);
 
         throw_if($leave_entitlement->user_id != $user->id, AppException::class, 'Invalid leave entitlement');
-        throw_if($leave_entitlement->balance_days < $request->total_days, AppException::class, 'Insufficient leave balance');
+        throw_if($this->availableLeaveDays($leave_entitlement) < $request->total_days, AppException::class, 'Insufficient leave balance');
         throw_if($notice_days < ($leave_policy->min_notice_days ?? 0), AppException::class, 'Minimum notice days is not fulfilled');
+        throw_if(Carbon::parse($request->resume_date)->startOfDay()->lte(Carbon::parse($last_date)->startOfDay()), AppException::class, 'Resume date must be after the last leave date');
         throw_if($is_handover_required && !$request->handover_by_uuid, AppException::class, 'Handover is required');
         throw_if($leave_policy->requires_attachment == StatusCodeConstants::ACTIVE && !$request->hasFile('attachment'), AppException::class, 'Attachment is required');
 
@@ -119,12 +126,8 @@ class LeaveRequestController extends Controller
                 'manager_approver_id' => $manager_approver->id,
                 'leave_entitlement_id' => $leave_entitlement->id,
                 'handover_by' => $handover_by?->id,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
                 'resume_date' => $request->resume_date,
                 'total_days' => $request->total_days,
-                'is_half_day' => $request->is_half_day ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
-                'is_first_half' => $request->is_first_half ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
                 'reason' => $request->reason,
                 'attachment_url' => $attachment_url,
                 'is_active' => StatusCodeConstants::ACTIVE,
@@ -133,6 +136,25 @@ class LeaveRequestController extends Controller
                 'updated_by' => self::auth()->uuid,
                 'updated_at' => self::currentDateTime(),
             ]);
+
+            if ($request->filled('request_dates') && !empty($request->request_dates))
+            {
+                foreach ($request->request_dates as $request_date)
+                {
+                    LeaveRequestDate::create([
+                        'uuid' => self::uuid(),
+                        'leave_request_id' => $leave_request->id,
+                        'date' => $request_date['date'],
+                        'is_half_day' => isset($request_date['is_half_day']) && $request_date['is_half_day'] ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                        'is_first_half' => isset($request_date['is_first_half']) && $request_date['is_first_half'] ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                        'is_active' => StatusCodeConstants::ACTIVE,
+                        'created_by' => self::auth()->uuid,
+                        'created_at' => self::currentDateTime(),
+                        'updated_by' => self::auth()->uuid,
+                        'updated_at' => self::currentDateTime(),
+                    ]);
+                }
+            }
 
             if ($handover_by)
             {
@@ -174,6 +196,8 @@ class LeaveRequestController extends Controller
             }
 
             $leave_request->load([
+                'leaveRequestDates',
+
                 'user.personal',
                 'user.contact',
                 'user.employment.office',
@@ -226,6 +250,7 @@ class LeaveRequestController extends Controller
         $leave_policy = $leave_entitlement->leavePolicy;
         $is_handover_required = $leave_policy?->is_handover_required == StatusCodeConstants::ACTIVE && $request->total_days >= ($leave_policy->handover_min_days ?? 0);
         $handover_changed = $handover_by?->id != $leave_request->handover_by;
+        $start_date = collect($request->request_dates)->pluck('date')->sort()->first();
 
         throw_if($leave_request->manager_action_at, AppException::class, 'Leave request already reviewed by manager');
         throw_if($leave_request->director_action_at, AppException::class, 'Leave request already reviewed by director');
@@ -233,6 +258,7 @@ class LeaveRequestController extends Controller
         throw_if($new_manager->id != $old_manager_id && $old_manager_id, AppException::class, 'Manager approver already assigned');
         throw_if($leave_entitlement->user_id != $leave_request->user_id, AppException::class, 'Invalid leave entitlement');
         throw_if($leave_entitlement->balance_days < $request->total_days, AppException::class, 'Insufficient leave balance');
+        throw_if(Carbon::parse($request->resume_date)->startOfDay()->lt(Carbon::parse($start_date)->startOfDay()), AppException::class, 'Resume date must be after or equal to leave date');
         throw_if($is_handover_required && !$request->handover_by_uuid, AppException::class, 'Handover is required');
 
         DB::beginTransaction();
@@ -255,17 +281,38 @@ class LeaveRequestController extends Controller
                 'handover_by' => $handover_by?->id,
                 'handover_action_at' => $handover_changed ? null : $leave_request->handover_action_at,
                 'handover_approved' => $handover_changed ? StatusCodeConstants::INACTIVE : $leave_request->handover_approved,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
                 'resume_date' => $request->resume_date,
                 'total_days' => $request->total_days,
-                'is_half_day' => $request->is_half_day ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
-                'is_first_half' => $request->is_first_half ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
                 'reason' => $request->reason,
                 'attachment_url' => $attachment_url ? $attachment_url : $leave_request->attachment_url,
                 'updated_by' => self::auth()->uuid,
                 'updated_at' => self::currentDateTime(),
             ]);
+
+            if ($request->filled('request_dates') && !empty($request->request_dates))
+            {
+                LeaveRequestDate::where('leave_request_id', $leave_request->id)->update([
+                    'is_active' => StatusCodeConstants::INACTIVE,
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ]);
+                
+                foreach ($request->request_dates as $request_date)
+                {
+                    LeaveRequestDate::create([
+                        'uuid' => self::uuid(),
+                        'leave_request_id' => $leave_request->id,
+                        'date' => $request_date['date'],
+                        'is_half_day' => isset($request_date['is_half_day']) && $request_date['is_half_day'] ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                        'is_first_half' => isset($request_date['is_first_half']) && $request_date['is_first_half'] ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+                        'is_active' => StatusCodeConstants::ACTIVE,
+                        'created_by' => self::auth()->uuid,
+                        'created_at' => self::currentDateTime(),
+                        'updated_by' => self::auth()->uuid,
+                        'updated_at' => self::currentDateTime(),
+                    ]);
+                }
+            }
 
             if ($handover_by && $handover_changed)
             {
@@ -307,6 +354,8 @@ class LeaveRequestController extends Controller
             }
 
             $leave_request->load([
+                'leaveRequestDates',
+                
                 'user.personal',
                 'user.contact',
                 'user.employment.office',
@@ -390,49 +439,54 @@ class LeaveRequestController extends Controller
         $start_date = Carbon::parse($request->start_date)->startOfDay();
         $end_date = Carbon::parse($request->end_date)->endOfDay();
 
-        $leave_requests = LeaveRequest::with([
-            'user.personal',
-            'user.contact',
-            'user.employment.office',
-            'user.employment.position',
-            'user.employment.department',
-            'user.emergency',
+        $leave_request_dates = LeaveRequestDate::with([
+            'leaveRequest.leaveRequestDates',
 
-            'managerApprover.personal',
-            'managerApprover.contact',
-            'managerApprover.employment.office',
-            'managerApprover.employment.position',
-            'managerApprover.employment.department',
-            'managerApprover.emergency',
+            'leaveRequest.user.personal',
+            'leaveRequest.user.contact',
+            'leaveRequest.user.employment.office',
+            'leaveRequest.user.employment.position',
+            'leaveRequest.user.employment.department',
+            'leaveRequest.user.emergency',
 
-            'leaveEntitlement.leavePolicy.leavePolicyTiers',
+            'leaveRequest.managerApprover.personal',
+            'leaveRequest.managerApprover.contact',
+            'leaveRequest.managerApprover.employment.office',
+            'leaveRequest.managerApprover.employment.position',
+            'leaveRequest.managerApprover.employment.department',
+            'leaveRequest.managerApprover.emergency',
 
-            'managerActionBy.personal',
-            'managerActionBy.contact',
-            'managerActionBy.employment.office',
-            'managerActionBy.employment.position',
-            'managerActionBy.employment.department',
-            'managerActionBy.emergency',
+            'leaveRequest.leaveEntitlement.leavePolicy.leavePolicyTiers',
 
-            'directorActionBy.personal',
-            'directorActionBy.contact',
-            'directorActionBy.employment.office',
-            'directorActionBy.employment.position',
-            'directorActionBy.employment.department',
-            'directorActionBy.emergency',
+            'leaveRequest.managerActionBy.personal',
+            'leaveRequest.managerActionBy.contact',
+            'leaveRequest.managerActionBy.employment.office',
+            'leaveRequest.managerActionBy.employment.position',
+            'leaveRequest.managerActionBy.employment.department',
+            'leaveRequest.managerActionBy.emergency',
 
-            'handoverBy.personal',
-            'handoverBy.contact',
-            'handoverBy.employment.office',
-            'handoverBy.employment.position',
-            'handoverBy.employment.department',
-            'handoverBy.emergency',
+            'leaveRequest.directorActionBy.personal',
+            'leaveRequest.directorActionBy.contact',
+            'leaveRequest.directorActionBy.employment.office',
+            'leaveRequest.directorActionBy.employment.position',
+            'leaveRequest.directorActionBy.employment.department',
+            'leaveRequest.directorActionBy.emergency',
+
+            'leaveRequest.handoverBy.personal',
+            'leaveRequest.handoverBy.contact',
+            'leaveRequest.handoverBy.employment.office',
+            'leaveRequest.handoverBy.employment.position',
+            'leaveRequest.handoverBy.employment.department',
+            'leaveRequest.handoverBy.emergency',
         ])
-            ->whereBetween('created_at', [$start_date, $end_date])
+            ->whereBetween('date', [$start_date->format('Y-m-d'), $end_date->format('Y-m-d')])
+            ->whereHas('leaveRequest', function ($query) {
+                $query->where('is_active', StatusCodeConstants::ACTIVE);
+            })
             ->active()
             ->get()
-            ->groupBy(function ($leave_request) {
-                return Carbon::parse($leave_request->created_at)->format('Y-m-d');
+            ->groupBy(function ($leave_request_date) {
+                return Carbon::parse($leave_request_date->date)->format('Y-m-d');
             });
 
         $data = [];
@@ -441,13 +495,12 @@ class LeaveRequestController extends Controller
         while($date->lte($end_date))
         {
             $date_key = $date->format('Y-m-d');
-            $daily_leave_requests = $leave_requests->get($date_key, collect());
+            $daily_leave_request_dates = $leave_request_dates->get($date_key, collect());
 
-            $data[$date_key] = [
-                'date' => $date_key,
-                'total' => $daily_leave_requests->count(),
-                'leave_requests' => LeaveRequestResource::collection($daily_leave_requests),
-            ];
+            if ($daily_leave_request_dates->isNotEmpty())
+            {
+                $data[$date_key] = LeaveRequestDateResource::collection($daily_leave_request_dates);
+            }
 
             $date->addDay();
         }

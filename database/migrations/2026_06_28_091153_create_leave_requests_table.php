@@ -37,14 +37,8 @@ return new class extends Migration
             $table->text('handover_remark')->nullable();
 
             // information
-            $table->date('start_date');
-            $table->date('end_date');
             $table->date('resume_date')->nullable();
             $table->decimal('total_days', 8, 2)->default(0);
-
-            // half day
-            $table->boolean('is_half_day')->default(false);
-            $table->boolean('is_first_half')->default(false);
 
             // reason
             $table->text('reason')->nullable();

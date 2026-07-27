@@ -27,12 +27,8 @@ class LeaveRequestResource extends JsonResource
             'director_approved' => $this->director_approved,
             'director_remark' => $this->director_remark,
             'handover_remark' => $this->handover_remark,
-            'start_date' => $this->start_date ? Carbon::parse($this->start_date)->utc() : null,
-            'end_date' => $this->end_date ? Carbon::parse($this->end_date)->utc() : null,
             'resume_date' => $this->resume_date ? Carbon::parse($this->resume_date)->utc() : null,
             'total_days' => $this->total_days,
-            'is_half_day' => $this->is_half_day,
-            'is_first_half' => $this->is_first_half,
             'reason' => $this->reason,
             'attachment_url' => $this->attachment_url ? asset(Storage::url($this->attachment_url)) : null,
             'is_active' => $this->is_active,
@@ -46,6 +42,7 @@ class LeaveRequestResource extends JsonResource
             'manager_action_by' => new UserResource($this->whenLoaded('managerActionBy')),
             'director_action_by' => new UserResource($this->whenLoaded('directorActionBy')),
             'handover_by' => new UserResource($this->whenLoaded('handoverBy')),
+            'leave_request_dates' => LeaveRequestDateResource::collection($this->whenLoaded('leaveRequestDates')),
         ];
 
         return $data;

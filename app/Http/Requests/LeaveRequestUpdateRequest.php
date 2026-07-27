@@ -34,18 +34,18 @@ class LeaveRequestUpdateRequest extends FormRequest
             'manager_approver_uuid' => ['required', 'string', 'uuid'],
             'leave_entitlement_uuid' => ['required', 'string', 'uuid'],
             'handover_by_uuid' => ['nullable', 'string', 'uuid'],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'resume_date' => ['required', 'date', 'after_or_equal:end_date'],
+            'resume_date' => ['required', 'date'],
             'total_days' => ['required', 'numeric', 'min:0'],
-            'is_half_day' => ['nullable', 'boolean'],
-            'is_first_half' => ['nullable', 'boolean'],
             'reason' => ['nullable', 'string'],
             'attachment' => [
                 'nullable',
                 'mimes:' . Configuration::findByKey(ConfigurationCodeConstants::FILE_ALLOWED_TYPES)->value,
                 'max:' . Configuration::findByKey(ConfigurationCodeConstants::FILE_MAX_SIZE_MB)->value * 1024, // size in MB
             ],
+            'request_dates' => ['required', 'array', 'min:1'],
+            'request_dates.*.date' => ['required', 'date', 'distinct', 'before:resume_date'],
+            'request_dates.*.is_half_day' => ['nullable', 'boolean'],
+            'request_dates.*.is_first_half' => ['nullable', 'boolean'],
         ];
     }
 }

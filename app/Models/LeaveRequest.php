@@ -20,11 +20,7 @@ class LeaveRequest extends Model
         'manager_approved' => 'boolean',
         'director_action_at' => 'datetime:Y-m-d H:i:s.u',
         'director_approved' => 'boolean',
-        'start_date' => 'date:Y-m-d',
-        'end_date' => 'date:Y-m-d',
         'resume_date' => 'date:Y-m-d',
-        'is_half_day' => 'boolean',
-        'is_first_half' => 'boolean',
         'is_active' => 'boolean',
         'created_at' => 'datetime:Y-m-d H:i:s.u',
         'updated_at' => 'datetime:Y-m-d H:i:s.u',
@@ -47,12 +43,8 @@ class LeaveRequest extends Model
         'handover_action_at',
         'handover_approved',
         'handover_remark',
-        'start_date',
-        'end_date',
         'resume_date',
         'total_days',
-        'is_half_day',
-        'is_first_half',
         'reason',
         'attachment_url',
         'is_active',
@@ -76,6 +68,8 @@ class LeaveRequest extends Model
     public static function findByUuid(string $uuid, bool $fail = true)
     {
         $query = self::with([
+            'leaveRequestDays',
+
             'user.personal',
             'user.contact',
             'user.employment.office',
@@ -154,5 +148,10 @@ class LeaveRequest extends Model
     public function handoverBy()
     {
         return $this->belongsTo(User::class, 'handover_by', 'id')->active();
+    }
+
+    public function leaveRequestDates()
+    {
+        return $this->hasMany(LeaveRequestDate::class, 'leave_request_id', 'id')->active();
     }
 }
