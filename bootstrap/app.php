@@ -41,6 +41,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        
+        $exceptions->report(function (Throwable $exception): void {
+            ErrorLogService::capture($exception); // Log the exception in error_logs
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -48,8 +52,6 @@ return Application::configure(basePath: dirname(__DIR__))
         |--------------------------------------------------------------------------
         */
         $exceptions->render(function (\Throwable $e, Request $request) {
-            
-            ErrorLogService::capture($e); // Log the exception in error_logs
             
             if (!$request->is('api/*'))
             {
