@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class OvertimeReviewActionFE extends FormRequest
+class OvertimeDirectorApproveRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,6 +13,11 @@ class OvertimeReviewActionFE extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge(['uuid' => $this->route('uuid')]);
     }
 
     /**
@@ -23,10 +28,7 @@ class OvertimeReviewActionFE extends FormRequest
     public function rules(): array
     {
         return [
-            'token' => ['required', 'string'],
-            'email' => ['required', 'email'],
-            'overtime_uuid' => ['nullable', 'string', 'uuid'],
-            'type' => ['nullable', 'string'],
+            'uuid' => ['required', 'exists:overtimes,uuid'],
             'approve' => ['required', 'boolean'],
             'remark' => ['nullable', 'string'],
         ];

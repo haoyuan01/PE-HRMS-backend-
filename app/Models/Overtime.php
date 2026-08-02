@@ -15,6 +15,8 @@ class Overtime extends Model
     protected $table = 'overtimes';
     public $timestamps = false;
     protected $casts = [
+        'director_action_at' => 'datetime:Y-m-d H:i:s.u',
+        'director_approved' => 'boolean',
         'manager_action_at' => 'datetime:Y-m-d H:i:s.u',
         'manager_approved' => 'boolean',
         'is_active' => 'boolean',
@@ -30,6 +32,10 @@ class Overtime extends Model
         'manager_action_at',
         'manager_approved',
         'manager_remark',
+        'director_action_by',
+        'director_action_at',
+        'director_approved',
+        'director_remark',
         'description',
         'total_days',
         'attachment_path',
@@ -72,6 +78,12 @@ class Overtime extends Model
             'managerActionBy.employment.position',
             'managerActionBy.employment.department',
             'managerActionBy.emergency',
+            'directorActionBy.personal',
+            'directorActionBy.contact',
+            'directorActionBy.employment.office',
+            'directorActionBy.employment.position',
+            'directorActionBy.employment.department',
+            'directorActionBy.emergency',
         ])->where('uuid', $uuid)
             ->active();
 
@@ -99,5 +111,10 @@ class Overtime extends Model
     public function managerActionBy()
     {
         return $this->belongsTo(User::class, 'manager_action_by', 'id')->active();
+    }
+
+    public function directorActionBy()
+    {
+        return $this->belongsTo(User::class, 'director_action_by', 'id')->active();
     }
 }

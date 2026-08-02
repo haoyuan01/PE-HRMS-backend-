@@ -53,7 +53,11 @@
                         </p>
 
                         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6;">
-                            An overtime application has been submitted by <strong>{{ $data['applicant_name'] }}</strong> ({{ $data['applicant_email'] }}{{ $data['applicant_phone_number'] ? ', ' . $data['applicant_phone_number'] : '' }}) and is pending your review.
+                            @if(isset($data['is_applicant_notification']) && $data['is_applicant_notification'])
+                                Your overtime application has been {{ $data['status_text'] ?? 'reviewed' }}{{ isset($data['reviewed_by']) && $data['reviewed_by'] ? ' by ' . $data['reviewed_by'] : '' }}.
+                            @else
+                                An overtime application has been submitted by <strong>{{ $data['applicant_name'] }}</strong> ({{ $data['applicant_email'] }}{{ $data['applicant_phone_number'] ? ', ' . $data['applicant_phone_number'] : '' }}) and is {{ $data['status_text'] ?? 'pending your review' }}.
+                            @endif
                         </p>
 
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden;">
@@ -84,6 +88,22 @@
                                     </td>
                                 </tr>
                             @endif
+                            @if(isset($data['manager_remark']) && $data['manager_remark'])
+                                <tr>
+                                    <td colspan="2" style="padding:14px 16px; background:#ffffff; border-top:1px solid #e5e7eb;">
+                                        <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Manager Remark</div>
+                                        <div style="font-size:14px; line-height:1.5; color:#111827;">{{ $data['manager_remark'] }}</div>
+                                    </td>
+                                </tr>
+                            @endif
+                            @if(isset($data['director_remark']) && $data['director_remark'])
+                                <tr>
+                                    <td colspan="2" style="padding:14px 16px; background:#ffffff; border-top:1px solid #e5e7eb;">
+                                        <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Director Remark</div>
+                                        <div style="font-size:14px; line-height:1.5; color:#111827;">{{ $data['director_remark'] }}</div>
+                                    </td>
+                                </tr>
+                            @endif
                         </table>
 
                         @if(isset($data['action_url']) && $data['action_url'])
@@ -98,7 +118,7 @@
                             </table>
                         @else
                             <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
-                                Please log in to PE Portal to review the overtime application.
+                                {{ $data['footer_message'] ?? 'Please log in to PE Portal to review the overtime application.' }}
                             </p>
                         @endif
                     </td>

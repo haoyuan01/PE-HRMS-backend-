@@ -41,7 +41,7 @@
         <div class="divider"></div>
 
         <div class="content">
-            <h2>Overtime Review</h2>
+            <h2>{{ $title }}</h2>
 
             <p>Hello <strong>{{ $name }}</strong>,</p>
             <p>Please accept or reject the overtime request below.</p>
@@ -63,9 +63,10 @@
                 <input type="hidden" name="token" value="{{ $token }}">
                 <input type="hidden" name="email" value="{{ $email }}">
                 <input type="hidden" name="overtime_uuid" value="{{ $overtime_uuid }}">
+                <input type="hidden" name="type" value="{{ $type }}">
 
                 <div class="form-group">
-                    <label for="remark">Manager Remark</label>
+                    <label for="remark">{{ $type == 'manager' ? 'Manager Remark' : 'Director Remark' }}</label>
                     <textarea id="remark" name="remark">{{ old('remark') }}</textarea>
                     @error('remark')
                         <div class="error">{{ $message }}</div>

@@ -30,19 +30,38 @@ class UserSeeder extends Seeder
                 [
                     'email' => 'admin@gmail.com',
                     'password' => '123456',
+                    'is_manager' => StatusCodeConstants::ACTIVE,
+                    'is_director' => StatusCodeConstants::ACTIVE,
+                    'is_accountant' => StatusCodeConstants::ACTIVE,
                 ],
                 [
                     'email' => 'employee@gmail.com',
                     'password' => '123456',
+                    'is_manager' => StatusCodeConstants::INACTIVE,
+                    'is_director' => StatusCodeConstants::INACTIVE,
+                    'is_accountant' => StatusCodeConstants::INACTIVE,
                 ],
             ];
 
             foreach($users as $user)
             {
-                User::create([
+                $user_id = User::create([
                     'uuid'          => (string) Str::uuid(),
                     'email'         => $user['email'],
                     'password'      => bcrypt($user['password']),
+                    'is_active'     => StatusCodeConstants::ACTIVE,
+                    'created_by'    => 'system',
+                    'created_at'    => Carbon::now(),
+                    'updated_by'    => 'system',
+                    'updated_at'    => Carbon::now(),
+                ]);
+
+                UserEmployment::create([
+                    'uuid'          => (string) Str::uuid(),
+                    'user_id'       => $user_id->id,
+                    'is_manager'    => $user['is_manager'],
+                    'is_director'   => $user['is_director'],
+                    'is_accountant' => $user['is_accountant'],
                     'is_active'     => StatusCodeConstants::ACTIVE,
                     'created_by'    => 'system',
                     'created_at'    => Carbon::now(),

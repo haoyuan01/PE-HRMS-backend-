@@ -7,6 +7,7 @@ use App\Exceptions\AppException;
 use App\Filters\OvertimeFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OvertimeIndexRequest;
+use App\Http\Requests\OvertimeDirectorApproveRequest;
 use App\Http\Requests\OvertimeManagerApproveRequest;
 use App\Http\Requests\OvertimeShowRequest;
 use App\Http\Requests\OvertimeStoreRequest;
@@ -49,6 +50,13 @@ class OvertimeController extends Controller
             'managerActionBy.employment.position',
             'managerActionBy.employment.department',
             'managerActionBy.emergency',
+
+            'directorActionBy.personal',
+            'directorActionBy.contact',
+            'directorActionBy.employment.office',
+            'directorActionBy.employment.position',
+            'directorActionBy.employment.department',
+            'directorActionBy.emergency',
         ])->active();
 
         $overtime = $this->overtime_filter->apply($request, $request->size, $overtime);
@@ -110,6 +118,13 @@ class OvertimeController extends Controller
                 'managerActionBy.employment.position',
                 'managerActionBy.employment.department',
                 'managerActionBy.emergency',
+
+                'directorActionBy.personal',
+                'directorActionBy.contact',
+                'directorActionBy.employment.office',
+                'directorActionBy.employment.position',
+                'directorActionBy.employment.department',
+                'directorActionBy.emergency',
             ]);
 
             $this->sendManagerEmail($overtime, $manager_approver);
@@ -178,6 +193,13 @@ class OvertimeController extends Controller
                 'managerActionBy.employment.position',
                 'managerActionBy.employment.department',
                 'managerActionBy.emergency',
+
+                'directorActionBy.personal',
+                'directorActionBy.contact',
+                'directorActionBy.employment.office',
+                'directorActionBy.employment.position',
+                'directorActionBy.employment.department',
+                'directorActionBy.emergency',
             ]);
 
             if ($manager_approver->id != $old_manager_approver_id)
@@ -246,7 +268,45 @@ class OvertimeController extends Controller
 
         if ($request->approve)
         {
-            $this->sendAccountantEmail($overtime);
+            $this->sendDirectorEmail($overtime);
+        }
+        else
+        {
+            $this->sendApplicantEmail($overtime, false, false, $manager);
+        }
+
+        $overtime = Overtime::findByUuid($uuid);
+
+        return self::response(new OvertimeResource($overtime));
+    }
+
+    public function directorApprove(OvertimeDirectorApproveRequest $request, string $uuid)
+    {
+        $overtime = Overtime::findByUuid($uuid);
+
+        $director = User::findByUuid(self::auth()->uuid);
+
+        throw_if($director->employment?->is_director != StatusCodeConstants::ACTIVE, AppException::class, 'Director access only');
+        throw_if($overtime->manager_action_at == null, AppException::class, 'Manager not yet approved or rejected');
+        throw_if($overtime->manager_approved != StatusCodeConstants::ACTIVE, AppException::class, 'Manager not approved');
+        throw_if($overtime->director_action_at, AppException::class, 'Overtime already reviewed by director');
+
+        $overtime->update([
+            'director_action_by' => $director->id,
+            'director_action_at' => self::currentDateTime(),
+            'director_approved' => $request->approve ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
+            'director_remark' => $request->remark,
+            'updated_by' => self::auth()->uuid,
+            'updated_at' => self::currentDateTime(),
+        ]);
+
+        if ($request->approve)
+        {
+            $this->sendApplicantEmail($overtime, true, true, $director);
+        }
+        else
+        {
+            $this->sendApplicantEmail($overtime, false, false, $director);
         }
 
         $overtime = Overtime::findByUuid($uuid);
@@ -256,6 +316,8 @@ class OvertimeController extends Controller
 
     private function sendManagerEmail($overtime, $manager_approver)
     {
+        Password::deleteToken($manager_approver);
+
         $token = Password::createToken($manager_approver);
 
         $data = [
@@ -267,14 +329,46 @@ class OvertimeController extends Controller
             'subject' => 'PE Portal - Overtime Pending Manager Approval',
             'title' => 'Overtime Manager Approval',
             'overtime' => $overtime,
-            'action_url' => url('/overtime-review?token=' . $token . '&email=' . urlencode($manager_approver->email) . '&overtime_uuid=' . $overtime->uuid),
+            'action_url' => url('/overtime-review?token=' . $token . '&email=' . urlencode($manager_approver->email) . '&overtime_uuid=' . $overtime->uuid . '&type=manager'),
             'action_label' => 'Review Overtime',
         ];
 
         Mail::to($manager_approver->email)->send(new OvertimeApplicationMail($data));
     }
 
-    private function sendAccountantEmail($overtime)
+    private function sendDirectorEmail($overtime)
+    {
+        $directors = User::whereHas('employment', function ($query) {
+            $query->where('is_director', '=', StatusCodeConstants::ACTIVE);
+        })
+            ->where('is_active', StatusCodeConstants::ACTIVE)
+            ->get();
+
+        foreach($directors as $director)
+        {
+            Password::deleteToken($director);
+
+            $token = Password::createToken($director);
+
+            $data = [
+                'name' => trim(($director->personal?->first_name ?? '') . ' ' . ($director->personal?->last_name ?? '')) ?: $director->email,
+                'applicant_name' => trim(($overtime->user->personal?->first_name ?? '') . ' ' . ($overtime->user->personal?->last_name ?? '')) ?: $overtime->user->email,
+                'applicant_email' => $overtime->user->email,
+                'applicant_phone_number' => $overtime->user->contact?->phone_number,
+                'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
+                'subject' => 'PE Portal - Overtime Pending Director Approval',
+                'title' => 'Overtime Director Approval',
+                'manager_remark' => $overtime->manager_remark,
+                'overtime' => $overtime,
+                'action_url' => url('/overtime-review?token=' . $token . '&email=' . urlencode($director->email) . '&overtime_uuid=' . $overtime->uuid . '&type=director'),
+                'action_label' => 'Review Overtime',
+            ];
+
+            Mail::to($director->email)->send(new OvertimeApplicationMail($data));
+        }
+    }
+
+    private function sendApplicantEmail($overtime, $approved = true, $cc_accountant = true, $reviewer = null)
     {
         $accountants = User::whereHas('employment', function ($query) {
             $query->where('is_accountant', '=', StatusCodeConstants::ACTIVE);
@@ -282,20 +376,30 @@ class OvertimeController extends Controller
             ->where('is_active', StatusCodeConstants::ACTIVE)
             ->get();
 
-        foreach($accountants as $accountant)
-        {
-            $data = [
-                'name' => trim(($accountant->personal?->first_name ?? '') . ' ' . ($accountant->personal?->last_name ?? '')) ?: $accountant->email,
-                'applicant_name' => trim(($overtime->user->personal?->first_name ?? '') . ' ' . ($overtime->user->personal?->last_name ?? '')) ?: $overtime->user->email,
-                'applicant_email' => $overtime->user->email,
-                'applicant_phone_number' => $overtime->user->contact?->phone_number,
-                'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
-                'subject' => 'PE Portal - Overtime Approved',
-                'title' => 'Overtime Approved',
-                'overtime' => $overtime,
-            ];
+        $data = [
+            'name' => trim(($overtime->user->personal?->first_name ?? '') . ' ' . ($overtime->user->personal?->last_name ?? '')) ?: $overtime->user->email,
+            'applicant_name' => trim(($overtime->user->personal?->first_name ?? '') . ' ' . ($overtime->user->personal?->last_name ?? '')) ?: $overtime->user->email,
+            'applicant_email' => $overtime->user->email,
+            'applicant_phone_number' => $overtime->user->contact?->phone_number,
+            'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
+            'subject' => $approved ? 'PE Portal - Overtime Approved' : 'PE Portal - Overtime Rejected',
+            'title' => $approved ? 'Overtime Approved' : 'Overtime Rejected',
+            'status_text' => $approved ? 'approved' : 'rejected',
+            'reviewed_by' => $reviewer ? trim(($reviewer->personal?->first_name ?? '') . ' ' . ($reviewer->personal?->last_name ?? '')) ?: $reviewer->email : null,
+            'manager_remark' => $overtime->manager_remark,
+            'director_remark' => $overtime->director_remark,
+            'footer_message' => 'Please log in to PE Portal to view the overtime application.',
+            'is_applicant_notification' => true,
+            'overtime' => $overtime,
+        ];
 
-            Mail::to($accountant->email)->send(new OvertimeApplicationMail($data));
+        $mail = Mail::to($overtime->user->email);
+
+        if ($cc_accountant)
+        {
+            $mail->cc($accountants->pluck('email')->filter()->values()->toArray());
         }
+
+        $mail->send(new OvertimeApplicationMail($data));
     }
 }

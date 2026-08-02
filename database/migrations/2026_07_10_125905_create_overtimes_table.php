@@ -23,6 +23,12 @@ return new class extends Migration
             $table->boolean('manager_approved')->default(0);
             $table->text('manager_remark')->nullable();
 
+            // director
+            $table->unsignedBigInteger('director_action_by')->nullable();
+            $table->dateTime('director_action_at', 6)->nullable();
+            $table->boolean('director_approved')->default(0);
+            $table->text('director_remark')->nullable();
+
             $table->text('description')->nullable();
             $table->decimal('total_days', 8, 2)->nullable();
             $table->string('attachment_path')->nullable();
