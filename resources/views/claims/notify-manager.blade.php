@@ -76,23 +76,27 @@
                         </p>
 
                         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6;">
-                            A claim application has been submitted by <strong>{{ $data['applicant_name'] }}</strong> ({{ $data['applicant_email'] }}{{ $data['applicant_phone_number'] ? ', ' . $data['applicant_phone_number'] : '' }}) and is {{ $data['status_text'] ?? 'pending your approval' }}.
+                            @if(isset($data['is_applicant_notification']) && $data['is_applicant_notification'])
+                                Your claim application has been reviewed. Please refer to the claim item status below.
+                            @else
+                                A claim application has been submitted by <strong>{{ $data['applicant_name'] }}</strong> ({{ $data['applicant_email'] }}{{ $data['applicant_phone_number'] ? ', ' . $data['applicant_phone_number'] : '' }}) and is {{ $data['status_text'] ?? 'pending your approval' }}.
+                            @endif
                         </p>
 
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden;">
                             <tr>
-                                <td colspan="3" style="padding:14px 16px; background:#111827; color:#ffffff; font-size:15px; font-weight:600;">
+                                <td colspan="{{ isset($data['show_item_status']) && $data['show_item_status'] ? 4 : 3 }}" style="padding:14px 16px; background:#111827; color:#ffffff; font-size:15px; font-weight:600;">
                                     Claim Details
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="3" style="padding:14px 16px; background:#f9fafb; border-bottom:1px solid #e5e7eb;">
+                                <td colspan="{{ isset($data['show_item_status']) && $data['show_item_status'] ? 4 : 3 }}" style="padding:14px 16px; background:#f9fafb; border-bottom:1px solid #e5e7eb;">
                                     <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Claim</div>
                                     <div style="font-size:15px; font-weight:600; color:#111827;">{{ $data['claim_header']->name }}</div>
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="3" style="padding:14px 16px; background:#f9fafb; border-bottom:1px solid #e5e7eb;">
+                                <td colspan="{{ isset($data['show_item_status']) && $data['show_item_status'] ? 4 : 3 }}" style="padding:14px 16px; background:#f9fafb; border-bottom:1px solid #e5e7eb;">
                                     <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Submitted At</div>
                                     <div style="font-size:15px; font-weight:600; color:#111827;">{{ $data['submitted_at'] }}</div>
                                 </td>
@@ -107,6 +111,11 @@
                                 <td align="right" style="padding:10px 12px; background:#f9fafb; color:#6b7280; font-size:13px; font-weight:600; width:24%;">
                                     Amount
                                 </td>
+                                @if(isset($data['show_item_status']) && $data['show_item_status'])
+                                    <td style="padding:10px 12px; background:#f9fafb; color:#6b7280; font-size:13px; font-weight:600; width:20%;">
+                                        Status
+                                    </td>
+                                @endif
                             </tr>
                             @foreach($data['claim_items'] as $item)
                                 <tr>
@@ -122,10 +131,15 @@
                                     <td align="right" style="padding:12px; color:#111827; font-size:14px; font-weight:600; border-top:1px solid #e5e7eb;">
                                         {{ number_format($item->amount, 2) }}
                                     </td>
+                                    @if(isset($data['show_item_status']) && $data['show_item_status'])
+                                        <td style="padding:12px; color:#111827; font-size:14px; font-weight:600; border-top:1px solid #e5e7eb;">
+                                            {{ $item->director_approved ? 'Approved' : 'Rejected' }}
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                             <tr>
-                                <td colspan="2" align="right" style="padding:14px 12px; background:#f9fafb; color:#111827; font-size:14px; font-weight:600; border-top:1px solid #e5e7eb;">
+                                <td colspan="{{ isset($data['show_item_status']) && $data['show_item_status'] ? 3 : 2 }}" align="right" style="padding:14px 12px; background:#f9fafb; color:#111827; font-size:14px; font-weight:600; border-top:1px solid #e5e7eb;">
                                     Total Amount
                                 </td>
                                 <td align="right" style="padding:14px 12px; background:#f9fafb; color:#111827; font-size:15px; font-weight:700; border-top:1px solid #e5e7eb;">

@@ -498,7 +498,7 @@ class ClaimHeaderController extends Controller
             'director_reviewed_at' => self::currentDateTime(),
         ]);
 
-        $this->sendAccountantEmail($claim_header);
+        $this->sendApplicantEmail($claim_header);
 
         $claim_header->load([
             'user.personal',
@@ -547,7 +547,7 @@ class ClaimHeaderController extends Controller
         return self::response(new ClaimHeaderResource($claim_header));
     }
 
-    private function sendAccountantEmail($claim_header)
+    private function sendApplicantEmail($claim_header)
     {
         $accountants = User::whereHas('employment', function ($query) {
             $query->where('is_accountant', '=', StatusCodeConstants::ACTIVE);
@@ -555,24 +555,23 @@ class ClaimHeaderController extends Controller
             ->where('is_active', StatusCodeConstants::ACTIVE)
             ->get();
 
-        foreach($accountants as $accountant)
-        {
-            $data = [
-                'name' => trim(($accountant->personal?->first_name ?? '') . ' ' . ($accountant->personal?->last_name ?? '')) ?: $accountant->email,
-                'applicant_name' => trim(($claim_header->user->personal?->first_name ?? '') . ' ' . ($claim_header->user->personal?->last_name ?? '')) ?: $claim_header->user->email,
-                'applicant_email' => $claim_header->user->email,
-                'applicant_phone_number' => $claim_header->user->contact?->phone_number,
-                'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
-                'subject' => 'PE Portal - Claim Approved',
-                'title' => 'Claim Approved',
-                'status_text' => 'approved and pending accounting processing',
-                'footer_message' => 'Please log in to PE Portal to process the claim application.',
-                'claim_header' => $claim_header,
-                'claim_items' => $claim_header->claimItems()->get(),
-                'total_amount' => $claim_header->total_amount,
-            ];
+        $data = [
+            'name' => trim(($claim_header->user->personal?->first_name ?? '') . ' ' . ($claim_header->user->personal?->last_name ?? '')) ?: $claim_header->user->email,
+            'applicant_name' => trim(($claim_header->user->personal?->first_name ?? '') . ' ' . ($claim_header->user->personal?->last_name ?? '')) ?: $claim_header->user->email,
+            'applicant_email' => $claim_header->user->email,
+            'applicant_phone_number' => $claim_header->user->contact?->phone_number,
+            'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
+            'subject' => 'PE Portal - Claim Reviewed',
+            'title' => 'Claim Reviewed',
+            'status_text' => 'reviewed',
+            'footer_message' => 'Please log in to PE Portal to view the claim application.',
+            'claim_header' => $claim_header,
+            'claim_items' => $claim_header->claimItems()->get(),
+            'total_amount' => $claim_header->total_amount,
+            'show_item_status' => true,
+            'is_applicant_notification' => true,
+        ];
 
-            Mail::to($accountant->email)->send(new ClaimApplicationMail($data));
-        }
+        Mail::to($claim_header->user->email)->cc($accountants->pluck('email')->filter()->values()->toArray())->send(new ClaimApplicationMail($data));
     }
 }
