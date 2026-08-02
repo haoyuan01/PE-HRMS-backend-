@@ -76,7 +76,7 @@
                         </p>
 
                         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6;">
-                            A claim application has been submitted by <strong>{{ $data['applicant_name'] }}</strong> ({{ $data['applicant_email'] }}{{ $data['applicant_phone_number'] ? ', ' . $data['applicant_phone_number'] : '' }}) and is pending your approval.
+                            A claim application has been submitted by <strong>{{ $data['applicant_name'] }}</strong> ({{ $data['applicant_email'] }}{{ $data['applicant_phone_number'] ? ', ' . $data['applicant_phone_number'] : '' }}) and is {{ $data['status_text'] ?? 'pending your approval' }}.
                         </p>
 
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden;">
@@ -147,7 +147,7 @@
                             </table>
                         @else
                             <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
-                                Please log in to PE Portal to review the claim application.
+                                {{ $data['footer_message'] ?? 'Please log in to PE Portal to review the claim application.' }}
                             </p>
                         @endif
 

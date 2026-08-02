@@ -142,6 +142,10 @@ class ClaimHeaderController extends Controller
 
             if ($request->manager_approver_uuid)
             {
+                Password::deleteToken($manager_approver);
+
+                $token = Password::createToken($manager_approver);
+
                 $data = [
                     'name' => trim(($manager_approver->personal?->first_name ?? '') . ' ' . ($manager_approver->personal?->last_name ?? '')) ?: $manager_approver->email,
                     'applicant_name' => trim(($user->personal?->first_name ?? '') . ' ' . ($user->personal?->last_name ?? '')) ?: $user->email,
@@ -153,7 +157,7 @@ class ClaimHeaderController extends Controller
                     'claim_header' => $claim_header,
                     'claim_items' => $claim_header->claimItems()->get(),
                     'total_amount' => $total_amount,
-                    'action_url' => url('/claim-header-review?token=' . Password::createToken($manager_approver) . '&email=' . urlencode($manager_approver->email) . '&claim_header_uuid=' . $claim_header->uuid . '&type=manager'),
+                    'action_url' => url('/claim-header-review?token=' . $token . '&email=' . urlencode($manager_approver->email) . '&claim_header_uuid=' . $claim_header->uuid . '&type=manager'),
                     'action_label' => 'Review Claim',
                 ];
 
@@ -279,7 +283,11 @@ class ClaimHeaderController extends Controller
             ]);
 
             if ($request->manager_approver_uuid && $new_manager->id != $old_manager_id) // only send email if manager is updated
-            {                    
+            {
+                Password::deleteToken($new_manager);
+
+                $token = Password::createToken($new_manager);
+
                 $data = [
                     'name' => trim(($new_manager->personal?->first_name ?? '') . ' ' . ($new_manager->personal?->last_name ?? '')) ?: $new_manager->email,
                     'applicant_name' => trim(($user->personal?->first_name ?? '') . ' ' . ($user->personal?->last_name ?? '')) ?: $user->email,
@@ -291,7 +299,7 @@ class ClaimHeaderController extends Controller
                     'claim_header' => $claim_header,
                     'claim_items' => $claim_header->claimItems()->get(),
                     'total_amount' => $total_amount,
-                    'action_url' => url('/claim-header-review?token=' . Password::createToken($new_manager) . '&email=' . urlencode($new_manager->email) . '&claim_header_uuid=' . $claim_header->uuid . '&type=manager'),
+                    'action_url' => url('/claim-header-review?token=' . $token . '&email=' . urlencode($new_manager->email) . '&claim_header_uuid=' . $claim_header->uuid . '&type=manager'),
                     'action_label' => 'Review Claim',
                 ];
 
@@ -412,6 +420,10 @@ class ClaimHeaderController extends Controller
             {
                 foreach($directors as $director)
                 {
+                    Password::deleteToken($director);
+
+                    $token = Password::createToken($director);
+
                     $data = [
                         'name' => trim(($director->personal?->first_name ?? '') . ' ' . ($director->personal?->last_name ?? '')) ?: $director->email,
                         'applicant_name' => trim(($claim_header->user->personal?->first_name ?? '') . ' ' . ($claim_header->user->personal?->last_name ?? '')) ?: $claim_header->user->email,
@@ -423,7 +435,7 @@ class ClaimHeaderController extends Controller
                         'claim_header' => $claim_header,
                         'claim_items' => $claim_header->claimItems()->get(),
                         'total_amount' => $claim_header->total_amount,
-                        'action_url' => url('/claim-header-review?token=' . Password::createToken($director) . '&email=' . urlencode($director->email) . '&claim_header_uuid=' . $claim_header->uuid . '&type=director'),
+                        'action_url' => url('/claim-header-review?token=' . $token . '&email=' . urlencode($director->email) . '&claim_header_uuid=' . $claim_header->uuid . '&type=director'),
                         'action_label' => 'Review Claim',
                     ];
 
@@ -486,6 +498,8 @@ class ClaimHeaderController extends Controller
             'director_reviewed_at' => self::currentDateTime(),
         ]);
 
+        $this->sendAccountantEmail($claim_header);
+
         $claim_header->load([
             'user.personal',
             'user.contact',
@@ -531,5 +545,34 @@ class ClaimHeaderController extends Controller
         ]);
 
         return self::response(new ClaimHeaderResource($claim_header));
+    }
+
+    private function sendAccountantEmail($claim_header)
+    {
+        $accountants = User::whereHas('employment', function ($query) {
+            $query->where('is_accountant', '=', StatusCodeConstants::ACTIVE);
+        })
+            ->where('is_active', StatusCodeConstants::ACTIVE)
+            ->get();
+
+        foreach($accountants as $accountant)
+        {
+            $data = [
+                'name' => trim(($accountant->personal?->first_name ?? '') . ' ' . ($accountant->personal?->last_name ?? '')) ?: $accountant->email,
+                'applicant_name' => trim(($claim_header->user->personal?->first_name ?? '') . ' ' . ($claim_header->user->personal?->last_name ?? '')) ?: $claim_header->user->email,
+                'applicant_email' => $claim_header->user->email,
+                'applicant_phone_number' => $claim_header->user->contact?->phone_number,
+                'submitted_at' => self::currentDateTime()->format('Y-m-d h:i:s A'),
+                'subject' => 'PE Portal - Claim Approved',
+                'title' => 'Claim Approved',
+                'status_text' => 'approved and pending accounting processing',
+                'footer_message' => 'Please log in to PE Portal to process the claim application.',
+                'claim_header' => $claim_header,
+                'claim_items' => $claim_header->claimItems()->get(),
+                'total_amount' => $claim_header->total_amount,
+            ];
+
+            Mail::to($accountant->email)->send(new ClaimApplicationMail($data));
+        }
     }
 }

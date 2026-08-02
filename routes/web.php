@@ -30,6 +30,7 @@ Route::group([
     Route::get('/leave-request-review-success', [LeaveRequestControllerFE::class, 'approveLeaveSuccess']);
 
     Route::get('/claim-header-review', [ClaimHeaderControllerFE::class, 'reviewClaim']);
+    Route::post('/claim-header-review/item', [ClaimHeaderControllerFE::class, 'approveItem']);
     Route::post('/claim-header-review', [ClaimHeaderControllerFE::class, 'reviewClaimAction']);
     Route::get('/claim-header-review-success', [ClaimHeaderControllerFE::class, 'reviewClaimSuccess']);
     

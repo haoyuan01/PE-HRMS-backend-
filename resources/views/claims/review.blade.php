@@ -17,8 +17,18 @@
     .content h2 { text-align: center; font-size: 20px; margin-bottom: 20px; color: #111827; }
     .detail-box { border: 1px solid #e5e7eb; border-radius: 6px; padding: 18px; margin-bottom: 20px; background: #f9fafb; }
     .detail-box div { margin-bottom: 8px; font-size: 14px; }
+    .item-box { border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px; margin-bottom: 12px; background: #ffffff; }
+    .item-title { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 6px; }
+    .item-meta { font-size: 13px; color: #4b5563; margin-bottom: 6px; }
+    .status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-approved { background: #dcfce7; color: #166534; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .item-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
     .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .button { display: block; width: 100%; padding: 14px; color: white; text-align: center; font-weight: 600; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; }
+    .button-small { padding: 10px; font-size: 13px; }
+    .button-review { background-color: #111827; }
     .accept { background-color: #16a34a; }
     .reject { background-color: #dc2626; }
     .footer { text-align: center; padding: 32px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; font-size: 12px; }
@@ -40,30 +50,76 @@
             <h2>{{ $title }}</h2>
 
             <p>Hello <strong>{{ $name }}</strong>,</p>
-            <p>Please accept or reject the claim request below.</p>
+            <p>Please approve or reject each claim item first. Once all items are done, you can review the claim.</p>
 
             <div class="detail-box">
                 <div><strong>Applicant:</strong> {{ $claim_header->user->email }}</div>
                 <div><strong>Claim:</strong> {{ $claim_header->name }}</div>
                 <div><strong>Total Amount:</strong> {{ number_format($claim_header->total_amount, 2) }}</div>
                 <div><strong>Remark:</strong> {{ $claim_header->remark ?: '-' }}</div>
-                @foreach($claim_items as $item)
-                    <div><strong>{{ $loop->iteration }}.</strong> {{ $item->name }} - {{ number_format($item->amount, 2) }}</div>
-                @endforeach
             </div>
 
-            <form method="POST" action="{{ $action_url }}">
-                @csrf
-                <input type="hidden" name="token" value="{{ $token }}">
-                <input type="hidden" name="email" value="{{ $email }}">
-                <input type="hidden" name="claim_header_uuid" value="{{ $claim_header_uuid }}">
-                <input type="hidden" name="type" value="{{ $type }}">
+            @foreach($claim_items as $item)
+                @php
+                    $action_at = $type == 'manager' ? $item->manager_action_at : $item->director_action_at;
+                    $approved = $type == 'manager' ? $item->manager_approved : $item->director_approved;
+                @endphp
 
-                <div class="actions">
-                    <button class="button accept" name="approve" value="1">Accept</button>
-                    <button class="button reject" name="approve" value="0">Reject</button>
+                <div class="item-box">
+                    <div class="item-title">{{ $loop->iteration }}. {{ $item->name }}</div>
+                    <div class="item-meta"><strong>Amount:</strong> {{ number_format($item->amount, 2) }}</div>
+                    <div class="item-meta"><strong>Date:</strong> {{ $item->date ? \Carbon\Carbon::parse($item->date)->format('Y-m-d') : '-' }}</div>
+                    <div class="item-meta"><strong>Remark:</strong> {{ $item->remark ?: '-' }}</div>
+                    <div class="item-meta">
+                        <strong>Status:</strong>
+                        @if($action_at)
+                            @if($approved)
+                                <span class="status status-approved">Approved</span>
+                            @else
+                                <span class="status status-rejected">Rejected</span>
+                            @endif
+                        @else
+                            <span class="status status-pending">Pending</span>
+                        @endif
+                    </div>
+
+                    @if(!$action_at)
+                        <form method="POST" action="{{ $approve_item_url }}">
+                            @csrf
+                            <input type="hidden" name="token" value="{{ $token }}">
+                            <input type="hidden" name="email" value="{{ $email }}">
+                            <input type="hidden" name="claim_header_uuid" value="{{ $claim_header_uuid }}">
+                            <input type="hidden" name="claim_item_uuid" value="{{ $item->uuid }}">
+                            <input type="hidden" name="type" value="{{ $type }}">
+
+                            <div class="item-actions">
+                                <button class="button button-small accept" name="approve" value="1">Approve Item</button>
+                                <button class="button button-small reject" name="approve" value="0">Reject Item</button>
+                            </div>
+                        </form>
+                    @endif
                 </div>
-            </form>
+            @endforeach
+
+            @if($pending_item_count > 0)
+                <div class="detail-box">
+                    <div><strong>Pending Items:</strong> {{ $pending_item_count }}</div>
+                    <div>Please approve or reject all claim items before reviewing the claim.</div>
+                </div>
+            @else
+                <form method="POST" action="{{ $action_url }}">
+                    @csrf
+                    <input type="hidden" name="token" value="{{ $token }}">
+                    <input type="hidden" name="email" value="{{ $email }}">
+                    <input type="hidden" name="claim_header_uuid" value="{{ $claim_header_uuid }}">
+                    <input type="hidden" name="type" value="{{ $type }}">
+                    <input type="hidden" name="approve" value="1">
+
+                    <div class="actions" style="grid-template-columns: 1fr;">
+                        <button class="button button-review">Review Claim</button>
+                    </div>
+                </form>
+            @endif
         </div>
 
         <div class="footer">
