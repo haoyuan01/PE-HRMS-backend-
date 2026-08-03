@@ -15,6 +15,7 @@ use App\Http\Controllers\BE\LeaveRequestController;
 use App\Http\Controllers\BE\LookupController;
 use App\Http\Controllers\BE\OfficeController;
 use App\Http\Controllers\BE\OvertimeController;
+use App\Http\Controllers\BE\PayrollController;
 use App\Http\Controllers\BE\RoleController;
 use App\Http\Controllers\BE\PositionController;
 use App\Http\Controllers\BE\RequestLogController;
@@ -202,6 +203,14 @@ Route::group([
             Route::patch('/manager-approves/{uuid}', [OvertimeController::class, 'managerApprove']);
             Route::patch('/director-approves/{uuid}', [OvertimeController::class, 'directorApprove']);
             Route::patch('/{uuid}', [OvertimeController::class, 'updateStatus']);
+        });
+
+        Route::prefix('payrolls')->group(function () {
+            Route::get('/', [PayrollController::class, 'index']);
+            Route::post('/', [PayrollController::class, 'store']);
+            Route::post('/{uuid}', [PayrollController::class, 'show']);
+            Route::put('/{uuid}', [PayrollController::class, 'update']);
+            Route::patch('/{uuid}', [PayrollController::class, 'updateStatus']);
         });
 
         Route::prefix('claim-headers')->group(function () {

@@ -4,6 +4,7 @@ use App\Http\Controllers\FE\AuthControllerFE;
 use App\Http\Controllers\FE\ClaimHeaderControllerFE;
 use App\Http\Controllers\FE\LeaveRequestControllerFE;
 use App\Http\Controllers\FE\OvertimeControllerFE;
+use App\Http\Controllers\FE\PayrollControllerFE;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -37,5 +38,9 @@ Route::group([
     Route::get('/overtime-review', [OvertimeControllerFE::class, 'review']);
     Route::post('/overtime-review', [OvertimeControllerFE::class, 'reviewAction']);
     Route::get('/overtime-review-success', [OvertimeControllerFE::class, 'reviewSuccess']);
+
+    Route::get('/payroll-preview', [PayrollControllerFE::class, 'preview']);
+    Route::post('/payroll-preview', [PayrollControllerFE::class, 'previewAction']);
+    Route::post('/payroll-forgot-passcode', [PayrollControllerFE::class, 'forgotPasscode']);
 
 });

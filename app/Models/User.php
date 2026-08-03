@@ -135,4 +135,14 @@ class User extends Authenticatable
         return $this->hasMany(LeaveEntitlement::class, 'user_id', 'id')->active();
     }
     
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class, 'user_id', 'id')->active();
+    }
+
+    public function payrolls()
+    {
+        return $this->hasMany(Payroll::class, 'user_id', 'id')->active();
+    }
+    
 }
