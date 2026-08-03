@@ -87,6 +87,7 @@ Route::group([
             Route::get('departments', [LookupController::class, 'departments']);
             Route::get('positions', [LookupController::class, 'positions']);
             Route::get('offices', [LookupController::class, 'offices']);
+            Route::get('movement-types', [LookupController::class, 'movementTypes']);
         });
 
         Route::prefix('users')->group(function () {

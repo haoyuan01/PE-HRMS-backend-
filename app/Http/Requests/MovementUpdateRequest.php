@@ -31,7 +31,6 @@ class MovementUpdateRequest extends FormRequest
     {
         return [
             'uuid' => ['required', 'string', 'uuid'],
-            'user_uuid' => ['required', 'string', 'uuid'],
             'movement_type_uuid' => ['required', 'string', 'uuid'],
             'location' => ['nullable', 'string'],
             'start_date' => ['nullable', 'date'],

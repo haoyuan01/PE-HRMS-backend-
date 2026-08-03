@@ -97,7 +97,6 @@ class MovementController extends Controller
     public function update(MovementUpdateRequest $request, string $uuid)
     {
         $movement = Movement::findByUuid($uuid);
-        $user = User::findByUuid($request->user_uuid);
         $movement_type = MovementType::findByUuid($request->movement_type_uuid);
 
         DB::beginTransaction();
@@ -115,7 +114,7 @@ class MovementController extends Controller
             }
 
             $movement->update([
-                'user_id' => $user->id,
+                'user_id' => $movement->user_id,
                 'movement_type_id' => $movement_type->id,
                 'location' => $request->location,
                 'start_date' => $request->start_date,

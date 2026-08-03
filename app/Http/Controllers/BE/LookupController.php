@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LookupSearchRequest;
 use App\Http\Resources\LookupResource;
 use App\Models\Department;
+use App\Models\MovementType;
 use App\Models\Office;
 use App\Models\Permission;
 use App\Models\Position;
@@ -220,6 +221,29 @@ class LookupController extends Controller
             });
         }
         
+        $data = $query->orderBy('created_at', 'asc')
+            ->limit(100)
+            ->get();
+
+        return self::response(LookupResource::collection($data));
+    }
+
+    public function movementTypes(LookupSearchRequest $request)
+    {
+        $query = MovementType::query()->active();
+
+        if ($request->filled('search_words'))
+        {
+            $query->where(function ($q) use ($request) {
+                foreach ($request->search_words as $word) {
+                    $q->orWhere(function ($sub) use ($word) {
+                        $sub->where('name', 'like', "%$word%")
+                            ->orWhere('uuid', $word);
+                    });
+                }
+            });
+        }
+
         $data = $query->orderBy('created_at', 'asc')
             ->limit(100)
             ->get();
