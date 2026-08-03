@@ -2,7 +2,6 @@
 
 namespace App\Filters;
 
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PayrollFilter
@@ -31,12 +30,14 @@ class PayrollFilter
             $data->where('is_published', "$filters->is_published");
         }
 
-        if ($filters->has('date') && !empty($filters->date))
+        if ($filters->has('year') && !empty($filters->year))
         {
-            $date = Carbon::parse($filters->date);
+            $data->where('year', $filters->year);
+        }
 
-            $data->where('month', $date->format('m'))
-                ->where('year', $date->format('Y'));
+        if ($filters->has('month') && !empty($filters->month))
+        {
+            $data->where('month', $filters->month);
         }
 
         if ($filters->has('email') && !empty($filters->email))
@@ -104,17 +105,13 @@ class PayrollFilter
         {
             $data->where(function($query) use ($filters) {
                 foreach ($filters->search_words as $word) {
-                    $query->where('uuid', $word)
-                        ->orWhere('remark', 'like', "%$word%")
-                        ->orWhereHas('user', function($query) use ($word) {
+                    $query->whereHas('user', function($query) use ($word) {
                             $query->where('email', 'like', "%$word%")
                                 ->orWhere('uuid', $word)
                                 ->orWhereHas('personal', function($query) use ($word) {
                                     $query->where('full_name', 'like', "%$word%")
                                         ->orWhere('first_name', 'like', "%$word%")
-                                        ->orWhere('last_name', 'like', "%$word%")
-                                        ->orWhere('identity_number', 'like', "%$word%")
-                                        ->orWhere('passport_number', 'like', "%$word%");
+                                        ->orWhere('last_name', 'like', "%$word%");
                                 });
                         });
                 }

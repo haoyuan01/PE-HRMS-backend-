@@ -13,6 +13,8 @@ use App\Http\Controllers\BE\LeaveEntitlementController;
 use App\Http\Controllers\BE\LeavePolicyController;
 use App\Http\Controllers\BE\LeaveRequestController;
 use App\Http\Controllers\BE\LookupController;
+use App\Http\Controllers\BE\MovementController;
+use App\Http\Controllers\BE\MovementTypeController;
 use App\Http\Controllers\BE\OfficeController;
 use App\Http\Controllers\BE\OvertimeController;
 use App\Http\Controllers\BE\PayrollController;
@@ -228,7 +230,21 @@ Route::group([
             Route::patch('/director-approves/{uuid}', [ClaimItemController::class, 'directorApprove']);
         });
 
+        Route::prefix('movement-types')->group(function () {
+            Route::get('/', [MovementTypeController::class, 'index']);
+            Route::post('/', [MovementTypeController::class, 'store']);
+            Route::get('/{uuid}', [MovementTypeController::class, 'show']);
+            Route::put('/{uuid}', [MovementTypeController::class, 'update']);
+            Route::patch('/{uuid}', [MovementTypeController::class, 'updateStatus']);
+        });
 
+        Route::prefix('movements')->group(function () {
+            Route::get('/', [MovementController::class, 'index']);
+            Route::post('/', [MovementController::class, 'store']);
+            Route::get('/{uuid}', [MovementController::class, 'show']);
+            Route::put('/{uuid}', [MovementController::class, 'update']);
+            Route::patch('/{uuid}', [MovementController::class, 'updateStatus']);
+        });
 
 
 
