@@ -3,47 +3,43 @@
 namespace App\Http\Controllers\BE;
 
 use App\Constants\StatusCodeConstants;
-use App\Filters\MovementFilter;
+use App\Filters\UserCertificateFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\MovementIndexRequest;
-use App\Http\Requests\MovementShowRequest;
-use App\Http\Requests\MovementStoreRequest;
-use App\Http\Requests\MovementUpdateRequest;
-use App\Http\Requests\MovementUpdateStatusRequest;
-use App\Http\Resources\MovementResource;
-use App\Models\Movement;
-use App\Models\MovementType;
+use App\Http\Requests\UserCertificateIndexRequest;
+use App\Http\Requests\UserCertificateShowRequest;
+use App\Http\Requests\UserCertificateStoreRequest;
+use App\Http\Requests\UserCertificateUpdateRequest;
+use App\Http\Requests\UserCertificateUpdateStatusRequest;
+use App\Http\Resources\UserCertificateResource;
 use App\Models\User;
+use App\Models\UserCertificate;
 use Illuminate\Support\Facades\DB;
 
-class MovementController extends Controller
+class UserCertificateController extends Controller
 {
-    public function __construct(private MovementFilter $movement_filter)
+    public function __construct(private UserCertificateFilter $user_certificate_filter)
     {
     }
 
-    public function index(MovementIndexRequest $request)
+    public function index(UserCertificateIndexRequest $request)
     {
-        $movement = Movement::with([
+        $user_certificate = UserCertificate::with([
             'user.personal',
             'user.contact',
             'user.employment.office',
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
-            'user.certificates',
-            'movement_type',
         ])->active();
 
-        $movement = $this->movement_filter->apply($request, $request->size, $movement);
+        $user_certificate = $this->user_certificate_filter->apply($request, $request->size, $user_certificate);
 
-        return self::responsePaginated(MovementResource::collection($movement), $movement);
+        return self::responsePaginated(UserCertificateResource::collection($user_certificate), $user_certificate);
     }
 
-    public function store(MovementStoreRequest $request)
+    public function store(UserCertificateStoreRequest $request)
     {
         $user = User::findByUuid($request->user_uuid);
-        $movement_type = MovementType::findByUuid($request->movement_type_uuid);
 
         DB::beginTransaction();
 
@@ -56,17 +52,17 @@ class MovementController extends Controller
 
                 $filename = time() . '_' . self::uuid() . '.' . $file->getClientOriginalExtension();
 
-                $attachment_path = $file->storeAs('movements', $filename, 'public');
+                $attachment_path = $file->storeAs('user-certificates', $filename, 'public');
             }
 
-            $movement = Movement::create([
+            $user_certificate = UserCertificate::create([
                 'uuid' => self::uuid(),
                 'user_id' => $user->id,
-                'movement_type_id' => $movement_type->id,
-                'location' => $request->location,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
+                'name' => $request->name,
+                'organization' => $request->organization,
                 'description' => $request->description,
+                'date_applied' => $request->date_applied,
+                'valid_until' => $request->valid_until,
                 'attachment_path' => $attachment_path,
                 'is_active' => StatusCodeConstants::ACTIVE,
                 'created_by' => self::auth()->uuid,
@@ -75,20 +71,18 @@ class MovementController extends Controller
                 'updated_at' => self::currentDateTime(),
             ]);
 
-            $movement->load([
+            $user_certificate->load([
                 'user.personal',
                 'user.contact',
                 'user.employment.office',
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
-                'user.certificates',
-                'movement_type',
             ]);
 
             DB::commit();
 
-            return self::response(new MovementResource($movement));
+            return self::response(new UserCertificateResource($user_certificate));
 
         } catch (\Exception $exception) {
             DB::rollback();
@@ -96,10 +90,9 @@ class MovementController extends Controller
         }
     }
 
-    public function update(MovementUpdateRequest $request, string $uuid)
+    public function update(UserCertificateUpdateRequest $request, string $uuid)
     {
-        $movement = Movement::findByUuid($uuid);
-        $movement_type = MovementType::findByUuid($request->movement_type_uuid);
+        $user_certificate = UserCertificate::findByUuid($uuid);
 
         DB::beginTransaction();
 
@@ -112,36 +105,34 @@ class MovementController extends Controller
 
                 $filename = time() . '_' . self::uuid() . '.' . $file->getClientOriginalExtension();
 
-                $attachment_path = $file->storeAs('movements', $filename, 'public');
+                $attachment_path = $file->storeAs('user-certificates', $filename, 'public');
             }
 
-            $movement->update([
-                'user_id' => $movement->user_id,
-                'movement_type_id' => $movement_type->id,
-                'location' => $request->location,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
+            $user_certificate->update([
+                'user_id' => $user_certificate->user_id,
+                'name' => $request->name,
+                'organization' => $request->organization,
                 'description' => $request->description,
-                'attachment_path' => $attachment_path ? $attachment_path : $movement->attachment_path,
+                'date_applied' => $request->date_applied,
+                'valid_until' => $request->valid_until,
+                'attachment_path' => $attachment_path ? $attachment_path : $user_certificate->attachment_path,
                 'is_active' => StatusCodeConstants::ACTIVE,
                 'updated_by' => self::auth()->uuid,
                 'updated_at' => self::currentDateTime(),
             ]);
 
-            $movement->load([
+            $user_certificate->load([
                 'user.personal',
                 'user.contact',
                 'user.employment.office',
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
-                'user.certificates',
-                'movement_type',
             ]);
 
             DB::commit();
 
-            return self::response(new MovementResource($movement));
+            return self::response(new UserCertificateResource($user_certificate));
 
         } catch (\Exception $exception) {
             DB::rollback();
@@ -149,43 +140,39 @@ class MovementController extends Controller
         }
     }
 
-    public function updateStatus(MovementUpdateStatusRequest $request, string $uuid)
+    public function updateStatus(UserCertificateUpdateStatusRequest $request, string $uuid)
     {
-        $movement = Movement::findByUuid($uuid);
+        $user_certificate = UserCertificate::findByUuid($uuid);
 
-        $movement->update([
+        $user_certificate->update([
             'is_active' => $request->is_active ? StatusCodeConstants::ACTIVE : StatusCodeConstants::INACTIVE,
             'updated_by' => self::auth()->uuid,
             'updated_at' => self::currentDateTime(),
         ]);
 
-        $movement->load([
+        $user_certificate->load([
             'user.personal',
             'user.contact',
             'user.employment.office',
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
-            'user.certificates',
-            'movement_type',
         ]);
 
-        return self::response(new MovementResource($movement));
+        return self::response(new UserCertificateResource($user_certificate));
     }
 
-    public function show(MovementShowRequest $request, string $uuid)
+    public function show(UserCertificateShowRequest $request, string $uuid)
     {
-        $movement = Movement::with([
+        $user_certificate = UserCertificate::with([
             'user.personal',
             'user.contact',
             'user.employment.office',
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
-            'user.certificates',
-            'movement_type',
         ])->where('uuid', $uuid)->active()->firstOrFail();
 
-        return self::response(new MovementResource($movement));
+        return self::response(new UserCertificateResource($user_certificate));
     }
 }

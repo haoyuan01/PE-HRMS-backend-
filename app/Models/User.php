@@ -130,6 +130,11 @@ class User extends Authenticatable
         return $this->hasOne(UserEmergency::class, 'user_id', 'id')->active();
     }
 
+    public function certificates()
+    {
+        return $this->hasMany(UserCertificate::class, 'user_id', 'id')->active();
+    }
+
     public function leaveEntitlements()
     {
         return $this->hasMany(LeaveEntitlement::class, 'user_id', 'id')->active();
@@ -145,4 +150,8 @@ class User extends Authenticatable
         return $this->hasMany(Payroll::class, 'user_id', 'id')->active();
     }
     
+    public function movements()
+    {
+        return $this->hasMany(Movement::class, 'user_id', 'id')->active();
+    }
 }

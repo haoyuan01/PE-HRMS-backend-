@@ -44,6 +44,7 @@ class LeaveRequestController extends Controller
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
+            'user.certificates',
 
             'managerApprover.personal',
             'managerApprover.contact',
@@ -204,6 +205,7 @@ class LeaveRequestController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
 
                 'managerApprover.personal',
                 'managerApprover.contact',
@@ -362,6 +364,7 @@ class LeaveRequestController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
 
                 'managerApprover.personal',
                 'managerApprover.contact',
@@ -448,6 +451,7 @@ class LeaveRequestController extends Controller
             'leaveRequest.user.employment.position',
             'leaveRequest.user.employment.department',
             'leaveRequest.user.emergency',
+            'leaveRequest.user.certificates',
 
             'leaveRequest.managerApprover.personal',
             'leaveRequest.managerApprover.contact',

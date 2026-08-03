@@ -57,6 +57,7 @@ class LeaveEntitlement extends Model
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
+            'user.certificates',
             'leavePolicy.leavePolicyTiers',
         ])->where('uuid', $uuid)
             ->where('is_active', StatusCodeConstants::ACTIVE);

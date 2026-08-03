@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
-class MovementResource extends JsonResource
+class UserCertificateResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,10 +18,11 @@ class MovementResource extends JsonResource
     {
         $data = [
             'uuid' => $this->uuid,
-            'location' => $this->location,
-            'start_date' => $this->start_date ? Carbon::parse($this->start_date)->utc() : null,
-            'end_date' => $this->end_date ? Carbon::parse($this->end_date)->utc() : null,
+            'name' => $this->name,
+            'organization' => $this->organization,
             'description' => $this->description,
+            'date_applied' => $this->date_applied ? Carbon::parse($this->date_applied)->utc() : null,
+            'valid_until' => $this->valid_until ? Carbon::parse($this->valid_until)->utc() : null,
             'attachment_path' => $this->attachment_path ? asset(Storage::url($this->attachment_path)) : null,
             'is_active' => $this->is_active,
             'created_by' => $this->created_by,
@@ -29,7 +30,6 @@ class MovementResource extends JsonResource
             'updated_by' => $this->updated_by,
             'updated_at' => Carbon::parse($this->updated_at)->utc(),
             'user' => new UserResource($this->whenLoaded('user')),
-            'movement_type' => new MovementTypeResource($this->whenLoaded('movement_type')),
         ];
 
         return $data;

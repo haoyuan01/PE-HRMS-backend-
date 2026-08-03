@@ -40,6 +40,7 @@ class UserController extends Controller
             'employment.department',
             'employment.position',
             'emergency',
+            'certificates',
             'roles.permissions',
             'roles' => function ($query) {
                 $query->where('is_active', StatusCodeConstants::ACTIVE);  
@@ -250,7 +251,7 @@ class UserController extends Controller
                 }
             }
 
-            $user->load(['personal', 'employment', 'contact', 'emergency', 'roles.permissions']);
+            $user->load(['personal', 'employment', 'contact', 'emergency', 'certificates', 'roles.permissions']);
 
             DB::commit();
 
@@ -453,7 +454,7 @@ class UserController extends Controller
                 }
             }
 
-            $user->load(['personal', 'employment', 'contact', 'emergency', 'roles.permissions']);
+            $user->load(['personal', 'employment', 'contact', 'emergency', 'certificates', 'roles.permissions']);
 
             DB::commit();
 

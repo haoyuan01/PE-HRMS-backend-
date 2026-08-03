@@ -3,34 +3,34 @@
 namespace App\Models;
 
 use App\Constants\StatusCodeConstants;
+use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Builder;
 
-class Payroll extends Model
+class UserCertificate extends Model
 {
     use HasFactory, HasActivityLog;
 
-    protected $table = 'payrolls';
+    protected $table = 'user_certificates';
     public $timestamps = false;
     protected $casts = [
-        'email_sent_at' => 'datetime',
-        'is_published' => 'boolean',
+        'date_applied' => 'date:Y-m-d',
+        'valid_until' => 'date:Y-m-d',
         'is_active' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'created_at' => 'datetime:Y-m-d H:i:s.u',
+        'updated_at' => 'datetime:Y-m-d H:i:s.u',
     ];
 
     protected $fillable = [
         'uuid',
         'user_id',
-        'month',
-        'year',
+        'name',
+        'organization',
+        'description',
+        'date_applied',
+        'valid_until',
         'attachment_path',
-        'remark',
-        'is_published',
-        'email_sent_at',
         'is_active',
         'created_by',
         'created_at',
@@ -51,15 +51,7 @@ class Payroll extends Model
      */
     public static function findByUuid(string $uuid, bool $fail = true)
     {
-        $query = self::with([
-            'user.personal',
-            'user.contact',
-            'user.employment.office',
-            'user.employment.position',
-            'user.employment.department',
-            'user.emergency',
-            'user.certificates',
-        ])->where('uuid', $uuid)
+        $query = self::where('uuid', $uuid)
             ->active();
 
         if ($fail)

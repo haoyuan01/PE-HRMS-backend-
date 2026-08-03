@@ -33,6 +33,7 @@ class LeaveEntitlementController extends Controller
             'employment.department',
             'employment.position',
             'emergency',
+            'certificates',
             'leaveEntitlements' => function($query) {
                 $query->where('is_active', StatusCodeConstants::ACTIVE);
             },

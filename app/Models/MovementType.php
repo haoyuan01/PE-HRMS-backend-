@@ -44,7 +44,10 @@ class MovementType extends Model
      */
     public static function findByUuid(string $uuid, bool $fail = true)
     {
-        $query = self::where('uuid', $uuid)
+        $query = self::with([
+                'movements',
+            ])
+            ->where('uuid', $uuid)
             ->where('is_active', StatusCodeConstants::ACTIVE);
 
         if ($fail)
@@ -58,4 +61,8 @@ class MovementType extends Model
     /**
      * Relationships
      */
+    public function movements()
+    {
+        return $this->hasMany(Movement::class, 'movement_type_id', 'id');
+    }
 }

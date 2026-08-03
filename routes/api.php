@@ -23,6 +23,7 @@ use App\Http\Controllers\BE\PositionController;
 use App\Http\Controllers\BE\RequestLogController;
 use App\Http\Controllers\BE\UpcomingEventController;
 use App\Http\Controllers\BE\UpcomingEventImageController;
+use App\Http\Controllers\BE\UserCertificateController;
 use App\Http\Controllers\BE\UserContactController;
 use App\Http\Controllers\BE\UserController;
 use App\Http\Controllers\BE\UserEmergencyController;
@@ -114,6 +115,14 @@ Route::group([
 
         Route::prefix('user-personals')->group(function () {
             Route::put('/', [UserPersonalController::class, 'update']);
+        });
+
+        Route::prefix('user-certificates')->group(function () {
+            Route::get('/', [UserCertificateController::class, 'index']);
+            Route::post('/', [UserCertificateController::class, 'store']);
+            Route::get('/{uuid}', [UserCertificateController::class, 'show']);
+            Route::put('/{uuid}', [UserCertificateController::class, 'update']);
+            Route::patch('/{uuid}', [UserCertificateController::class, 'updateStatus']);
         });
 
         Route::prefix('roles')->group(function () {

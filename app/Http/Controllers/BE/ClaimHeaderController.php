@@ -37,6 +37,7 @@ class ClaimHeaderController extends Controller
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
+            'user.certificates',
 
             'managerApprover.personal',
             'managerApprover.contact',
@@ -171,6 +172,7 @@ class ClaimHeaderController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
 
                 'managerApprover.personal',
                 'managerApprover.contact',
@@ -313,6 +315,7 @@ class ClaimHeaderController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
 
                 'managerApprover.personal',
                 'managerApprover.contact',
@@ -450,6 +453,7 @@ class ClaimHeaderController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
 
                 'managerApprover.personal',
                 'managerApprover.contact',
@@ -507,6 +511,7 @@ class ClaimHeaderController extends Controller
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
+            'user.certificates',
 
             'managerApprover.personal',
             'managerApprover.contact',

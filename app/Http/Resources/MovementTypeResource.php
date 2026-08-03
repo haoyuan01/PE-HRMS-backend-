@@ -24,6 +24,7 @@ class MovementTypeResource extends JsonResource
             'created_at' => Carbon::parse($this->created_at)->utc(),
             'updated_by' => $this->updated_by,
             'updated_at' => Carbon::parse($this->updated_at)->utc(),
+            'movements' => MovementResource::collection($this->whenLoaded('movements')),
         ];
 
         return $data;

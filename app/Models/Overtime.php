@@ -66,6 +66,7 @@ class Overtime extends Model
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
+            'user.certificates',
             'managerApprover.personal',
             'managerApprover.contact',
             'managerApprover.employment.office',

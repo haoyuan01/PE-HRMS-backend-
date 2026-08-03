@@ -35,6 +35,7 @@ class PayrollController extends Controller
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
+            'user.certificates',
         ])->active();
 
         $payroll = $this->payroll_filter->apply($request, $request->size, $payroll);
@@ -85,6 +86,7 @@ class PayrollController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
             ]);
 
             if ($payroll->is_published)
@@ -142,6 +144,7 @@ class PayrollController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
             ]);
 
             if (!$old_is_published && $payroll->is_published && !$payroll->email_sent_at)
@@ -179,6 +182,7 @@ class PayrollController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
             ]);
 
             DB::commit();

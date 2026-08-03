@@ -49,7 +49,18 @@ class Movement extends Model
      */
     public static function findByUuid(string $uuid, bool $fail = true)
     {
-        $query = self::where('uuid', $uuid)
+        $query = self::with([
+                'user.personal',
+                'user.contact',
+                'user.employment.office',
+                'user.employment.position',
+                'user.employment.department',
+                'user.emergency',
+                'user.certificates',
+
+                'movement_type',
+            ])
+            ->where('uuid', $uuid)
             ->where('is_active', StatusCodeConstants::ACTIVE);
 
         if ($fail)

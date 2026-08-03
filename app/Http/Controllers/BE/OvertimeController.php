@@ -36,6 +36,7 @@ class OvertimeController extends Controller
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
+            'user.certificates',
 
             'managerApprover.personal',
             'managerApprover.contact',
@@ -104,6 +105,7 @@ class OvertimeController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
 
                 'managerApprover.personal',
                 'managerApprover.contact',
@@ -179,6 +181,7 @@ class OvertimeController extends Controller
                 'user.employment.position',
                 'user.employment.department',
                 'user.emergency',
+                'user.certificates',
 
                 'managerApprover.personal',
                 'managerApprover.contact',

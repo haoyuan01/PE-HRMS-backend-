@@ -63,6 +63,7 @@ class ClaimHeader extends Model
             'user.employment.position',
             'user.employment.department',
             'user.emergency',
+            'user.certificates',
 
             'managerApprover.personal',
             'managerApprover.contact',
