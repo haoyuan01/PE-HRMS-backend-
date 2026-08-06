@@ -53,10 +53,27 @@
                         </p>
 
                         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6;">
-                            @if(isset($data['is_applicant_notification']) && $data['is_applicant_notification'])
-                                Your overtime application has been {{ $data['status_text'] ?? 'reviewed' }}{{ isset($data['reviewed_by']) && $data['reviewed_by'] ? ' by ' . $data['reviewed_by'] : '' }}.
+                            @if(isset($data['is_cancelled_notification']) && $data['is_cancelled_notification'])
+                                An overtime application submitted by <strong>{{ $data['applicant_name'] }}</strong> ({{ $data['applicant_email'] }}{{ $data['applicant_phone_number'] ? ', ' . $data['applicant_phone_number'] : '' }}) has been <span style="display:inline-block; padding:3px 8px; background:#fee2e2; color:#dc2626; border-radius:4px; font-size:13px; font-weight:700; text-transform:uppercase;">Cancelled</span>{{ isset($data['cancelled_by']) && $data['cancelled_by'] ? ' by ' . $data['cancelled_by'] : '' }}.
+                            @elseif(isset($data['is_applicant_notification']) && $data['is_applicant_notification'])
+                                Your overtime application has been
+                                @if(($data['status_text'] ?? null) == 'approved')
+                                    <span style="display:inline-block; padding:3px 8px; background:#dbeafe; color:#2563eb; border-radius:4px; font-size:13px; font-weight:700; text-transform:uppercase;">Approved</span>
+                                @elseif(($data['status_text'] ?? null) == 'rejected')
+                                    <span style="display:inline-block; padding:3px 8px; background:#fee2e2; color:#dc2626; border-radius:4px; font-size:13px; font-weight:700; text-transform:uppercase;">Rejected</span>
+                                @else
+                                    {{ $data['status_text'] ?? 'reviewed' }}
+                                @endif
+                                {{ isset($data['reviewed_by']) && $data['reviewed_by'] ? ' by ' . $data['reviewed_by'] : '' }}.
                             @else
-                                An overtime application has been submitted by <strong>{{ $data['applicant_name'] }}</strong> ({{ $data['applicant_email'] }}{{ $data['applicant_phone_number'] ? ', ' . $data['applicant_phone_number'] : '' }}) and is {{ $data['status_text'] ?? 'pending your review' }}.
+                                An overtime application has been submitted by <strong>{{ $data['applicant_name'] }}</strong> ({{ $data['applicant_email'] }}{{ $data['applicant_phone_number'] ? ', ' . $data['applicant_phone_number'] : '' }}) and is
+                                @if(($data['status_text'] ?? null) == 'approved')
+                                    <span style="display:inline-block; padding:3px 8px; background:#dbeafe; color:#2563eb; border-radius:4px; font-size:13px; font-weight:700; text-transform:uppercase;">Approved</span>
+                                @elseif(($data['status_text'] ?? null) == 'rejected')
+                                    <span style="display:inline-block; padding:3px 8px; background:#fee2e2; color:#dc2626; border-radius:4px; font-size:13px; font-weight:700; text-transform:uppercase;">Rejected</span>
+                                @else
+                                    {{ $data['status_text'] ?? 'pending your review' }}
+                                @endif{{ isset($data['reviewed_by']) && $data['reviewed_by'] ? ' by ' . $data['reviewed_by'] : '' }}.
                             @endif
                         </p>
 
@@ -85,14 +102,6 @@
                                     <td colspan="2" style="padding:14px 16px; background:#ffffff;">
                                         <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Attachment</div>
                                         <a href="{{ asset(\Illuminate\Support\Facades\Storage::url($data['overtime']->attachment_path)) }}" target="_blank" style="color:#17a2b8; text-decoration:none; font-size:14px; font-weight:600;">View Attachment</a>
-                                    </td>
-                                </tr>
-                            @endif
-                            @if(isset($data['manager_remark']) && $data['manager_remark'])
-                                <tr>
-                                    <td colspan="2" style="padding:14px 16px; background:#ffffff; border-top:1px solid #e5e7eb;">
-                                        <div style="font-size:13px; color:#6b7280; margin-bottom:4px;">Manager Remark</div>
-                                        <div style="font-size:14px; line-height:1.5; color:#111827;">{{ $data['manager_remark'] }}</div>
                                     </td>
                                 </tr>
                             @endif

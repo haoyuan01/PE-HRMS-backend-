@@ -211,8 +211,6 @@ Route::group([
             Route::get('/', [OvertimeController::class, 'index']);
             Route::post('/', [OvertimeController::class, 'store']);
             Route::get('/{uuid}', [OvertimeController::class, 'show']);
-            Route::put('/{uuid}', [OvertimeController::class, 'update']);
-            Route::patch('/manager-approves/{uuid}', [OvertimeController::class, 'managerApprove']);
             Route::patch('/director-approves/{uuid}', [OvertimeController::class, 'directorApprove']);
             Route::patch('/{uuid}', [OvertimeController::class, 'updateStatus']);
         });

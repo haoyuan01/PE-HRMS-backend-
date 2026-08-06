@@ -17,8 +17,6 @@ class Overtime extends Model
     protected $casts = [
         'director_action_at' => 'datetime:Y-m-d H:i:s.u',
         'director_approved' => 'boolean',
-        'manager_action_at' => 'datetime:Y-m-d H:i:s.u',
-        'manager_approved' => 'boolean',
         'is_active' => 'boolean',
         'created_at' => 'datetime:Y-m-d H:i:s.u',
         'updated_at' => 'datetime:Y-m-d H:i:s.u',
@@ -27,11 +25,6 @@ class Overtime extends Model
     protected $fillable = [
         'uuid',
         'user_id',
-        'manager_approver_id',
-        'manager_action_by',
-        'manager_action_at',
-        'manager_approved',
-        'manager_remark',
         'director_action_by',
         'director_action_at',
         'director_approved',
@@ -67,24 +60,13 @@ class Overtime extends Model
             'user.employment.department',
             'user.emergency',
             'user.certificates',
-            'managerApprover.personal',
-            'managerApprover.contact',
-            'managerApprover.employment.office',
-            'managerApprover.employment.position',
-            'managerApprover.employment.department',
-            'managerApprover.emergency',
-            'managerActionBy.personal',
-            'managerActionBy.contact',
-            'managerActionBy.employment.office',
-            'managerActionBy.employment.position',
-            'managerActionBy.employment.department',
-            'managerActionBy.emergency',
             'directorActionBy.personal',
             'directorActionBy.contact',
             'directorActionBy.employment.office',
             'directorActionBy.employment.position',
             'directorActionBy.employment.department',
             'directorActionBy.emergency',
+            'directorActionBy.certificates',
         ])->where('uuid', $uuid)
             ->active();
 
@@ -102,16 +84,6 @@ class Overtime extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
-    }
-
-    public function managerApprover()
-    {
-        return $this->belongsTo(User::class, 'manager_approver_id', 'id')->active();
-    }
-
-    public function managerActionBy()
-    {
-        return $this->belongsTo(User::class, 'manager_action_by', 'id')->active();
     }
 
     public function directorActionBy()

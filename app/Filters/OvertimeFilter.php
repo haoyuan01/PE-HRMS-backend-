@@ -20,19 +20,12 @@ class OvertimeFilter
             });
         }
 
-        if ($filters->has('manager_approver_uuid') && !empty($filters->manager_approver_uuid))
-        {
-            $data->whereHas('managerApprover', function($query) use ($filters) {
-                $query->where('uuid', $filters->manager_approver_uuid);
-            });
-        }
-
-        if ($filters->has('user_name') && !empty($filters->name))
+        if ($filters->has('user_name') && !empty($filters->user_name))
         {
             $data->whereHas('user.personal', function($query) use ($filters) {
-                $query->where('full_name', 'like', "%$filters->name%")
-                    ->orWhere('first_name', 'like', "%$filters->name%")
-                    ->orWhere('last_name', 'like', "%$filters->name%");
+                $query->where('full_name', 'like', "%$filters->user_name%")
+                    ->orWhere('first_name', 'like', "%$filters->user_name%")
+                    ->orWhere('last_name', 'like', "%$filters->user_name%");
             });
         }
 

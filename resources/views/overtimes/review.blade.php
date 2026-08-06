@@ -63,10 +63,9 @@
                 <input type="hidden" name="token" value="{{ $token }}">
                 <input type="hidden" name="email" value="{{ $email }}">
                 <input type="hidden" name="overtime_uuid" value="{{ $overtime_uuid }}">
-                <input type="hidden" name="type" value="{{ $type }}">
 
                 <div class="form-group">
-                    <label for="remark">{{ $type == 'manager' ? 'Manager Remark' : 'Director Remark' }}</label>
+                    <label for="remark">Director Remark</label>
                     <textarea id="remark" name="remark">{{ old('remark') }}</textarea>
                     @error('remark')
                         <div class="error">{{ $message }}</div>

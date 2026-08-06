@@ -25,11 +25,11 @@ class OvertimeStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'manager_approver_uuid' => ['required', 'string', 'uuid'],
+            'user_uuid' => ['required', 'string', 'uuid'],
             'description' => ['nullable', 'string'],
             'total_days' => ['nullable', 'numeric', 'min:0'],
             'attachment' => [
-                'nullable',
+                'required',
                 'mimes:' . Configuration::findByKey(ConfigurationCodeConstants::FILE_ALLOWED_TYPES)->value,
                 'max:' . Configuration::findByKey(ConfigurationCodeConstants::FILE_MAX_SIZE_MB)->value * 1024, // size in MB
             ],

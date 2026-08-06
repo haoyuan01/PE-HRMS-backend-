@@ -19,12 +19,7 @@ class OvertimeResource extends JsonResource
         $data = [
             'uuid' => $this->uuid,
             'user' => new UserResource($this->whenLoaded('user')),
-            'manager_approver' => new UserResource($this->whenLoaded('managerApprover')),
-            'manager_action_by' => new UserResource($this->whenLoaded('managerActionBy')),
             'director_action_by' => new UserResource($this->whenLoaded('directorActionBy')),
-            'manager_action_at' => $this->manager_action_at ? Carbon::parse($this->manager_action_at)->utc() : null,
-            'manager_approved' => $this->manager_approved,
-            'manager_remark' => $this->manager_remark,
             'director_action_at' => $this->director_action_at ? Carbon::parse($this->director_action_at)->utc() : null,
             'director_approved' => $this->director_approved,
             'director_remark' => $this->director_remark,

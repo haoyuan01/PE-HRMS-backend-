@@ -15,13 +15,6 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('manager_approver_id');
-
-            // manager
-            $table->unsignedBigInteger('manager_action_by')->nullable();
-            $table->dateTime('manager_action_at', 6)->nullable();
-            $table->boolean('manager_approved')->default(0);
-            $table->text('manager_remark')->nullable();
 
             // director
             $table->unsignedBigInteger('director_action_by')->nullable();
@@ -39,8 +32,6 @@ return new class extends Migration
             $table->dateTime('updated_at', 6);
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('manager_approver_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('manager_action_by')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

@@ -26,7 +26,6 @@ class OvertimeReviewActionFE extends FormRequest
             'token' => ['required', 'string'],
             'email' => ['required', 'email'],
             'overtime_uuid' => ['nullable', 'string', 'uuid'],
-            'type' => ['nullable', 'string'],
             'approve' => ['required', 'boolean'],
             'remark' => ['nullable', 'string'],
         ];
