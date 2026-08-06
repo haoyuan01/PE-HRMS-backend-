@@ -30,6 +30,7 @@ class UserSeeder extends Seeder
                 [
                     'email' => 'admin@gmail.com',
                     'password' => '123456',
+                    'passcode' => '123456',
                     'is_manager' => StatusCodeConstants::ACTIVE,
                     'is_director' => StatusCodeConstants::ACTIVE,
                     'is_accountant' => StatusCodeConstants::ACTIVE,
@@ -37,6 +38,7 @@ class UserSeeder extends Seeder
                 [
                     'email' => 'employee@gmail.com',
                     'password' => '123456',
+                    'passcode' => '123456',
                     'is_manager' => StatusCodeConstants::INACTIVE,
                     'is_director' => StatusCodeConstants::INACTIVE,
                     'is_accountant' => StatusCodeConstants::INACTIVE,
@@ -49,6 +51,7 @@ class UserSeeder extends Seeder
                     'uuid'          => (string) Str::uuid(),
                     'email'         => $user['email'],
                     'password'      => bcrypt($user['password']),
+                    'passcode'      => bcrypt($user['passcode']),
                     'is_active'     => StatusCodeConstants::ACTIVE,
                     'created_by'    => 'system',
                     'created_at'    => Carbon::now(),

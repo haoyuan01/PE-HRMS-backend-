@@ -21,13 +21,15 @@ use App\Models\Office;
 use App\Models\Position;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AuthService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function __construct(private UserFilter $user_filter)
+    public function __construct(private UserFilter $user_filter, private AuthService $auth_service)
     {
     }
 
@@ -502,13 +504,26 @@ class UserController extends Controller
     public function updatePasscode(UserUpdatePasscodeRequest $request, string $uuid)
     {
         $user = User::findByUuid($uuid);
-        
-        $user->update([
-            'passcode' => bcrypt($request->passcode),
-            'updated_by' => self::auth()->uuid,
-            'updated_at' => self::currentDateTime(),
-        ]);
-        
-        return self::response(new UserResource($user));
+
+        $this->auth_service->validatePasscode($user, $request->old_passcode);
+
+        DB::beginTransaction();
+
+        try {
+            
+            $user->update([
+                'passcode' => bcrypt($request->passcode),
+                'updated_by' => self::auth()->uuid,
+                'updated_at' => self::currentDateTime(),
+            ]);
+            
+            DB::commit();
+            
+            return self::response(new UserResource($user));
+
+        } catch (\Exception $exception) {
+            DB::rollback();
+            throw $exception;
+        }
     }
 }

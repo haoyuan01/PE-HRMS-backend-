@@ -29,6 +29,7 @@ class UserUpdatePasscodeRequest extends FormRequest
     {
         return [
             'uuid' => ['required', 'string', 'uuid'],
+            'old_passcode' => ['required', 'string'],
             'passcode' => ['required', 'digits:6'],
         ];
     }
