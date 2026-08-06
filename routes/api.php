@@ -248,6 +248,7 @@ Route::group([
 
         Route::prefix('movements')->group(function () {
             Route::get('/', [MovementController::class, 'index']);
+            Route::get('/calendar-summaries', [MovementController::class, 'calendarSummaries']);
             Route::post('/', [MovementController::class, 'store']);
             Route::get('/{uuid}', [MovementController::class, 'show']);
             Route::put('/{uuid}', [MovementController::class, 'update']);
