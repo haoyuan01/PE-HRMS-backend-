@@ -30,6 +30,7 @@ class UserResource extends JsonResource
             'emergency' => new UserEmergencyResource($this->whenLoaded('emergency')),
             'roles' => RoleResource::collection($this->whenLoaded('roles')),
             'leave_entitlements' => LeaveEntitlementResource::collection($this->whenLoaded('leaveEntitlements')),
+            'payrolls' => PayrollResource::collection($this->whenLoaded('payrolls')),
         ];
         
         return $data;

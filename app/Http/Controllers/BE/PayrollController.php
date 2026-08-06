@@ -5,13 +5,14 @@ namespace App\Http\Controllers\BE;
 use App\Http\Controllers\Controller;
 use App\Constants\StatusCodeConstants;
 use App\Exceptions\AppException;
-use App\Filters\PayrollFilter;
-use App\Http\Requests\PayrollIndexRequest;
+use App\Filters\UserFilter;
 use App\Http\Requests\PayrollShowRequest;
 use App\Http\Requests\PayrollStoreRequest;
 use App\Http\Requests\PayrollUpdateRequest;
 use App\Http\Requests\PayrollUpdateStatusRequest;
+use App\Http\Requests\UserIndexRequest;
 use App\Http\Resources\PayrollResource;
+use App\Http\Resources\UserResource;
 use App\Mail\PayrollNotificationMail;
 use App\Models\Payroll;
 use App\Models\User;
@@ -22,25 +23,42 @@ use Illuminate\Support\Facades\Password;
 
 class PayrollController extends Controller
 {
-    public function __construct(private PayrollFilter $payroll_filter, private AuthService $auth_service)
+    public function __construct(private UserFilter $user_filter, private AuthService $auth_service)
     {
     }
 
-    public function index(PayrollIndexRequest $request)
+    public function index(UserIndexRequest $request)
     {
-        $payroll = Payroll::with([
-            'user.personal',
-            'user.contact',
-            'user.employment.office',
-            'user.employment.position',
-            'user.employment.department',
-            'user.emergency',
-            'user.certificates',
-        ])->active();
+        $user = User::with([
+            'personal',
+            'contact',
+            'employment.office',
+            'employment.department',
+            'employment.position',
+            'emergency',
+            'certificates',
+            'roles.permissions',
+            'roles' => function ($query) {
+                $query->where('is_active', StatusCodeConstants::ACTIVE);  
+            },
+            'payrolls' => function ($query) use ($request) {
 
-        $payroll = $this->payroll_filter->apply($request, $request->size, $payroll);
+                if ($request->has('payroll_month') && !empty($request->payroll_month))
+                {
+                    $query->where('month', $request->payroll_month);
+                }
 
-        return self::responsePaginated(PayrollResource::collection($payroll), $payroll);
+                if ($request->has('payroll_year') && !empty($request->payroll_year))
+                {
+                    $query->where('year', $request->payroll_year);
+                }
+                
+            },
+        ]);
+        
+        $user = $this->user_filter->apply($request, $request->size, $user);
+        
+        return self::responsePaginated(UserResource::collection($user), $user);
     }
 
     public function store(PayrollStoreRequest $request)

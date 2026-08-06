@@ -3,38 +3,44 @@
 namespace App\Http\Controllers\BE;
 
 use App\Constants\StatusCodeConstants;
-use App\Filters\UserCertificateFilter;
+use App\Filters\UserFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UserCertificateIndexRequest;
 use App\Http\Requests\UserCertificateShowRequest;
 use App\Http\Requests\UserCertificateStoreRequest;
 use App\Http\Requests\UserCertificateUpdateRequest;
 use App\Http\Requests\UserCertificateUpdateStatusRequest;
+use App\Http\Requests\UserIndexRequest;
 use App\Http\Resources\UserCertificateResource;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Models\UserCertificate;
 use Illuminate\Support\Facades\DB;
 
 class UserCertificateController extends Controller
 {
-    public function __construct(private UserCertificateFilter $user_certificate_filter)
+    public function __construct(private UserFilter $user_filter)
     {
     }
 
-    public function index(UserCertificateIndexRequest $request)
+    public function index(UserIndexRequest $request)
     {
-        $user_certificate = UserCertificate::with([
-            'user.personal',
-            'user.contact',
-            'user.employment.office',
-            'user.employment.position',
-            'user.employment.department',
-            'user.emergency',
-        ])->active();
-
-        $user_certificate = $this->user_certificate_filter->apply($request, $request->size, $user_certificate);
-
-        return self::responsePaginated(UserCertificateResource::collection($user_certificate), $user_certificate);
+        $user = User::with([
+            'personal',
+            'contact',
+            'employment.office',
+            'employment.department',
+            'employment.position',
+            'emergency',
+            'certificates',
+            'roles.permissions',
+            'roles' => function ($query) {
+                $query->where('is_active', StatusCodeConstants::ACTIVE);  
+            },
+        ]);
+        
+        $user = $this->user_filter->apply($request, $request->size, $user);
+        
+        return self::responsePaginated(UserResource::collection($user), $user);
     }
 
     public function store(UserCertificateStoreRequest $request)
