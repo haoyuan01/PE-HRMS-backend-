@@ -328,6 +328,50 @@ class UserSeeder extends Seeder
                     'name' => 'Delete Leave Entitlement',
                     'module' => 'leave_entitlement',
                 ],
+
+                // overtime
+                [
+                    'code' => 'overtime_read',
+                    'name' => 'Read Overtime',
+                    'module' => 'overtime',
+                ],
+                [
+                    'code' => 'overtime_create',
+                    'name' => 'Create Overtime',
+                    'module' => 'overtime',
+                ],
+                [
+                    'code' => 'overtime_update',
+                    'name' => 'Update Overtime',
+                    'module' => 'overtime',
+                ],
+                [
+                    'code' => 'overtime_delete',
+                    'name' => 'Delete Overtime',
+                    'module' => 'overtime',
+                ],
+
+                // movement
+                [
+                    'code' => 'movement_read',
+                    'name' => 'Read Movement',
+                    'module' => 'movement',
+                ],
+                [
+                    'code' => 'movement_create',
+                    'name' => 'Create Movement',
+                    'module' => 'movement',
+                ],
+                [
+                    'code' => 'movement_update',
+                    'name' => 'Update Movement',
+                    'module' => 'movement',
+                ],
+                [
+                    'code' => 'movement_delete',
+                    'name' => 'Delete Movement',
+                    'module' => 'movement',
+                ],
             ];
 
             $roles = [
