@@ -38,18 +38,16 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+    Route::get('/test', function () {
+        return 'test uzumaki'; 
+    });
+
 $version = 'v1';
 
 Route::group([
     'prefix' => $version,
     'middleware' => ['throttle:auth', 'log.request'],
 ], function () {
-
-    Route::prefix('test')->group(function () {
-        Route::get('/', function () {
-           return 'test uzumaki'; 
-        });
-    });
 
     Route::prefix('auth')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
