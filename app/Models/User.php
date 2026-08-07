@@ -90,6 +90,7 @@ class User extends Authenticatable
             'employment.department',
             'employment.position',
             'emergency',
+            'certificates',
             'roles.permissions',
             'roles' => function ($query) {
                 $query->where('is_active', StatusCodeConstants::ACTIVE);
