@@ -24,7 +24,7 @@ class UserIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'uuid' => ['nullable', 'string', 'uuid'],
+            'user_uuid' => ['nullable', 'string', 'uuid'],
             'name' => ['nullable', 'string'],
             'email' => ['nullable', 'string', 'email'],
             'company_email' => ['nullable', 'string', 'email'],

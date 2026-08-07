@@ -9,9 +9,9 @@ class UserFilter
 {
     public function apply(Request $filters, $size, $data)
     {
-        if ($filters->has('uuid') && !empty($filters->uuid))
+        if ($filters->has('user_uuid') && !empty($filters->user_uuid))
         {
-            $data->where('uuid', $filters->uuid);
+            $data->where('uuid', $filters->user_uuid);
         }
 
         if ($filters->has('name') && !empty($filters->name))
