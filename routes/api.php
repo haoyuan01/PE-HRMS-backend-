@@ -45,6 +45,12 @@ Route::group([
     'middleware' => ['throttle:auth', 'log.request'],
 ], function () {
 
+    Route::prefix('test')->group(function () {
+        Route::get('/', function () {
+           return 'test uzumaki'; 
+        });
+    });
+
     Route::prefix('auth')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
         Route::post('forgot-password-email', [AuthController::class, 'forgotPasswordEmail']);
