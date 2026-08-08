@@ -51,6 +51,7 @@ class UserCertificateController extends Controller
 
         try {
             $attachment_path = null;
+            $attachment_name = null;
 
             if ($request->hasFile('attachment'))
             {
@@ -59,6 +60,8 @@ class UserCertificateController extends Controller
                 $filename = time() . '_' . self::uuid() . '.' . $file->getClientOriginalExtension();
 
                 $attachment_path = $file->storeAs('user-certificates', $filename, 'public');
+
+                $attachment_name = $file->getClientOriginalName();
             }
 
             $user_certificate = UserCertificate::create([
@@ -70,6 +73,7 @@ class UserCertificateController extends Controller
                 'date_applied' => $request->date_applied,
                 'valid_until' => $request->valid_until,
                 'attachment_path' => $attachment_path,
+                'attachment_name' => $attachment_name,
                 'is_active' => StatusCodeConstants::ACTIVE,
                 'created_by' => self::auth()->uuid,
                 'created_at' => self::currentDateTime(),
@@ -104,6 +108,7 @@ class UserCertificateController extends Controller
 
         try {
             $attachment_path = null;
+            $attachment_name = null;
 
             if ($request->hasFile('attachment'))
             {
@@ -112,6 +117,8 @@ class UserCertificateController extends Controller
                 $filename = time() . '_' . self::uuid() . '.' . $file->getClientOriginalExtension();
 
                 $attachment_path = $file->storeAs('user-certificates', $filename, 'public');
+
+                $attachment_name = $file->getClientOriginalName();
             }
 
             $user_certificate->update([
@@ -122,6 +129,7 @@ class UserCertificateController extends Controller
                 'date_applied' => $request->date_applied,
                 'valid_until' => $request->valid_until,
                 'attachment_path' => $attachment_path ? $attachment_path : $user_certificate->attachment_path,
+                'attachment_name' => $attachment_name ? $attachment_name : $user_certificate->attachment_name,
                 'is_active' => StatusCodeConstants::ACTIVE,
                 'updated_by' => self::auth()->uuid,
                 'updated_at' => self::currentDateTime(),
