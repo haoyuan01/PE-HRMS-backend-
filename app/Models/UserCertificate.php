@@ -31,6 +31,7 @@ class UserCertificate extends Model
         'date_applied',
         'valid_until',
         'attachment_path',
+        'attachment_name',
         'is_active',
         'created_by',
         'created_at',

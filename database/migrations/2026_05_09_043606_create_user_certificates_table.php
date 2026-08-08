@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('date_applied')->nullable();
             $table->date('valid_until')->nullable();
             $table->string('attachment_path')->nullable();
+            $table->string('attachment_name')->nullable();
             $table->boolean('is_active')->default(1);
             $table->string('created_by', 350);
             $table->dateTime('created_at', 6);
