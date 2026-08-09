@@ -265,6 +265,28 @@ class UserSeeder extends Seeder
                     'module' => 'user',
                 ],
 
+                // user certificate
+                [
+                    'code' => 'user_read_certificate',
+                    'name' => 'Read User Certificate',
+                    'module' => 'user_certificate',
+                ],
+                [
+                    'code' => 'user_create_certificate',
+                    'name' => 'Create User Certificate',
+                    'module' => 'user_certificate',
+                ],
+                [
+                    'code' => 'user_update_certificate',
+                    'name' => 'Update User Certificate',
+                    'module' => 'user_certificate',
+                ],
+                [
+                    'code' => 'user_delete_certificate',
+                    'name' => 'Delete User Certificate',
+                    'module' => 'user_certificate',
+                ],
+
                 // claim header
                 [
                     'code' => 'claim_header_read',
