@@ -4,6 +4,7 @@ namespace App\Http\Controllers\BE;
 
 use App\Exceptions\AppException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AuthCheckPasscodeRequest;
 use App\Http\Requests\AuthForgotPasswordEmailRequest;
 use App\Http\Requests\AuthLoginRequest;
 use App\Http\Requests\AuthResetPasswordRequest;
@@ -157,5 +158,12 @@ class AuthController extends Controller
             DB::rollback();
             throw $exception;
         }
+    }
+
+    public function checkPasscode(AuthCheckPasscodeRequest $request)
+    {
+        $this->auth_service->validatePasscode(self::auth(), $request->passcode);
+
+        return self::response(null);
     }
 }
