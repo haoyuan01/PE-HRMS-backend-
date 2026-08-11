@@ -39,9 +39,14 @@ class UpcomingEventUpdateRequest extends FormRequest
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date'],
             'is_published' => ['required', 'boolean'],
+            'department_uuid' => ['nullable', 'array'],
+            'department_uuid.*' => ['nullable', 'string', 'uuid'],
+            'office_uuid' => ['nullable', 'array'],
+            'office_uuid.*' => ['nullable', 'string', 'uuid'],
             'images' => ['nullable', 'array'],
-            'images.*' => [
-                'required',
+            'images.*.uuid' => ['nullable', 'string', 'uuid'],
+            'images.*.image' => [
+                'nullable',
                 'image',
                 'mimes:' . Configuration::findByKey(ConfigurationCodeConstants::IMAGE_ALLOWED_TYPES)->value,
                 'max:' . Configuration::findByKey(ConfigurationCodeConstants::IMAGE_MAX_SIZE_MB)->value * 1024, // size in MB

@@ -39,8 +39,9 @@ class AnnouncementUpdateRequest extends FormRequest
             'end_date' => ['required', 'date'],
             'is_published' => ['required', 'boolean'],
             'images' => ['nullable', 'array'],
-            'images.*' => [
-                'required',
+            'images.*.uuid' => ['nullable', 'string', 'uuid'],
+            'images.*.image' => [
+                'nullable',
                 'image',
                 'mimes:' . Configuration::findByKey(ConfigurationCodeConstants::IMAGE_ALLOWED_TYPES)->value,
                 'max:' . Configuration::findByKey(ConfigurationCodeConstants::IMAGE_MAX_SIZE_MB)->value * 1024, // size in MB

@@ -29,6 +29,8 @@ class UpcomingEventResource extends JsonResource
             'updated_by' => $this->updated_by,
             'updated_at' => Carbon::parse($this->updated_at)->utc(),
             'images' => UpcomingEventImageResource::collection($this->whenLoaded('upcomingEventImages')),
+            'departments' => DepartmentResource::collection($this->whenLoaded('upcomingEventDepartments')->pluck('department')),
+            'offices' => OfficeResource::collection($this->whenLoaded('upcomingEventOffices')->pluck('office')),
         ];
 
         return $data;

@@ -7,16 +7,13 @@ use App\Traits\HasActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
-class UpcomingEvent extends Model
+class UpcomingEventDepartment extends Model
 {
     use HasActivityLog;
 
-    protected $table = 'upcoming_events';
+    protected $table = 'upcoming_event_departments';
     public $timestamps = false;
     protected $casts = [
-        'start_date' => 'datetime:Y-m-d',
-        'end_date' => 'datetime:Y-m-d',
-        'is_published' => 'boolean',
         'is_active' => 'boolean',
         'created_at' => 'datetime:Y-m-d H:i:s.u',
         'updated_at' => 'datetime:Y-m-d H:i:s.u',
@@ -24,12 +21,8 @@ class UpcomingEvent extends Model
 
     protected $fillable = [
         'uuid',
-        'name',
-        'description',
-        'location',
-        'start_date',
-        'end_date',
-        'is_published',
+        'upcoming_event_id',
+        'department_id',
         'is_active',
         'created_by',
         'created_at',
@@ -51,9 +44,7 @@ class UpcomingEvent extends Model
     public static function findByUuid(string $uuid, bool $fail = true)
     {
         $query = self::with([
-            'upcomingEventImages',
-            'upcomingEventDepartments.department',
-            'upcomingEventOffices.office',
+
         ])->where('uuid', $uuid)
         ->active();
 
@@ -68,18 +59,13 @@ class UpcomingEvent extends Model
     /**
      * Relationships
      */
-    public function upcomingEventImages()
+    public function upcomingEvent()
     {
-        return $this->hasMany(UpcomingEventImage::class, 'upcoming_event_id', 'id')->active();
+        return $this->belongsTo(UpcomingEvent::class, 'upcoming_event_id', 'id')->active();
     }
 
-    public function upcomingEventDepartments()
+    public function department()
     {
-        return $this->hasMany(UpcomingEventDepartment::class, 'upcoming_event_id', 'id')->active();
-    }
-
-    public function upcomingEventOffices()
-    {
-        return $this->hasMany(UpcomingEventOffice::class, 'upcoming_event_id', 'id')->active();
+        return $this->belongsTo(Department::class, 'department_id', 'id')->active();
     }
 }

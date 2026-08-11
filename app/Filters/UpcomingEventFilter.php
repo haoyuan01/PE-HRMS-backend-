@@ -2,7 +2,10 @@
 
 namespace App\Filters;
 
+use App\Constants\StatusCodeConstants;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UpcomingEventFilter
 {
@@ -32,6 +35,36 @@ class UpcomingEventFilter
         if ($filters->has('location') && !empty($filters->location))
         {
             $data->where('location', 'like', "%$filters->location%");
+        }
+
+        if ($filters->has('department_uuid') && !empty($filters->department_uuid))
+        {
+            $data->whereHas('upcomingEventDepartments.department', function($query) use ($filters) {
+                $query->where('uuid', $filters->department_uuid);
+            });
+        }
+
+        if ($filters->has('office_uuid') && !empty($filters->office_uuid))
+        {
+            $data->whereHas('upcomingEventOffices.office', function($query) use ($filters) {
+                $query->where('uuid', $filters->office_uuid);
+            });
+        }
+
+        if ($filters->has('relevant_to_me') && $filters->relevant_to_me)
+        {
+            $user = User::findByUuid(Auth::user()->uuid);
+
+            $data->where(function($query) use ($user) {
+                $query->whereHas('upcomingEventDepartments', function($query) use ($user) {
+                    $query->where('department_id', $user->employment?->department_id)
+                        ->where('is_active', StatusCodeConstants::ACTIVE);
+                })
+                ->orWhereHas('upcomingEventOffices', function($query) use ($user) {
+                    $query->where('office_id', $user->employment?->office_id)
+                        ->where('is_active', StatusCodeConstants::ACTIVE);
+                });
+            });
         }
 
         if ($filters->has('is_published') && $filters->is_published >= 0)

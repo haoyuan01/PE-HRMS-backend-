@@ -102,26 +102,85 @@ class AnnouncementController extends Controller
                 'updated_at' => self::currentDateTime(),
             ]);
 
-            if ($request->hasFile('images') && !empty($request->images))
+            $image_uuids = [];
+
+            if ($request->has('images') && $request->images)
             {
-                foreach($request->images as $image)
+                foreach($request->images as $index => $image)
                 {
-                    $filename = time() . '_' . self::uuid() . '.' . $image->getClientOriginalExtension();
+                    $image_uuid = $image['uuid'] ?? null;
+                    $announcement_image = null;
 
-                    $image_path = $image->storeAs('announcements', $filename, 'public');
+                    if ($image_uuid)
+                    {
+                        $image_uuids[] = $image_uuid;
 
-                    AnnouncementImage::create([
-                        'uuid' => self::uuid(),
-                        'announcement_id' => $announcement->id,
-                        'image_path' => $image_path,
-                        'is_active' => StatusCodeConstants::ACTIVE,
-                        'created_by' => self::auth()->uuid,
-                        'updated_by' => self::auth()->uuid,
-                        'created_at' => self::currentDateTime(),
-                        'updated_at' => self::currentDateTime(),
-                    ]);
+                        $announcement_image = AnnouncementImage::where('announcement_id', $announcement->id)
+                            ->where('uuid', $image_uuid)
+                            ->first();
+                    }
+
+                    if (!$announcement_image)
+                    {
+                        $image_path = null;
+
+                        if ($request->hasFile("images.$index.image"))
+                        {
+                            $file = $request->file("images.$index.image");
+
+                            $filename = time() . '_' . self::uuid() . '.' . $file->getClientOriginalExtension();
+
+                            $image_path = $file->storeAs('announcements', $filename, 'public');
+                        }
+
+                        $announcement_image = AnnouncementImage::create([
+                            'uuid' => self::uuid(),
+                            'announcement_id' => $announcement->id,
+                            'image_path' => $image_path,
+                            'is_active' => StatusCodeConstants::ACTIVE,
+                            'created_by' => self::auth()->uuid,
+                            'updated_by' => self::auth()->uuid,
+                            'created_at' => self::currentDateTime(),
+                            'updated_at' => self::currentDateTime(),
+                        ]);
+
+                        $image_uuids[] = $announcement_image->uuid;
+                    }
+                    else
+                    {
+                        $image_path = $announcement_image->image_path;
+
+                        if ($request->hasFile("images.$index.image"))
+                        {
+                            if ($announcement_image->image_path && Storage::disk('public')->exists($announcement_image->image_path))
+                            {
+                                Storage::disk('public')->delete($announcement_image->image_path);
+                            }
+
+                            $file = $request->file("images.$index.image");
+
+                            $filename = time() . '_' . self::uuid() . '.' . $file->getClientOriginalExtension();
+
+                            $image_path = $file->storeAs('announcements', $filename, 'public');
+                        }
+
+                        $announcement_image->update([
+                            'image_path' => $image_path,
+                            'is_active' => StatusCodeConstants::ACTIVE,
+                            'updated_by' => self::auth()->uuid,
+                            'updated_at' => self::currentDateTime(),
+                        ]);
+                    }
                 }
             }
+
+            AnnouncementImage::where('announcement_id', $announcement->id)
+                ->whereNotIn('uuid', $image_uuids)
+                ->update([
+                    'is_active' => StatusCodeConstants::INACTIVE,
+                    'updated_by' => self::auth()->uuid,
+                    'updated_at' => self::currentDateTime(),
+                ]);
             
             $announcement->load(['announcementImages']);
 

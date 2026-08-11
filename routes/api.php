@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\BE\ActivityLogController;
 use App\Http\Controllers\BE\AnnouncementController;
-use App\Http\Controllers\BE\AnnouncementImageController;
 use App\Http\Controllers\BE\AuthController;
 use App\Http\Controllers\BE\ClaimHeaderController;
 use App\Http\Controllers\BE\ClaimItemController;
@@ -22,7 +21,6 @@ use App\Http\Controllers\BE\RoleController;
 use App\Http\Controllers\BE\PositionController;
 use App\Http\Controllers\BE\RequestLogController;
 use App\Http\Controllers\BE\UpcomingEventController;
-use App\Http\Controllers\BE\UpcomingEventImageController;
 use App\Http\Controllers\BE\UserCertificateController;
 use App\Http\Controllers\BE\UserContactController;
 use App\Http\Controllers\BE\UserController;
@@ -166,20 +164,12 @@ Route::group([
             Route::patch('/{uuid}', [AnnouncementController::class, 'updateStatus']);
         });
 
-        Route::prefix('announcement-images')->group(function () {
-            Route::patch('/{uuid}', [AnnouncementImageController::class, 'updateStatus']);
-        });
-
         Route::prefix('upcoming-events')->group(function () {
             Route::get('/', [UpcomingEventController::class, 'index']);
             Route::post('/', [UpcomingEventController::class, 'store']);
             Route::get('/{uuid}', [UpcomingEventController::class, 'show']);
             Route::put('/{uuid}', [UpcomingEventController::class, 'update']);
             Route::patch('/{uuid}', [UpcomingEventController::class, 'updateStatus']);
-        });
-
-        Route::prefix('upcoming-event-images')->group(function () {
-            Route::patch('/{uuid}', [UpcomingEventImageController::class, 'updateStatus']);
         });
 
         Route::prefix('leave-policies')->group(function () {

@@ -33,6 +33,10 @@ class UpcomingEventStoreRequest extends FormRequest
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date'],
             'is_published' => ['required', 'boolean'],
+            'department_uuid' => ['nullable', 'array'],
+            'department_uuid.*' => ['nullable', 'string', 'uuid'],
+            'office_uuid' => ['nullable', 'array'],
+            'office_uuid.*' => ['nullable', 'string', 'uuid'],
             'images' => ['nullable', 'array'],
             'images.*' => [
                 'required',
