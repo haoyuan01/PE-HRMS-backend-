@@ -167,15 +167,25 @@ class DashboardController extends Controller
 
         $leave_balance = LeaveEntitlement::where('user_id', $user->id)
             ->active()
-            ->sum('balance_days');
+            ->get()
+            ->sum(function ($leave_entitlement) {
+                return ($leave_entitlement->entitled_days + $leave_entitlement->carried_forward_days) - $leave_entitlement->used_days;
+            });
 
         $pending_leave = LeaveRequest::where('user_id', $user->id)
-            ->whereNull('director_action_at')
+            ->where(function ($query) {
+                $query->where('manager_approved', '!=', StatusCodeConstants::ACTIVE)
+                    ->orWhere('handover_approved', '!=', StatusCodeConstants::ACTIVE)
+                    ->orWhere('director_approved', '!=', StatusCodeConstants::ACTIVE);
+            })
             ->active()
             ->count();
 
         $pending_claim = ClaimHeader::where('user_id', $user->id)
-            ->whereNull('director_reviewed_at')
+            ->where(function ($query) {
+                $query->whereNull('manager_reviewed_at')
+                    ->orWhereNull('director_reviewed_at');
+            })
             ->active()
             ->count();
 
