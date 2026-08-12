@@ -3,6 +3,7 @@
 namespace App\Filters;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LeaveRequestFilter
 {
@@ -34,6 +35,11 @@ class LeaveRequestFilter
                     ->orWhere('name', 'like', "%$filters->leave_entitlement_policy%")
                     ->orWhere('code', 'like', "%$filters->leave_entitlement_policy%");
             });
+        }
+
+        if ($filters->has('relevant_to_me') && $filters->relevant_to_me)
+        {
+            $data->where('user_id', Auth::user()->id);
         }
 
         if ($filters->has('is_director') && $filters->is_director >= 0)

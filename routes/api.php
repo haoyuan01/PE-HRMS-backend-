@@ -6,6 +6,7 @@ use App\Http\Controllers\BE\AuthController;
 use App\Http\Controllers\BE\ClaimHeaderController;
 use App\Http\Controllers\BE\ClaimItemController;
 use App\Http\Controllers\BE\ConfigurationController;
+use App\Http\Controllers\BE\DashboardController;
 use App\Http\Controllers\BE\DepartmentController;
 use App\Http\Controllers\BE\ErrorLogController;
 use App\Http\Controllers\BE\LeaveEntitlementController;
@@ -245,6 +246,21 @@ Route::group([
             Route::put('/{uuid}', [MovementController::class, 'update']);
             Route::patch('/{uuid}', [MovementController::class, 'updateStatus']);
         });
+
+        Route::prefix('dashboards')->group(function () {
+            Route::get('/upcoming-events', [DashboardController::class, 'upcomingEvent']);
+            Route::get('/leave-requests', [DashboardController::class, 'leaveRequest']);
+            Route::get('/claim-headers', [DashboardController::class, 'claimHeader']);
+            Route::get('/announcements', [DashboardController::class, 'announcement']);
+            Route::get('/dashboard-summaries', [DashboardController::class, 'dashboardSummary']);
+        });
+
+
+
+
+
+
+
 
 
 

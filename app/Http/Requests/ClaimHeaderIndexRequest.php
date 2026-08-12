@@ -31,6 +31,7 @@ class ClaimHeaderIndexRequest extends FormRequest
             'user_office_uuid' => ['nullable', 'string', 'uuid'],
             'user_position_uuid' => ['nullable', 'string', 'uuid'],
             'name' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'relevant_to_me' => ['nullable', 'boolean'],
             'start_date' => ['nullable', 'date'],
             'end_date'   => ['nullable', 'date', 'after_or_equal:start_date'],
             'created_at_from' => ['nullable', 'date_format:Y-m-d'],

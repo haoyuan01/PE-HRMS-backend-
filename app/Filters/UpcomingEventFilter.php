@@ -3,7 +3,6 @@
 namespace App\Filters;
 
 use App\Constants\StatusCodeConstants;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -53,15 +52,13 @@ class UpcomingEventFilter
 
         if ($filters->has('relevant_to_me') && $filters->relevant_to_me)
         {
-            $user = User::findByUuid(Auth::user()->uuid);
-
-            $data->where(function($query) use ($user) {
-                $query->whereHas('upcomingEventDepartments', function($query) use ($user) {
-                    $query->where('department_id', $user->employment?->department_id)
+            $data->where(function($query) {
+                $query->whereHas('upcomingEventDepartments', function($query) {
+                    $query->where('department_id', Auth::user()->employment?->department_id)
                         ->where('is_active', StatusCodeConstants::ACTIVE);
                 })
-                ->orWhereHas('upcomingEventOffices', function($query) use ($user) {
-                    $query->where('office_id', $user->employment?->office_id)
+                ->orWhereHas('upcomingEventOffices', function($query) {
+                    $query->where('office_id', Auth::user()->employment?->office_id)
                         ->where('is_active', StatusCodeConstants::ACTIVE);
                 });
             });

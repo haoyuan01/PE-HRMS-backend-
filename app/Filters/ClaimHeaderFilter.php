@@ -3,6 +3,7 @@
 namespace App\Filters;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ClaimHeaderFilter
 {
@@ -51,6 +52,11 @@ class ClaimHeaderFilter
             $data->whereHas('managerApprover', function($query) use ($filters) {
                 $query->where('uuid', $filters->manager_approver_uuid);
             });
+        }
+
+        if ($filters->has('relevant_to_me') && $filters->relevant_to_me)
+        {
+            $data->where('user_id', Auth::user()->id);
         }
         
         if ($filters->has('name') && !empty($filters->name))

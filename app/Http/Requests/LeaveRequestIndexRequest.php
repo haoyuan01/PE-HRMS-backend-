@@ -28,6 +28,7 @@ class LeaveRequestIndexRequest extends FormRequest
             'user_uuid' => ['nullable', 'string', 'uuid'],
             'manager_approver_uuid' => ['nullable', 'string', 'uuid'],
             'leave_entitlement_policy' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
+            'relevant_to_me' => ['nullable', 'boolean'],
             'is_director' => ['nullable', 'integer', 'between:0,1'],
             'created_at_from' => ['nullable', 'date_format:Y-m-d'],
             'created_at_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:created_at_from'],
