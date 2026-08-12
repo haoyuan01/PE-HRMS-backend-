@@ -10,6 +10,7 @@ use App\Filters\UpcomingEventFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AnnouncementIndexRequest;
 use App\Http\Requests\ClaimHeaderIndexRequest;
+use App\Http\Requests\DashboardSummaryRequest;
 use App\Http\Requests\LeaveRequestIndexRequest;
 use App\Http\Requests\UpcomingEventIndexRequest;
 use App\Http\Resources\AnnouncementResource;
@@ -161,33 +162,48 @@ class DashboardController extends Controller
         return self::responsePaginated(AnnouncementResource::collection($announcement), $announcement);
     }
 
-    public function dashboardSummary()
+    public function dashboardSummary(DashboardSummaryRequest $request)
     {
         $user = User::findByUuid(self::auth()->uuid);
 
-        $leave_balance = LeaveEntitlement::where('user_id', $user->id)
-            ->active()
-            ->get()
+        $leave_entitlement = LeaveEntitlement::active();
+
+        if ($request->relevant_to_me)
+        {
+            $leave_entitlement->where('user_id', $user->id);
+        }
+
+        $leave_balance = $leave_entitlement->get()
             ->sum(function ($leave_entitlement) {
                 return ($leave_entitlement->entitled_days + $leave_entitlement->carried_forward_days) - $leave_entitlement->used_days;
             });
 
-        $pending_leave = LeaveRequest::where('user_id', $user->id)
-            ->where(function ($query) {
+        $leave_request = LeaveRequest::where(function ($query) {
                 $query->where('manager_approved', '!=', StatusCodeConstants::ACTIVE)
                     ->orWhere('handover_approved', '!=', StatusCodeConstants::ACTIVE)
                     ->orWhere('director_approved', '!=', StatusCodeConstants::ACTIVE);
             })
-            ->active()
-            ->count();
+            ->active();
 
-        $pending_claim = ClaimHeader::where('user_id', $user->id)
-            ->where(function ($query) {
+        if ($request->relevant_to_me)
+        {
+            $leave_request->where('user_id', $user->id);
+        }
+
+        $pending_leave = $leave_request->count();
+
+        $claim_header = ClaimHeader::where(function ($query) {
                 $query->whereNull('manager_reviewed_at')
                     ->orWhereNull('director_reviewed_at');
             })
-            ->active()
-            ->count();
+            ->active();
+
+        if ($request->relevant_to_me)
+        {
+            $claim_header->where('user_id', $user->id);
+        }
+
+        $pending_claim = $claim_header->count();
 
         $total_users = User::where('is_active', StatusCodeConstants::ACTIVE)
             ->count();
