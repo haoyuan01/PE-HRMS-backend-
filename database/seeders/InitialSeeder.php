@@ -93,7 +93,7 @@ class InitialSeeder extends Seeder
             $configurations = [
                 [
                     'key' => ConfigurationCodeConstants::AUTH_RATE_LIMIT,
-                    'value' => 30,
+                    'value' => 300,
                     'value_type' => ConfigurationCodeConstants::VALUE_TYPE_INTEGER,
                     'description' => 'Maximum number of login attempts allowed per hour',
                     'is_editable' => StatusCodeConstants::ACTIVE,
