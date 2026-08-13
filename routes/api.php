@@ -201,6 +201,7 @@ Route::group([
 
         Route::prefix('overtimes')->group(function () {
             Route::get('/', [OvertimeController::class, 'index']);
+            Route::get('/export-excel', [OvertimeController::class, 'exportExcel']);
             Route::post('/', [OvertimeController::class, 'store']);
             Route::get('/{uuid}', [OvertimeController::class, 'show']);
             Route::patch('/director-approves/{uuid}', [OvertimeController::class, 'directorApprove']);
@@ -248,11 +249,11 @@ Route::group([
         });
 
         Route::prefix('dashboards')->group(function () {
-            Route::get('/upcoming-events', [DashboardController::class, 'upcomingEvent']);
-            Route::get('/leave-requests', [DashboardController::class, 'leaveRequest']);
-            Route::get('/claim-headers', [DashboardController::class, 'claimHeader']);
-            Route::get('/announcements', [DashboardController::class, 'announcement']);
             Route::get('/dashboard-summaries', [DashboardController::class, 'dashboardSummary']);
+            Route::get('/upcoming-events', [UpcomingEventController::class, 'index']);
+            Route::get('/leave-requests', [LeaveRequestController::class, 'index']);
+            Route::get('/claim-headers', [ClaimHeaderController::class, 'index']);
+            Route::get('/announcements', [AnnouncementController::class, 'index']);
         });
 
 

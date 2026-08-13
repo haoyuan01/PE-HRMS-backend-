@@ -34,6 +34,8 @@ class OvertimeIndexRequest extends FormRequest
             'position' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'office' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'is_active' => ['nullable', 'integer', 'between:0,1'],
+            'created_from' => ['nullable', 'date'],
+            'created_to' => ['nullable', 'date'],
             'search_words' => ['nullable', 'array'],
             'search_words.*' => ['nullable', 'string', 'regex:' . RegexConstants::DYNAMIC_SEARCH_INJECTION_PROTECTED],
             'page' => ['nullable', 'integer', 'min:1'],

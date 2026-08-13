@@ -28,138 +28,8 @@ use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
-    public function __construct(
-        private UpcomingEventFilter $upcoming_event_filter,
-        private LeaveRequestFilter $leave_request_filter,
-        private ClaimHeaderFilter $claim_header_filter,
-        private AnnouncementFilter $announcement_filter
-    )
+    public function __construct()
     {
-    }
-
-    public function upcomingEvent(UpcomingEventIndexRequest $request)
-    {
-        $upcoming_event = UpcomingEvent::with([
-            'upcomingEventImages',
-            'upcomingEventDepartments.department',
-            'upcomingEventOffices.office',
-        ])->active();
-
-        $upcoming_event = $this->upcoming_event_filter->apply($request, $request->size, $upcoming_event);
-
-        return self::responsePaginated(UpcomingEventResource::collection($upcoming_event), $upcoming_event);
-    }
-
-    public function leaveRequest(LeaveRequestIndexRequest $request)
-    {
-        $leave_request = LeaveRequest::with([
-            'leaveRequestDates',
-
-            'user.personal',
-            'user.contact',
-            'user.employment.office',
-            'user.employment.position',
-            'user.employment.department',
-            'user.emergency',
-            'user.certificates',
-
-            'managerApprover.personal',
-            'managerApprover.contact',
-            'managerApprover.employment.office',
-            'managerApprover.employment.position',
-            'managerApprover.employment.department',
-            'managerApprover.emergency',
-
-            'leaveEntitlement.leavePolicy.leavePolicyTiers',
-
-            'managerActionBy.personal',
-            'managerActionBy.contact',
-            'managerActionBy.employment.office',
-            'managerActionBy.employment.position',
-            'managerActionBy.employment.department',
-            'managerActionBy.emergency',
-
-            'directorActionBy.personal',
-            'directorActionBy.contact',
-            'directorActionBy.employment.office',
-            'directorActionBy.employment.position',
-            'directorActionBy.employment.department',
-            'directorActionBy.emergency',
-
-            'handoverBy.personal',
-            'handoverBy.contact',
-            'handoverBy.employment.office',
-            'handoverBy.employment.position',
-            'handoverBy.employment.department',
-            'handoverBy.emergency',
-        ])->active();
-
-        $leave_request = $this->leave_request_filter->apply($request, $request->size, $leave_request);
-
-        return self::responsePaginated(LeaveRequestResource::collection($leave_request), $leave_request);
-    }
-
-    public function claimHeader(ClaimHeaderIndexRequest $request)
-    {
-        $claim_header = ClaimHeader::with([
-            'user.personal',
-            'user.contact',
-            'user.employment.office',
-            'user.employment.position',
-            'user.employment.department',
-            'user.emergency',
-            'user.certificates',
-
-            'managerApprover.personal',
-            'managerApprover.contact',
-            'managerApprover.employment.office',
-            'managerApprover.employment.position',
-            'managerApprover.employment.department',
-            'managerApprover.emergency',
-
-            'managerReviewedBy.personal',
-            'managerReviewedBy.contact',
-            'managerReviewedBy.employment.office',
-            'managerReviewedBy.employment.position',
-            'managerReviewedBy.employment.department',
-            'managerReviewedBy.emergency',
-
-            'directorReviewedBy.personal',
-            'directorReviewedBy.contact',
-            'directorReviewedBy.employment.office',
-            'directorReviewedBy.employment.position',
-            'directorReviewedBy.employment.department',
-            'directorReviewedBy.emergency',
-
-            'claimItems.managerActionBy.personal',
-            'claimItems.managerActionBy.contact',
-            'claimItems.managerActionBy.employment.office',
-            'claimItems.managerActionBy.employment.position',
-            'claimItems.managerActionBy.employment.department',
-            'claimItems.managerActionBy.emergency',
-
-            'claimItems.directorActionBy.personal',
-            'claimItems.directorActionBy.contact',
-            'claimItems.directorActionBy.employment.office',
-            'claimItems.directorActionBy.employment.position',
-            'claimItems.directorActionBy.employment.department',
-            'claimItems.directorActionBy.emergency',
-        ])->active();
-
-        $claim_header = $this->claim_header_filter->apply($request, $request->size, $claim_header);
-
-        return self::responsePaginated(ClaimHeaderResource::collection($claim_header), $claim_header);
-    }
-
-    public function announcement(AnnouncementIndexRequest $request)
-    {
-        $announcement = Announcement::with([
-            'announcementImages',
-        ])->active();
-
-        $announcement = $this->announcement_filter->apply($request, $request->size, $announcement);
-
-        return self::responsePaginated(AnnouncementResource::collection($announcement), $announcement);
     }
 
     public function dashboardSummary(DashboardSummaryRequest $request)
@@ -192,6 +62,17 @@ class DashboardController extends Controller
 
         $pending_leave = $leave_request->count();
 
+        $leave_request_current_month = LeaveRequest::whereMonth('created_at', self::currentDateTime()->format('m'))
+            ->whereYear('created_at', self::currentDateTime()->format('Y'))
+            ->active();
+
+        if ($request->relevant_to_me)
+        {
+            $leave_request_current_month->where('user_id', $user->id);
+        }
+
+        $leave_request_current_month = $leave_request_current_month->count();
+
         $claim_header = ClaimHeader::where(function ($query) {
                 $query->whereNull('manager_reviewed_at')
                     ->orWhereNull('director_reviewed_at');
@@ -218,6 +99,7 @@ class DashboardController extends Controller
         $data = [
             'leave_balance' => $leave_balance,
             'pending_leave' => $pending_leave,
+            'leave_request_current_month' => $leave_request_current_month,
             'pending_claim' => $pending_claim,
             'total_users' => $total_users,
             'latest_payroll' => $payroll ? [

@@ -18,6 +18,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class OvertimeController extends Controller
 {
@@ -258,5 +260,95 @@ class OvertimeController extends Controller
 
             Mail::to($director->email)->send(new OvertimeApplicationMail($data));
         }
+    }
+
+    public function exportExcel(OvertimeIndexRequest $request)
+    {
+        $overtime = Overtime::with([
+            'user.personal',
+            'user.contact',
+            'user.employment.office',
+            'user.employment.position',
+            'user.employment.department',
+            'user.emergency',
+            'user.certificates',
+
+            'directorActionBy.personal',
+            'directorActionBy.contact',
+            'directorActionBy.employment.office',
+            'directorActionBy.employment.position',
+            'directorActionBy.employment.department',
+            'directorActionBy.emergency',
+            'directorActionBy.certificates',
+        ])->active();
+
+        $overtime = $this->overtime_filter->apply($request, $request->size ?? 1000, $overtime);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $title = 'Overtime Listing';
+
+        if ($request->created_from && $request->created_to)
+        {
+            $title = 'Overtime Listing submitted from ' . $request->created_from . ' to ' . $request->created_to;
+        }
+
+        $sheet->mergeCells('A1:N1');
+        $sheet->setCellValue('A1', $title);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1:N1')->getAlignment()->setHorizontal('center');
+        
+        $sheet->setCellValue('A3', 'No.');
+        $sheet->setCellValue('B3', 'Applicant Name');
+        $sheet->setCellValue('C3', 'Email');
+        $sheet->setCellValue('D3', 'Company Email');
+        $sheet->setCellValue('E3', 'Phone Number');
+        $sheet->setCellValue('F3', 'Department');
+        $sheet->setCellValue('G3', 'Position');
+        $sheet->setCellValue('H3', 'Office');
+        $sheet->setCellValue('I3', 'Total Days');
+        $sheet->setCellValue('J3', 'Description');
+        $sheet->setCellValue('K3', 'Submitted Date');
+        $sheet->setCellValue('L3', 'Director Approved');
+        $sheet->setCellValue('M3', 'Director Approved At');
+        $sheet->setCellValue('N3', 'Director Remark');
+        $sheet->getStyle('A3:N3')->getFont()->setBold(true);
+
+        $row = 4;
+
+        foreach($overtime as $key => $item)
+        {
+            $sheet->setCellValue('A' . $row, ($overtime->firstItem() ?? 1) + $key);
+            $sheet->setCellValue('B' . $row, trim(($item->user->personal?->first_name ?? '') . ' ' . ($item->user->personal?->last_name ?? '')) ?: $item->user->email);
+            $sheet->setCellValue('C' . $row, $item->user->email);
+            $sheet->setCellValue('D' . $row, $item->user->contact?->company_email);
+            $sheet->setCellValue('E' . $row, $item->user->contact?->phone_number);
+            $sheet->setCellValue('F' . $row, $item->user->employment?->department?->name);
+            $sheet->setCellValue('G' . $row, $item->user->employment?->position?->name);
+            $sheet->setCellValue('H' . $row, $item->user->employment?->office?->name);
+            $sheet->setCellValue('I' . $row, $item->total_days);
+            $sheet->setCellValue('J' . $row, $item->description);
+            $sheet->setCellValue('K' . $row, $item->created_at ? $item->created_at->format('Y-m-d h:i:s A') : null);
+            $sheet->setCellValue('L' . $row, $item->director_action_at ? ($item->director_approved ? 'Approved' : 'Rejected') : 'Pending');
+            $sheet->setCellValue('M' . $row, $item->director_action_at ? $item->director_action_at->format('Y-m-d h:i:s A') : null);
+            $sheet->setCellValue('N' . $row, $item->director_remark);
+
+            $row++;
+        }
+
+        foreach(range('A', 'N') as $column)
+        {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'overtimes_' . self::currentDateTime()->format('YmdHis') . '.xlsx';
+
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 }

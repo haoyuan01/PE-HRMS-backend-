@@ -28,6 +28,8 @@ class ErrorLog extends Model
         'previous_exception',
         'performance',
         'hostname',
+        'created_at',
+        'updated_at',
     ];
 
     /**

@@ -60,6 +60,10 @@ class UpcomingEventFilter
                 ->orWhereHas('upcomingEventOffices', function($query) {
                     $query->where('office_id', Auth::user()->employment?->office_id)
                         ->where('is_active', StatusCodeConstants::ACTIVE);
+                })
+                ->orWhere(function($query) {
+                    $query->doesntHave('upcomingEventDepartments')
+                        ->doesntHave('upcomingEventOffices');
                 });
             });
         }
