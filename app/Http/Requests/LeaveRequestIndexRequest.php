@@ -32,6 +32,8 @@ class LeaveRequestIndexRequest extends FormRequest
             'is_director' => ['nullable', 'integer', 'between:0,1'],
             'created_at_from' => ['nullable', 'date_format:Y-m-d'],
             'created_at_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:created_at_from'],
+            'created_from' => ['nullable', 'date'],
+            'created_to' => ['nullable', 'date'],
             'is_active' => ['nullable', 'integer', 'between:0,1'],
             'search_words' => ['nullable', 'array'],
             'search_words.*' => ['nullable', 'string', 'regex:' . RegexConstants::DYNAMIC_SEARCH_INJECTION_PROTECTED],

@@ -30,6 +30,8 @@ class MovementIndexRequest extends FormRequest
             'end_date' => ['nullable', 'date'],
             'location' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'is_active' => ['nullable', 'integer', 'between:-1,1'],
+            'created_from' => ['nullable', 'date'],
+            'created_to' => ['nullable', 'date'],
             'user_uuid' => ['nullable', 'string', 'uuid'],
             'user_name' => ['nullable', 'string', 'regex:' . RegexConstants::INJECTION_PROTECTED],
             'email' => ['nullable', 'string', 'regex:' . RegexConstants::EMAIL],

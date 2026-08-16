@@ -35,6 +35,16 @@ class MovementFilter
             $data->where('is_active', "$filters->is_active");
         }
 
+        if ($filters->has('created_from') && !empty($filters->created_from))
+        {
+            $data->whereDate('created_at', '>=', $filters->created_from);
+        }
+
+        if ($filters->has('created_to') && !empty($filters->created_to))
+        {
+            $data->whereDate('created_at', '<=', $filters->created_to);
+        }
+
         if ($filters->has('user_uuid') && !empty($filters->user_uuid))
         {
             $data->whereHas('user', function($query) use ($filters) {

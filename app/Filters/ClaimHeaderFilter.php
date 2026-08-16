@@ -75,6 +75,16 @@ class ClaimHeaderFilter
             });
         }
 
+        if ($filters->has('created_from') && !empty($filters->created_from))
+        {
+            $data->whereDate('created_at', '>=', $filters->created_from);
+        }
+
+        if ($filters->has('created_to') && !empty($filters->created_to))
+        {
+            $data->whereDate('created_at', '<=', $filters->created_to);
+        }
+
         if ($filters->filled('start_date') && $filters->filled('end_date'))
         {
             $data->where(function ($q) use ($filters) {
