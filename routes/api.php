@@ -189,6 +189,7 @@ Route::group([
 
         Route::prefix('leave-requests')->group(function () {
             Route::get('/', [LeaveRequestController::class, 'index']);
+            Route::get('/export-excel', [LeaveRequestController::class, 'exportExcel']);
             Route::get('/calendar-summaries', [LeaveRequestController::class, 'calendarSummaries']);
             Route::get('/status-summaries', [LeaveRequestController::class, 'statusSummaries']);
             Route::post('/', [LeaveRequestController::class, 'store']);
@@ -218,6 +219,7 @@ Route::group([
 
         Route::prefix('claim-headers')->group(function () {
             Route::get('/', [ClaimHeaderController::class, 'index']);
+            Route::get('/export-excel', [ClaimHeaderController::class, 'exportExcel']);
             Route::post('/', [ClaimHeaderController::class, 'store']);
             Route::get('/{uuid}', [ClaimHeaderController::class, 'show']);
             Route::put('/{uuid}', [ClaimHeaderController::class, 'update']);
@@ -241,6 +243,7 @@ Route::group([
 
         Route::prefix('movements')->group(function () {
             Route::get('/', [MovementController::class, 'index']);
+            Route::get('/export-excel', [MovementController::class, 'exportExcel']);
             Route::get('/calendar-summaries', [MovementController::class, 'calendarSummaries']);
             Route::post('/', [MovementController::class, 'store']);
             Route::get('/{uuid}', [MovementController::class, 'show']);

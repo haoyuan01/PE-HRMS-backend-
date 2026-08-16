@@ -21,6 +21,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ClaimHeaderController extends Controller
 {
@@ -578,5 +580,137 @@ class ClaimHeaderController extends Controller
         ];
 
         Mail::to($claim_header->user->email)->cc($accountants->pluck('email')->filter()->values()->toArray())->send(new ClaimApplicationMail($data));
+    }
+
+    public function exportExcel(ClaimHeaderIndexRequest $request)
+    {
+        $claim_header = ClaimHeader::with([
+            'user.personal',
+            'user.contact',
+            'user.employment.office',
+            'user.employment.position',
+            'user.employment.department',
+            'user.emergency',
+            'user.certificates',
+
+            'managerApprover.personal',
+            'managerApprover.contact',
+            'managerApprover.employment.office',
+            'managerApprover.employment.position',
+            'managerApprover.employment.department',
+            'managerApprover.emergency',
+
+            'managerReviewedBy.personal',
+            'managerReviewedBy.contact',
+            'managerReviewedBy.employment.office',
+            'managerReviewedBy.employment.position',
+            'managerReviewedBy.employment.department',
+            'managerReviewedBy.emergency',
+
+            'directorReviewedBy.personal',
+            'directorReviewedBy.contact',
+            'directorReviewedBy.employment.office',
+            'directorReviewedBy.employment.position',
+            'directorReviewedBy.employment.department',
+            'directorReviewedBy.emergency',
+
+            'claimItems.managerActionBy.personal',
+            'claimItems.managerActionBy.contact',
+            'claimItems.managerActionBy.employment.office',
+            'claimItems.managerActionBy.employment.position',
+            'claimItems.managerActionBy.employment.department',
+            'claimItems.managerActionBy.emergency',
+
+            'claimItems.directorActionBy.personal',
+            'claimItems.directorActionBy.contact',
+            'claimItems.directorActionBy.employment.office',
+            'claimItems.directorActionBy.employment.position',
+            'claimItems.directorActionBy.employment.department',
+            'claimItems.directorActionBy.emergency',
+        ])->active();
+
+        $claim_header = $this->claim_header_filter->apply($request, $request->size ?? 1000, $claim_header);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $title = 'Claim Listing';
+
+        if ($request->created_at_from && $request->created_at_to)
+        {
+            $title = 'Claim Listing submitted from ' . $request->created_at_from . ' to ' . $request->created_at_to;
+        }
+
+        $sheet->mergeCells('A1:R1');
+        $sheet->setCellValue('A1', $title);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1:R1')->getAlignment()->setHorizontal('center');
+
+        $sheet->setCellValue('A3', 'No.');
+        $sheet->setCellValue('B3', 'Applicant Name');
+        $sheet->setCellValue('C3', 'Email');
+        $sheet->setCellValue('D3', 'Company Email');
+        $sheet->setCellValue('E3', 'Phone Number');
+        $sheet->setCellValue('F3', 'Department');
+        $sheet->setCellValue('G3', 'Position');
+        $sheet->setCellValue('H3', 'Office');
+        $sheet->setCellValue('I3', 'Claim Title');
+        $sheet->setCellValue('J3', 'Start Date');
+        $sheet->setCellValue('K3', 'End Date');
+        $sheet->setCellValue('L3', 'Total Amount');
+        $sheet->setCellValue('M3', 'Items');
+        $sheet->setCellValue('N3', 'Submitted Date');
+        $sheet->setCellValue('O3', 'Manager Reviewed');
+        $sheet->setCellValue('P3', 'Manager Reviewed At');
+        $sheet->setCellValue('Q3', 'Director Reviewed');
+        $sheet->setCellValue('R3', 'Director Reviewed At');
+        $sheet->getStyle('A3:R3')->getFont()->setBold(true);
+
+        $row = 4;
+
+        foreach($claim_header as $key => $item)
+        {
+            $claim_items = $item->claimItems->map(function($claim_item) {
+                $manager_status = $claim_item->manager_action_at ? ($claim_item->manager_approved ? 'Manager Approved' : 'Manager Rejected') : 'Manager Pending';
+                $director_status = $claim_item->director_action_at ? ($claim_item->director_approved ? 'Director Approved' : 'Director Rejected') : 'Director Pending';
+
+                return $claim_item->name . ' - ' . $claim_item->amount . ' (' . $manager_status . ', ' . $director_status . ')';
+            })->implode(', ');
+
+            $sheet->setCellValue('A' . $row, ($claim_header->firstItem() ?? 1) + $key);
+            $sheet->setCellValue('B' . $row, trim(($item->user->personal?->first_name ?? '') . ' ' . ($item->user->personal?->last_name ?? '')) ?: $item->user->email);
+            $sheet->setCellValue('C' . $row, $item->user->email);
+            $sheet->setCellValue('D' . $row, $item->user->contact?->company_email);
+            $sheet->setCellValue('E' . $row, $item->user->contact?->phone_number);
+            $sheet->setCellValue('F' . $row, $item->user->employment?->department?->name);
+            $sheet->setCellValue('G' . $row, $item->user->employment?->position?->name);
+            $sheet->setCellValue('H' . $row, $item->user->employment?->office?->name);
+            $sheet->setCellValue('I' . $row, $item->name);
+            $sheet->setCellValue('J' . $row, $item->start_date ? $item->start_date->format('Y-m-d') : null);
+            $sheet->setCellValue('K' . $row, $item->end_date ? $item->end_date->format('Y-m-d') : null);
+            $sheet->setCellValue('L' . $row, $item->total_amount);
+            $sheet->setCellValue('M' . $row, $claim_items);
+            $sheet->setCellValue('N' . $row, $item->created_at ? $item->created_at->format('Y-m-d h:i:s A') : null);
+            $sheet->setCellValue('O' . $row, $item->manager_reviewed_at ? 'Reviewed' : 'Pending');
+            $sheet->setCellValue('P' . $row, $item->manager_reviewed_at ? $item->manager_reviewed_at->format('Y-m-d h:i:s A') : null);
+            $sheet->setCellValue('Q' . $row, $item->director_reviewed_at ? 'Reviewed' : 'Pending');
+            $sheet->setCellValue('R' . $row, $item->director_reviewed_at ? $item->director_reviewed_at->format('Y-m-d h:i:s A') : null);
+
+            $row++;
+        }
+
+        foreach(range('A', 'R') as $column)
+        {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'claim_headers_' . self::currentDateTime()->format('YmdHis') . '.xlsx';
+
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 }

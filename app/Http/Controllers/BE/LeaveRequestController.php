@@ -26,6 +26,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class LeaveRequestController extends Controller
 {
@@ -681,6 +683,139 @@ class LeaveRequestController extends Controller
             'balance_days' => $leave_entitlement->balance_days - $remaining_days,
             'updated_by' => $updated_by,
             'updated_at' => self::currentDateTime(),
+        ]);
+    }
+
+    public function exportExcel(LeaveRequestIndexRequest $request)
+    {
+        $leave_request = LeaveRequest::with([
+            'leaveRequestDates',
+
+            'user.personal',
+            'user.contact',
+            'user.employment.office',
+            'user.employment.position',
+            'user.employment.department',
+            'user.emergency',
+            'user.certificates',
+
+            'managerApprover.personal',
+            'managerApprover.contact',
+            'managerApprover.employment.office',
+            'managerApprover.employment.position',
+            'managerApprover.employment.department',
+            'managerApprover.emergency',
+
+            'leaveEntitlement.leavePolicy.leavePolicyTiers',
+
+            'managerActionBy.personal',
+            'managerActionBy.contact',
+            'managerActionBy.employment.office',
+            'managerActionBy.employment.position',
+            'managerActionBy.employment.department',
+            'managerActionBy.emergency',
+
+            'directorActionBy.personal',
+            'directorActionBy.contact',
+            'directorActionBy.employment.office',
+            'directorActionBy.employment.position',
+            'directorActionBy.employment.department',
+            'directorActionBy.emergency',
+
+            'handoverBy.personal',
+            'handoverBy.contact',
+            'handoverBy.employment.office',
+            'handoverBy.employment.position',
+            'handoverBy.employment.department',
+            'handoverBy.emergency',
+        ])->active();
+
+        $leave_request = $this->leave_request_filter->apply($request, $request->size ?? 1000, $leave_request);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $title = 'Leave Request Listing';
+
+        if ($request->created_at_from && $request->created_at_to)
+        {
+            $title = 'Leave Request Listing submitted from ' . $request->created_at_from . ' to ' . $request->created_at_to;
+        }
+
+        $sheet->mergeCells('A1:T1');
+        $sheet->setCellValue('A1', $title);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1:T1')->getAlignment()->setHorizontal('center');
+
+        $sheet->setCellValue('A3', 'No.');
+        $sheet->setCellValue('B3', 'Applicant Name');
+        $sheet->setCellValue('C3', 'Email');
+        $sheet->setCellValue('D3', 'Company Email');
+        $sheet->setCellValue('E3', 'Phone Number');
+        $sheet->setCellValue('F3', 'Department');
+        $sheet->setCellValue('G3', 'Position');
+        $sheet->setCellValue('H3', 'Office');
+        $sheet->setCellValue('I3', 'Leave Policy');
+        $sheet->setCellValue('J3', 'Applied Dates');
+        $sheet->setCellValue('K3', 'Total Days');
+        $sheet->setCellValue('L3', 'Resume Date');
+        $sheet->setCellValue('M3', 'Reason');
+        $sheet->setCellValue('N3', 'Submitted Date');
+        $sheet->setCellValue('O3', 'Handover Approved');
+        $sheet->setCellValue('P3', 'Handover Remark');
+        $sheet->setCellValue('Q3', 'Manager Approved');
+        $sheet->setCellValue('R3', 'Manager Remark');
+        $sheet->setCellValue('S3', 'Director Approved');
+        $sheet->setCellValue('T3', 'Director Remark');
+        $sheet->getStyle('A3:T3')->getFont()->setBold(true);
+
+        $row = 4;
+
+        foreach($leave_request as $key => $item)
+        {
+            $leave_dates = $item->leaveRequestDates->map(function($leave_request_date) {
+                $date = $leave_request_date->date ? Carbon::parse($leave_request_date->date)->format('Y-m-d') : null;
+                $half_day = $leave_request_date->is_half_day ? ($leave_request_date->is_first_half ? ' First Half' : ' Second Half') : '';
+
+                return trim($date . $half_day);
+            })->implode(', ');
+
+            $sheet->setCellValue('A' . $row, ($leave_request->firstItem() ?? 1) + $key);
+            $sheet->setCellValue('B' . $row, trim(($item->user->personal?->first_name ?? '') . ' ' . ($item->user->personal?->last_name ?? '')) ?: $item->user->email);
+            $sheet->setCellValue('C' . $row, $item->user->email);
+            $sheet->setCellValue('D' . $row, $item->user->contact?->company_email);
+            $sheet->setCellValue('E' . $row, $item->user->contact?->phone_number);
+            $sheet->setCellValue('F' . $row, $item->user->employment?->department?->name);
+            $sheet->setCellValue('G' . $row, $item->user->employment?->position?->name);
+            $sheet->setCellValue('H' . $row, $item->user->employment?->office?->name);
+            $sheet->setCellValue('I' . $row, $item->leaveEntitlement?->leavePolicy?->name);
+            $sheet->setCellValue('J' . $row, $leave_dates);
+            $sheet->setCellValue('K' . $row, $item->total_days);
+            $sheet->setCellValue('L' . $row, $item->resume_date ? Carbon::parse($item->resume_date)->format('Y-m-d') : null);
+            $sheet->setCellValue('M' . $row, $item->reason);
+            $sheet->setCellValue('N' . $row, $item->created_at ? $item->created_at->format('Y-m-d h:i:s A') : null);
+            $sheet->setCellValue('O' . $row, $item->handover_action_at ? ($item->handover_approved ? 'Approved' : 'Rejected') : 'Pending');
+            $sheet->setCellValue('P' . $row, $item->handover_remark);
+            $sheet->setCellValue('Q' . $row, $item->manager_action_at ? ($item->manager_approved ? 'Approved' : 'Rejected') : 'Pending');
+            $sheet->setCellValue('R' . $row, $item->manager_remark);
+            $sheet->setCellValue('S' . $row, $item->director_action_at ? ($item->director_approved ? 'Approved' : 'Rejected') : 'Pending');
+            $sheet->setCellValue('T' . $row, $item->director_remark);
+
+            $row++;
+        }
+
+        foreach(range('A', 'T') as $column)
+        {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'leave_requests_' . self::currentDateTime()->format('YmdHis') . '.xlsx';
+
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 }

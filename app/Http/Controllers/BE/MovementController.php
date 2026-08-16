@@ -17,6 +17,8 @@ use App\Models\MovementType;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class MovementController extends Controller
 {
@@ -245,5 +247,88 @@ class MovementController extends Controller
         }
 
         return self::response($data);
+    }
+
+    public function exportExcel(MovementIndexRequest $request)
+    {
+        $movement = Movement::with([
+            'user.personal',
+            'user.contact',
+            'user.employment.office',
+            'user.employment.position',
+            'user.employment.department',
+            'user.emergency',
+            'user.certificates',
+            'movement_type',
+        ])->active();
+
+        $movement = $this->movement_filter->apply($request, $request->size ?? 1000, $movement);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $title = 'Movement Listing';
+
+        if ($request->start_date && $request->end_date)
+        {
+            $title = 'Movement Listing from ' . $request->start_date . ' to ' . $request->end_date;
+        }
+
+        $sheet->mergeCells('A1:N1');
+        $sheet->setCellValue('A1', $title);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1:N1')->getAlignment()->setHorizontal('center');
+
+        $sheet->setCellValue('A3', 'No.');
+        $sheet->setCellValue('B3', 'Applicant Name');
+        $sheet->setCellValue('C3', 'Email');
+        $sheet->setCellValue('D3', 'Company Email');
+        $sheet->setCellValue('E3', 'Phone Number');
+        $sheet->setCellValue('F3', 'Department');
+        $sheet->setCellValue('G3', 'Position');
+        $sheet->setCellValue('H3', 'Office');
+        $sheet->setCellValue('I3', 'Movement Type');
+        $sheet->setCellValue('J3', 'Location');
+        $sheet->setCellValue('K3', 'Start Date');
+        $sheet->setCellValue('L3', 'End Date');
+        $sheet->setCellValue('M3', 'Description');
+        $sheet->setCellValue('N3', 'Submitted Date');
+        $sheet->getStyle('A3:N3')->getFont()->setBold(true);
+
+        $row = 4;
+
+        foreach($movement as $key => $item)
+        {
+            $sheet->setCellValue('A' . $row, ($movement->firstItem() ?? 1) + $key);
+            $sheet->setCellValue('B' . $row, trim(($item->user->personal?->first_name ?? '') . ' ' . ($item->user->personal?->last_name ?? '')) ?: $item->user->email);
+            $sheet->setCellValue('C' . $row, $item->user->email);
+            $sheet->setCellValue('D' . $row, $item->user->contact?->company_email);
+            $sheet->setCellValue('E' . $row, $item->user->contact?->phone_number);
+            $sheet->setCellValue('F' . $row, $item->user->employment?->department?->name);
+            $sheet->setCellValue('G' . $row, $item->user->employment?->position?->name);
+            $sheet->setCellValue('H' . $row, $item->user->employment?->office?->name);
+            $sheet->setCellValue('I' . $row, $item->movement_type?->name);
+            $sheet->setCellValue('J' . $row, $item->location);
+            $sheet->setCellValue('K' . $row, $item->start_date ? Carbon::parse($item->start_date)->format('Y-m-d') : null);
+            $sheet->setCellValue('L' . $row, $item->end_date ? Carbon::parse($item->end_date)->format('Y-m-d') : null);
+            $sheet->setCellValue('M' . $row, $item->description);
+            $sheet->setCellValue('N' . $row, $item->created_at ? $item->created_at->format('Y-m-d h:i:s A') : null);
+
+            $row++;
+        }
+
+        foreach(range('A', 'N') as $column)
+        {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'movements_' . self::currentDateTime()->format('YmdHis') . '.xlsx';
+
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 }
