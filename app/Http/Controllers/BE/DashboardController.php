@@ -36,17 +36,17 @@ class DashboardController extends Controller
     {
         $user = User::findByUuid(self::auth()->uuid);
 
-        $leave_entitlement = LeaveEntitlement::active();
+        // $leave_entitlement = LeaveEntitlement::active();
 
-        if ($request->relevant_to_me)
-        {
-            $leave_entitlement->where('user_id', $user->id);
-        }
+        // if ($request->relevant_to_me)
+        // {
+        //     $leave_entitlement->where('user_id', $user->id);
+        // }
 
-        $leave_balance = $leave_entitlement->get()
-            ->sum(function ($leave_entitlement) {
-                return ($leave_entitlement->entitled_days + $leave_entitlement->carried_forward_days) - $leave_entitlement->used_days;
-            });
+        // $leave_balance = $leave_entitlement->get()
+        //     ->sum(function ($leave_entitlement) {
+        //         return ($leave_entitlement->entitled_days + $leave_entitlement->carried_forward_days) - $leave_entitlement->used_days;
+        //     });
 
         $leave_request = LeaveRequest::where(function ($query) {
                 $query->where('manager_approved', '!=', StatusCodeConstants::ACTIVE)
@@ -97,7 +97,7 @@ class DashboardController extends Controller
             ->first();
 
         $data = [
-            'leave_balance' => $leave_balance,
+            // 'leave_balance' => $leave_balance,
             'pending_leave' => $pending_leave,
             'leave_request_current_month' => $leave_request_current_month,
             'pending_claim' => $pending_claim,
