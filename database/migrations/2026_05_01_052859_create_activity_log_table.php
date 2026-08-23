@@ -28,7 +28,6 @@ class CreateActivityLogTable extends Migration
             $table->index('request_log_uuid');
             $table->index('log_name');
             $table->index('event');
-            $table->index('description');
             $table->index('created_at');
         });
     }
